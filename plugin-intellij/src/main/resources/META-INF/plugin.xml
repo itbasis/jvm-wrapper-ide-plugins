@@ -1,0 +1,37 @@
+<idea-plugin>
+  <name>JVM Wrapper Support</name>
+  <vendor email="Victor@Alenkov.name" url="https://github.com/itbasis/jvm-wrapper"/>
+
+  <category>Tools Integration</category>
+
+  <description>JVM Wrapper support</description>
+
+  <depends>com.intellij.modules.java</depends>
+
+  <project-components>
+    <component>
+      <interface-class>com.intellij.openapi.components.ProjectComponent</interface-class>
+      <implementation-class>ru.itbasis.plugins.intellij.jvmwrapper.WrapperProjectComponent</implementation-class>
+    </component>
+  </project-components>
+
+  <actions>
+    <group id="WrapperBuildMenu" compact="true">
+      <add-to-group group-id="BuildMenu" anchor="after" relative-to-action="CompileProject"/>
+      <separator/>
+      <group text="JVM Wrapper" popup="true">
+        <separator/>
+        <action id="jvmUpdaterAction" class="ru.itbasis.plugins.intellij.jvmwrapper.actions.JvmUpdaterAction"/>
+        <action id="generateAction" class="ru.itbasis.plugins.intellij.jvmwrapper.actions.GenerateAction"/>
+        <separator/>
+      </group>
+      <separator/>
+    </group>
+  </actions>
+
+  <extensions defaultExtensionNs="com.intellij">
+    <projectService serviceImplementation="ru.itbasis.plugins.intellij.jvmwrapper.JvmWrapperService"/>
+    <projectService serviceImplementation="ru.itbasis.plugins.intellij.jvmwrapper.ProjectSdkUpdater"/>
+    <postStartupActivity implementation="ru.itbasis.plugins.intellij.jvmwrapper.WrapperStartupActivity"/>
+  </extensions>
+</idea-plugin>

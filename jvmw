@@ -1,0 +1,460 @@
+#!/usr/bin/env bash
+export JVMW=true
+#JVMW_HOME=${HOME}/.jvm
+if [[ -z "${JVMW_HOME}" ]]; then
+	JVMW_HOME="${HOME}/.jvm"
+fi
+JVMW_PROPERTY_FILE="${JVMW_PROPERTY_FILE:-./jvmw.properties}"
+OS=$(uname | tr '[:upper:]' '[:lower:]')
+ARCH=$([[ "$(uname -m)" == "x86_64" ]] && echo "x64" || echo "i586")
+ARCHIVE_EXT=$([[ "${OS}" == "darwin" ]] && echo "dmg" || echo "tar.gz")
+#
+REQUIRED_COMMANDS_CORE='awk tr head rm mv cd curl readlink dirname'
+REQUIRED_COMMANDS_DARWIN='hdiutil xar cpio shasum'
+REQUIRED_COMMANDS_LINUX='sha256sum tar'
+function log_2() {
+	if [[ ! -z "$1" ]]; then
+		printf "[%s] [%s" "$1" "${BASH_SOURCE[1]}"
+		for i in "${!FUNCNAME[@]}"; do
+			printf ":%s(%s)" "${FUNCNAME[$i]}" "${BASH_LINENO[$i]}"
+		done
+		printf "] "
+	fi
+	printf "%s\\n" "${*:2}"
+}
+function print_debug_info() {
+	if [[ "${JVMW_DEBUG}" == "Y" ]]; then
+		printf ''
+		for key in OS ARCH JVMW_HOME ARCHIVE_EXT JVM_VERSION JVM_VERSION_MAJOR JVM_VERSION_UPDATE JDK_ROOT_DIR JDK_HOME_DIR JAVA_HOME_DIR JVM_PAGE_URL ARCHIVE_JVM_URL ARCHIVE_JVM_CHECKSUM ARCHIVE_FILE LAST_UPDATE_FILE REQUIRED_UPDATE JVMW_DEBUG USE_SYSTEM_JVM JVM_VENDOR ORACLE_USER; do
+			>&2 log_2 '' "${key}=${!key}";
+		done
+	fi
+}
+function debug() {
+	if [[ "${JVMW_DEBUG}" == "Y" ]]; then
+		>&2 log_2 'DEBUG' "$*"
+	fi
+}
+function die() {
+	JVMW_DEBUG=Y
+	print_debug_info
+	>&2 log_2 'ERROR' "$*"
+	exit 1
+}
+function check_checksum() {
+	if [[ ${JVM_VERSION_MAJOR} -lt 8 ]]; then
+		# checksum was added only from version 8
+		return 0
+	fi
+	local local_jdk_checksum
+	if [[ "${OS}" == "darwin" ]]; then
+		local_jdk_checksum=$(shasum -a 256 "${ARCHIVE_FILE}" | cut -d' ' -f 1)
+	else
+		local_jdk_checksum=$(sha256sum "${ARCHIVE_FILE}" | cut -d' ' -f 1)
+	fi
+	if [[ "${local_jdk_checksum}" != "${ARCHIVE_JVM_CHECKSUM}" ]]; then
+		debug "checksum of archive does not match: local_jdk_checksum=${local_jdk_checksum}, ARCHIVE_JVM_CHECKSUM=${ARCHIVE_JVM_CHECKSUM}"
+		return 1
+	fi
+	return 0
+}
+function write_last_update() {
+	local -r now=$(date +"%F %R")
+	if [[ -z "${ARCHIVE_JVM_URL}" ]]; then
+		printf "%s\\n%s" "${now}" "$(tail -n2 "${LAST_UPDATE_FILE}")" >"${LAST_UPDATE_FILE}"
+	else
+		printf "%s\\n%s\\n%s" "${now}" "${ARCHIVE_JVM_URL}" "${ARCHIVE_JVM_CHECKSUM}" >"${LAST_UPDATE_FILE}"
+	fi
+}
+function whereis() {
+	for path in ${PATH//:/ }; do
+		if [[ -f "${path}/${1}" ]]; then
+			echo "${path}/${1}"
+			return 0
+		fi
+	done
+}
+function properties_parser() {
+	while IFS='=' read -r key value || [[ -n "$key" ]]; do
+		[[ ! -z "${key}" ]] && [[ -z "${!key}" ]] && { debug "${key}='${value}'"; eval "${key}='${value}'"; }
+	done <<<"$1"
+}
+function properties_default() {
+	cat << EOF
+JVM_VERSION=9
+REQUIRED_UPDATE=Y
+CLEAR_COOKIE=Y
+JVMW_DEBUG=N
+USE_SYSTEM_JVM=Y
+JVM_VENDOR=oracle
+JVMW_ORACLE_KEYCHAIN=JVM_WRAPPER_ORACLE
+EOF
+}
+function properties_build() {
+	JVM_VERSION_MAJOR="${JVM_VERSION%_*}"
+	JVM_VERSION_MAJOR="${JVM_VERSION_MAJOR#1.*}"
+	JVM_VERSION_MAJOR="${JVM_VERSION_MAJOR%%.*}"
+	JVM_VERSION_MAJOR="${JVM_VERSION_MAJOR%%u*}"
+	if [[ "${JVM_VERSION}" != "${JVM_VERSION_MAJOR}" ]]; then
+		JVM_VERSION_UPDATE="${JVM_VERSION##*.}"
+		JVM_VERSION_UPDATE="${JVM_VERSION_UPDATE##*_}"
+		JVM_VERSION_UPDATE="${JVM_VERSION_UPDATE##*u}"
+		JVM_VERSION_UPDATE="${JVM_VERSION_UPDATE%%-b*}"
+	else
+		unset JVM_VERSION_UPDATE
+	fi
+	JVM_FULL_NAME="${JVM_VENDOR}-jdk-"
+	if [[ ${JVM_VERSION_MAJOR} -lt 9 ]]; then
+		JVM_FULL_NAME="${JVM_FULL_NAME}${JVM_VERSION_MAJOR}"
+		if [[ ! -z "${JVM_VERSION_UPDATE}" ]]; then
+			JVM_FULL_NAME="${JVM_FULL_NAME}u${JVM_VERSION_UPDATE}"
+		fi
+	else
+		JVM_FULL_NAME="${JVM_FULL_NAME}${JVM_VERSION}"
+	fi
+	JDK_ROOT_DIR=${JVMW_HOME}/${JVM_FULL_NAME}
+	ARCHIVE_FILE=${JDK_ROOT_DIR}.${ARCHIVE_EXT}
+	LAST_UPDATE_FILE=${JDK_ROOT_DIR}.last_update
+	JDK_HOME_DIR=${JDK_ROOT_DIR}/$([[ "${OS}" == 'darwin' ]] && echo 'Home/')
+}
+function oracle_otn_curl_send_request() {
+	local -r url="$1"
+	debug "url='${url}'"
+	local -r CURL_OPTIONS="${*:2}"
+	# shellcheck disable=SC2086
+	curl -kLs -A "${OTN_USER_AGENT}" -D "${OTN_HEADERS_FILE}" -b "${OTN_COOKIE_FILE}" -c "${OTN_COOKIE_FILE}" ${CURL_OPTIONS} "${url}" >"${OTN_CONTENT_FILE}"
+}
+function oracle_otn_curl_post() {
+	oracle_otn_form_parser
+	oracle_otn_curl_send_request "${OTN_FORM_ACTION}" -X POST -d "${OTN_FORM_DATA}"
+}
+function ont_form_data_build() {
+	IFS='>'
+	local form_data=
+	for fld in $(echo "$1" | awk '{ if (match($0, "<input")) print }'); do
+		fld_name=$(echo "${fld}" | awk 'match($0, /name="([^"]+)/) { print substr($0, RSTART+6, RLENGTH-6) }')
+		fld_value=$(echo "${fld}" | awk 'match($0, /value="([^"]+)/) { print substr($0, RSTART+7, RLENGTH-7) }')
+		if [[ ! -z "${fld_name}" ]]; then
+			if [[ "${fld_name}" == "userid" ]]; then
+				fld_value=${ORACLE_USER}
+			elif [[ "${fld_name}" == "pass" ]]; then
+				fld_value=${ORACLE_PASSWORD}
+			fi
+			form_data="${form_data}&${fld_name}=${fld_value}"
+		fi
+	done
+	echo "${form_data}"
+}
+function oracle_otn_form_clean_env() {
+	unset oracle_otn_FORM_DATA oracle_otn_FORM_ACTION
+}
+function oracle_otn_form_parser() {
+	oracle_otn_form_clean_env
+	OTN_FORM_DATA=$(ont_form_data_build "$(cat "${OTN_CONTENT_FILE}")")
+	OTN_FORM_ACTION=$(awk 'match($0, /action="([^"]+)/) { print substr($0, RSTART+8, RLENGTH-8) }' <"${OTN_CONTENT_FILE}")
+	if [[ "${OTN_FORM_ACTION:0:1}" == "/" ]]; then
+		OTN_FORM_ACTION="${OTN_HOST_LOGIN}${OTN_FORM_ACTION}"
+	fi
+}
+function oracle_otn_curl_redirect() {
+	# FIXME https://github.com/koalaman/shellcheck/issues/1089
+	# shellcheck disable=SC2155
+	local host=$(awk '{ if (match($0, "http-equiv=\"refresh\".*")) print substr($0, RSTART, RLENGTH) }' <"${OTN_CONTENT_FILE}" | awk -F';' '{ if (match($0, "URL=[^\"]+")) print substr($0, RSTART+4, RLENGTH-4)}')
+	if [[ "${host:0:1}" == "/" ]]; then
+		host="${OTN_HOST_LOGIN}${host}"
+	fi
+	oracle_otn_curl_send_request "${host}"
+}
+function oracle_otn_login() {
+	OTN_COOKIE_FILE="${TMPDIR}/jvm_wrapper.oracle_otn.cookie"
+	if [[ "${CLEAR_COOKIE}" == "Y" ]]; then
+		rm -f "${OTN_COOKIE_FILE}";
+	fi
+	if [[ -f "${OTN_COOKIE_FILE}" ]]; then
+		return 0
+	fi
+	if [[ -z "${ORACLE_USER}" ]] || [[ -z "${ORACLE_PASSWORD}" ]]; then
+		case "${OS}" in
+			darwin)
+				if [[ ! -z "${JVMW_ORACLE_KEYCHAIN}" ]]; then
+					ORACLE_USER="$(security 2>&1 find-generic-password -l "${JVMW_ORACLE_KEYCHAIN}" | awk 'match($0, /\"acct\"<blob>=\"([^\"]+)/) { print substr($0, RSTART+14, RLENGTH-14) }')"
+				fi
+				if [[ ! -z "${ORACLE_USER}" ]]; then
+					ORACLE_PASSWORD="$(security 2>&1 find-generic-password -g -a "${ORACLE_USER}" | awk 'match($0, /password: \"([^\"]+)/) { print substr($0, RSTART+11, RLENGTH-11) }')"
+				fi
+			;;
+		esac
+	fi
+	if [[ -z "${ORACLE_USER}" ]] || [[ -z "${ORACLE_PASSWORD}" ]]; then
+		die 'no values were found in ORACLE_USER and ORACLE_PASSWORD'
+	fi
+	debug "login OTN as '${ORACLE_USER}'"
+	OTN_HEADERS_FILE=$(mktemp -t oracle_otn_HEADERS_XXXXX.tmp)
+	OTN_CONTENT_FILE=$(mktemp -t oracle_otn_CONTENT_XXXXX.tmp)
+	OTN_URL_INDEX=https://www.oracle.com/index.html
+	OTN_HOST_LOGIN=https://login.oracle.com
+	OTN_URL_SIGNON="http://www.oracle.com/webapps/redirect/signon?nexturl=${OTN_URL_INDEX}"
+	oracle_otn_curl_send_request "${OTN_URL_SIGNON}"
+	oracle_otn_curl_post
+	oracle_otn_curl_post
+	oracle_otn_curl_redirect
+	oracle_otn_curl_post
+	oracle_otn_curl_send_request "${OTN_URL_SIGNON}"
+	rm -f "${OTN_HEADERS_FILE}" "${OTN_CONTENT_FILE}"
+}
+function oracle_download_jdk() {
+	if [[ "${ARCHIVE_JVM_URL}" != *'/otn-pub/'* ]]; then
+		oracle_otn_login
+	fi
+	debug "download ${ARCHIVE_JVM_URL}..."
+	curl -kL -A "${OTN_USER_AGENT}" -b "${OTN_COOKIE_FILE}" -o "${ARCHIVE_FILE}" --cookie "oraclelicense=accept-securebackup-cookie" "${ARCHIVE_JVM_URL}"
+	rm -f "${OTN_HEADERS_FILE}" "${OTN_CONTENT_FILE}"
+	if [[ "${CLEAR_COOKIE}" == "Y" ]]; then
+		rm -f "${OTN_COOKIE_FILE}";
+	fi
+	if [[ ! check_checksum ]]; then
+		die
+	fi
+}
+function oracle_check_the_need_for_downloading() {
+	if [[ "${REQUIRED_UPDATE}" != "Y" ]]; then
+		return 0
+	fi
+	if [[ ! -f "${JVM_HOME_DIR}/bin/java" ]]; then
+		REQUIRED_UPDATE=Y
+	else
+		check_is_out_of_date
+	fi
+	if [[ "${REQUIRED_UPDATE}" != "Y" ]]; then
+		debug "not required update"
+		return 0
+	fi
+	oracle_otn_page_latest_version_jdk_page_parser
+	if [[ ${ARCHIVE_JVM_URL} == *"${JVM_VERSION}"* ]] && [[ "${REQUIRED_UPDATE}" != "Y" ]]; then
+		write_last_update
+		return 0
+	fi
+}
+function oracle_otn_page_latest_version_jdk_page_parser() {
+	JVM_PAGE_URL=http://www.oracle.com$(curl -s http://www.oracle.com/technetwork/java/javase/downloads/index.html | awk 'match($0, /(\/technetwork\/java\/javase\/downloads\/jdk'"${JVM_VERSION_MAJOR}"'-downloads-[^\"]+)/) { print substr($0, RSTART, RLENGTH) }' | head -1)
+	if [[ "${JVM_PAGE_URL}" != "http://www.oracle.com" ]]; then
+		oracle_otn_page_archive_jdk_parser
+		if [[ ! -z "${ARCHIVE_JVM_URL}" ]]; then
+			return 0
+		fi
+	fi
+	local -r url_archive=http://www.oracle.com$(curl -sS http://www.oracle.com/technetwork/java/javase/downloads/index.html | awk 'match($0, /(\/technetwork\/java\/javase\/archive-[^\"]+)/) { print substr($0, RSTART, RLENGTH) }' | head -1)
+	JVM_PAGE_URL=http://www.oracle.com$(curl -sS "${url_archive}" | awk 'match($0, /(\/technetwork\/java\/javase\/downloads\/java-archive-[^'"${JVM_VERSION_MAJOR}"']+'"${JVM_VERSION_MAJOR}"'-[^\"]+)/) { print substr($0, RSTART, RLENGTH) }' 2>&1 | head -1)
+	oracle_otn_page_archive_jdk_parser
+}
+function oracle_otn_page_archive_jdk_parser() {
+	debug "JVM_PAGE_URL='${JVM_PAGE_URL}'"
+	local -r content=$(curl -s "${JVM_PAGE_URL}")
+	local awk_mask
+	if [[ ${JVM_VERSION_MAJOR} -lt 9 ]]; then
+		awk_mask='^downloads.*?jdk-'${JVM_VERSION_MAJOR}'u'${JVM_VERSION_UPDATE}'.*?-'${ARCH}'.*?.'${ARCHIVE_EXT}
+	else
+		awk_mask='^downloads.*?jdk-'${JVM_VERSION}'.*?-'${ARCH}'.*?.'${ARCHIVE_EXT}
+	fi
+	debug "awk_mask=${awk_mask}"
+	# shellcheck disable=SC2034
+	local -r separator='":"|", "|"}'
+	# shellcheck disable=SC2086
+	local -r row=$(echo "${content}" | awk '{ if (match($0, "'${awk_mask}'")) print }')
+	IFS=',"' read -ra fields <<<"${row}"
+	for i in "${!fields[@]}"; do
+		case "${fields[$i]}" in
+			filepath)
+				ARCHIVE_JVM_URL="${fields[$i+2]}"
+			;;
+			SHA256)
+				ARCHIVE_JVM_CHECKSUM="${fields[$i+2]}"
+			;;
+		esac
+	done
+	debug "ARCHIVE_JVM_URL='${ARCHIVE_JVM_URL}'"
+}
+function oracle_unpack_darwin() {
+	hdiutil detach "/Volumes/${JVM_FULL_NAME}" -quiet -force 2> /dev/null
+	hdiutil attach "${ARCHIVE_FILE}" -mountpoint "/Volumes/${JVM_FULL_NAME}" 2>&1 || die
+	local -r PKG_FILE_NAME=$(find "/Volumes/${JVM_FULL_NAME}" -mindepth 1 -maxdepth 1 -name '*.pkg')
+	local -r tmp_dir=$(mktemp -d -t "${JVM_FULL_NAME}.XXXXXX")/
+	cd "${tmp_dir}/" || { rm -Rf "${tmp_dir}";
+		die "can't change directory: ${tmp_dir}/"; }
+	xar -xf "${PKG_FILE_NAME}" . &> /dev/null || die
+	for dir in ./*jdk*; do
+		cpio -i <"${dir}/Payload" || exit 1
+	done
+	mv Contents "${JDK_ROOT_DIR}" 1> /dev/null 2>&1 || die
+	cd - || die
+	rm -Rf "${tmp_dir}" "${ARCHIVE_FILE}"
+	#
+	hdiutil detach "/Volumes/${JVM_FULL_NAME}" -force || die
+}
+function oracle_unpack_linux() {
+	local -r tmp_dir=$(mktemp -d -t "${JVM_FULL_NAME}.XXXXXX")/
+	debug "tmp_dir=${tmp_dir}"
+	tar xf "${ARCHIVE_FILE}" -C "${tmp_dir}" || { rm -Rf "${tmp_dir}";
+		die 'error unpack archive...'; }
+	mv "$(find "${tmp_dir}" -mindepth 1 -maxdepth 1 -type d)" "${JDK_ROOT_DIR}" || { rm -Rf "${tmp_dir}";
+		die 'error move unpacked jdk...'; }
+	rm -Rf "${tmp_dir}" "${ARCHIVE_FILE}"
+}
+function download_jdk() {
+	eval "${JVM_VENDOR}_check_the_need_for_downloading"
+	debug "REQUIRED_UPDATE=${REQUIRED_UPDATE}"
+	if [[ "${REQUIRED_UPDATE}" != "Y" ]]; then
+		return 0
+	fi
+	if [[ -z "${ARCHIVE_JVM_URL}" ]]; then
+		die "empty ARCHIVE_JVM_URL. Use page '${JVM_PAGE_URL}'"
+	fi
+	#
+	if [[ -f "${LAST_UPDATE_FILE}" ]] && [[ "${ARCHIVE_JVM_URL}" == "$(head -2 <"${LAST_UPDATE_FILE}" | tail -1)" ]]; then
+		return 0
+	fi
+	#
+	if [[ -f "${ARCHIVE_FILE}" ]]; then
+		if [[ ${JVM_VERSION_MAJOR} -lt 8 ]]; then
+			rm -f "${ARCHIVE_FILE}"
+		elif check_checksum; then
+			eval "${JVM_VENDOR}_unpack_${OS}"
+			return 0
+		fi
+	fi
+	#
+	if [[ -d "${JDK_HOME_DIR}" ]]; then
+		if [[ "$("${JVM_HOME_DIR}/bin/java" -fullversion 2>&1)" == *"${JVM_VERSION}"* ]]; then
+			write_last_update
+			return 0
+		fi
+	fi
+	#
+	eval "${JVM_VENDOR}_download_jdk"
+	eval "${JVM_VENDOR}_unpack_${OS}"
+	write_last_update
+}
+function main_properties() {
+	[[ -f "${JVMW_HOME}/${JVMW_PROPERTY_FILE}" ]] && { properties_parser "$(cat "${JVMW_HOME}/${JVMW_PROPERTY_FILE}")"; }
+	[[ -f "${JVMW_PROPERTY_FILE}" ]] && { properties_parser "$(cat "${JVMW_PROPERTY_FILE}")"; }
+	properties_parser "$(properties_default)"
+	properties_build
+}
+function check_is_out_of_date() {
+	REQUIRED_UPDATE=N
+	if [[ ! -f "${LAST_UPDATE_FILE}" ]]; then
+		debug "not found file: '${LAST_UPDATE_FILE}'"
+		REQUIRED_UPDATE=Y
+	else
+		local -r luf_date="$(head -1 <"${LAST_UPDATE_FILE}")"
+		# shellcheck disable=SC2005
+		local -r prev_date=$([[ "${OS}" == "darwin" ]] && echo "$(date -jf '%F %R' "${luf_date}" +%j)" || echo "$(date --date="${luf_date}" '+%j')")
+		local -r curr_date=$(date +%j)
+		debug "prev_date='${prev_date}', curr_date='${curr_date}'"
+		if [[ ${curr_date} > ${prev_date} ]]; then
+			REQUIRED_UPDATE=Y
+		fi
+	fi
+	return 0
+}
+function detect_system_jdk() {
+	local -r cmd="javac"
+	cmd_path=$(whereis "${cmd}")
+	if [[ -z "${cmd_path}" ]]; then
+		USE_SYSTEM_JVM=N
+		return 0
+	fi
+	ls_output="$(ls -l "${cmd_path}")"
+	while [[ "${ls_output}" == *"${cmd_path} "* ]]; do
+		cmd_path="$(readlink "${cmd_path}")"
+		ls_output="$(ls -l "${cmd_path}")"
+	done
+	jvm_dir=$(dirname "${cmd_path}")
+	if [[ -f "${jvm_dir}/java_home" ]]; then
+		jvm_dir=$("${jvm_dir}/java_home" 2>&1)
+	fi
+	if [[ -z "${jvm_dir}" ]] || [[ "${jvm_dir}" == *"Unable to find any JVMs matching version"* ]]; then
+		USE_SYSTEM_JVM=N
+		return 0
+	fi
+	local -r jdk_output="$(java -XshowSettings:properties -version 2>&1)"
+	if [[ "${jdk_output}" == *"command not found"* ]]; then
+		USE_SYSTEM_JVM=N
+		return 0
+	fi
+	if [[ "${jdk_output}" != *"java.runtime.version = ${JVM_VERSION_MAJOR}."* ]] && [[ "${jdk_output}" != *"java.runtime.version = 1.${JVM_VERSION_MAJOR}."* ]] && [[ "${jdk_output}" != *"java.runtime.version = ${JVM_VERSION_MAJOR}+"* ]]; then
+		USE_SYSTEM_JVM=N
+		return 0
+	fi
+	USE_SYSTEM_JVM=Y
+	eval "JDK_HOME_DIR='${jvm_dir}/'"
+	return 0
+}
+function detect_reuse_jdk() {
+	if [[ -z "${JVM_VERSION_UPDATE}" ]]; then
+		return 0;
+	fi
+	local -r jvm_root_dir=${JVMW_HOME}/${JVM_VENDOR}-jdk-${JVM_VERSION_MAJOR}/$([[ "${OS}" == 'darwin' ]] && echo 'Home/')
+	if [[ ! -d "${jvm_root_dir}" ]]; then
+		return 0;
+	fi
+	local -r jdk_output="$("${jvm_root_dir}/bin/java" -fullversion 2>&1)"
+	if [[ "${jdk_output}" != *"java full version \"${JVM_VERSION_MAJOR}.0.${JVM_VERSION_UPDATE}+"* ]] && [[ "${jdk_output}" != *"java full version \"1.${JVM_VERSION_MAJOR}.0_${JVM_VERSION_UPDATE}-"* ]] && [[ "${jdk_output}" != *"java full version \"${JVM_VERSION_MAJOR}+"* ]]; then
+		return 0
+	fi
+	JVM_FULL_NAME="${JVM_VENDOR}-jdk-${JVM_VERSION_MAJOR}"
+	JDK_ROOT_DIR=${JVMW_HOME}/${JVM_FULL_NAME}
+	JDK_HOME_DIR=${JDK_ROOT_DIR}/$([[ "${OS}" == 'darwin' ]] && echo 'Home/')
+	REQUIRED_UPDATE=N
+	return 0
+}
+if [[ "${OS}" == "darwin" ]]; then
+	system_check_program_exists "${REQUIRED_COMMANDS_CORE}" "${REQUIRED_COMMANDS_DARWIN}"
+else
+	system_check_program_exists "${REQUIRED_COMMANDS_CORE}" "${REQUIRED_COMMANDS_LINUX}"
+fi
+if [[ "$1" == "upgrade" ]]; then
+	curl -sS https://raw.githubusercontent.com/itbasis/jvm-wrapper/master/jvmw >"$0"
+	exit 0
+fi
+main_properties
+detect_reuse_jdk
+if [[ "${USE_SYSTEM_JVM}" == "Y" ]]; then
+	detect_system_jdk
+fi
+if [[ "${USE_SYSTEM_JVM}" -eq "Y" ]]; then
+	JVM_HOME_DIR="${JDK_HOME_DIR}"
+fi
+export JDK_HOME=${JDK_HOME_DIR%%/bin/*}
+export JAVA_HOME=${JVM_HOME_DIR%%/bin/*}
+if [[ -z "$1" ]] || [[ "$1" == "info" ]]; then
+	print_debug_info
+	echo "JDK_HOME=${JDK_HOME}"
+	echo "JAVA_HOME=${JAVA_HOME}"
+else
+	download_jdk
+	if [[ -z "${JVM_HOME_DIR}" ]]; then
+		die "can't JVM_HOME_DIR"
+	fi
+	print_debug_info
+	if [[ "$1" == "javac" ]] && [[ "${USE_SYSTEM_JVM}" != "Y" ]]; then
+		PATH=.:${JDK_HOME}/bin:$PATH
+		EXEC_PATH=${JDK_HOME}/bin/$1
+	elif [[ "$1" == "java" ]] && [[ "${USE_SYSTEM_JVM}" != "Y" ]]; then
+		PATH=.:${JAVA_HOME}/bin:$PATH
+		EXEC_PATH=${JDK_HOME}/bin/$1
+	else
+		PATH=.:$PATH
+		if [[ "${1:0:2}" == "./" ]]; then
+			EXEC_PATH="$1"
+		else
+			EXEC_PATH=$(whereis "$1")
+		fi
+	fi
+	if [[ -z "${EXEC_PATH}" ]]; then
+		die "No program found to execute: $1"
+	fi
+	# execute program
+	debug "command: ${EXEC_PATH}" "${@:2}"
+	eval "${EXEC_PATH}" "${@:2}"
+fi
