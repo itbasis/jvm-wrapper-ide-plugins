@@ -68,8 +68,4 @@ tasks.withType(PublishTask::class.java).all {
 
 dependencies {
   "compile"(project(":plugin-common"))
-
-  "compile"(group = "com.github.shafirov.klogging", name = "klogging.jvm")
-
-//  "testImplementation"(group = "org.mockito", name = "mockito-junit-jupiter")
 }

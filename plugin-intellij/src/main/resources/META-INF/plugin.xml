@@ -1,6 +1,6 @@
 <idea-plugin>
   <name>JVM Wrapper Support</name>
-  <vendor email="Victor@Alenkov.name" url="https://github.com/itbasis/jvm-wrapper"/>
+  <vendor email="Victor@Alenkov.name" url="https://github.com/itbasis/jvm-wrapper-ide-plugins"/>
 
   <category>Tools Integration</category>
 

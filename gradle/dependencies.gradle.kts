@@ -25,7 +25,6 @@ configurations.all {
         "org.jetbrains.kotlin" -> useVersion(kotlinVersion)
         "io.kotlintest" -> useVersion("3.1.6")
         "io.github.glytching" -> useVersion("2.2.0")
-        "com.github.shafirov.klogging" -> useVersion("1.2.10")
         "org.apache.commons" -> when (requested.name) {
           "commons-lang3" -> useVersion("3.4")
           "commons-compress" -> useVersion("1.17")
