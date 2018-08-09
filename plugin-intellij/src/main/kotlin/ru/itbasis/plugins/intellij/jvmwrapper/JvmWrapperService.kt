@@ -38,34 +38,38 @@ class JvmWrapperService(
 
   private fun getWrapper(): JvmWrapper? {
     return progressManager.run(object : Task.WithResult<JvmWrapper, ExecutionException>(project, "JVM Wrapper", true) {
-      override fun compute(progressIndicator: ProgressIndicator): JvmWrapper? = if (!hasWrapper()) null
-      else JvmWrapper(
-        workingDir = File(project.baseDir.canonicalPath),
-        stepListener = stepListener(progressIndicator),
-        downloadProcessListener = downloadProcessListener(progressIndicator)
-      )
+      override fun compute(progressIndicator: ProgressIndicator): JvmWrapper? {
+        return if (!hasWrapper()) null
+        else JvmWrapper(
+          workingDir = File(project.baseDir.canonicalPath),
+          stepListener = stepListener(progressIndicator),
+          downloadProcessListener = downloadProcessListener(progressIndicator)
+        )
+      }
     })
   }
 
   fun getSdk(): Sdk? {
-    val wrapper = getWrapper() ?: return null
+    return actionGetSdk.execute().resultObject
+  }
 
-    return object : WriteAction<Sdk>() {
-      override fun run(result: Result<Sdk>) {
-        val sdkName = "${JvmWrapper.SCRIPT_FILE_NAME}-${wrapper.jvmName}"
+  private val actionGetSdk = object : WriteAction<Sdk?>() {
+    override fun run(result: Result<Sdk?>) {
+      val wrapper = getWrapper() ?: return
 
-        var findJdk = projectJdkTable.findJdk(sdkName)
-        while (findJdk != null) {
-          projectJdkTable.removeJdk(findJdk)
-          findJdk = projectJdkTable.findJdk(sdkName)
-        }
-//
-        val sdk = SdkConfigurationUtil.createAndAddSDK(wrapper.jvmHomeDir.absolutePath, javaSdk) as ProjectJdkImpl
-        val wrapperSdk = sdk.clone().apply { name = sdkName }
-        projectJdkTable.updateJdk(sdk, wrapperSdk)
-        result.setResult(wrapperSdk)
+      val sdkName = "${JvmWrapper.SCRIPT_FILE_NAME}-${wrapper.jvmName}"
+
+      var findJdk = projectJdkTable.findJdk(sdkName)
+      while (findJdk != null) {
+        projectJdkTable.removeJdk(findJdk)
+        findJdk = projectJdkTable.findJdk(sdkName)
       }
-    }.execute().resultObject
+//
+      val sdk = SdkConfigurationUtil.createAndAddSDK(wrapper.jvmHomeDir.absolutePath, javaSdk) as ProjectJdkImpl
+      val wrapperSdk = sdk.clone().apply { name = sdkName }
+      projectJdkTable.updateJdk(sdk, wrapperSdk)
+      result.setResult(wrapperSdk)
+    }
   }
 
   private fun stepListener(progressIndicator: ProgressIndicator): ProcessStepListener = { msg ->

@@ -1,37 +1,40 @@
 <idea-plugin>
-  <name>JVM Wrapper Support</name>
-  <vendor email="Victor@Alenkov.name" url="https://github.com/itbasis/jvm-wrapper-ide-plugins"/>
+    <name>JVM Wrapper Support</name>
+    <vendor email="Victor@Alenkov.name" url="https://github.com/itbasis/jvm-wrapper-ide-plugins"/>
 
-  <category>Tools Integration</category>
+    <category>Tools Integration</category>
 
-  <description>JVM Wrapper support</description>
+    <description>
+        JVM Wrapper support
+        Details: https://github.com/itbasis/jvm-wrapper-ide-plugins/tree/master/plugin-intellij
+    </description>
 
-  <depends>com.intellij.modules.java</depends>
+    <depends>com.intellij.modules.java</depends>
 
-  <project-components>
-    <component>
-      <interface-class>com.intellij.openapi.components.ProjectComponent</interface-class>
-      <implementation-class>ru.itbasis.plugins.intellij.jvmwrapper.WrapperProjectComponent</implementation-class>
-    </component>
-  </project-components>
+    <project-components>
+        <component>
+            <interface-class>com.intellij.openapi.components.ProjectComponent</interface-class>
+            <implementation-class>ru.itbasis.plugins.intellij.jvmwrapper.WrapperProjectComponent</implementation-class>
+        </component>
+    </project-components>
 
-  <actions>
-    <group id="WrapperBuildMenu" compact="true">
-      <add-to-group group-id="BuildMenu" anchor="after" relative-to-action="CompileProject"/>
-      <separator/>
-      <group text="JVM Wrapper" popup="true">
-        <separator/>
-        <action id="jvmUpdaterAction" class="ru.itbasis.plugins.intellij.jvmwrapper.actions.JvmUpdaterAction"/>
-        <action id="generateAction" class="ru.itbasis.plugins.intellij.jvmwrapper.actions.GenerateAction"/>
-        <separator/>
-      </group>
-      <separator/>
-    </group>
-  </actions>
+    <actions>
+        <group id="WrapperBuildMenu" compact="true">
+            <add-to-group group-id="BuildMenu" anchor="after" relative-to-action="CompileProject"/>
+            <separator/>
+            <group text="JVM Wrapper" popup="true">
+                <separator/>
+                <action id="jvmUpdaterAction" class="ru.itbasis.plugins.intellij.jvmwrapper.actions.JvmUpdaterAction"/>
+                <action id="generateAction" class="ru.itbasis.plugins.intellij.jvmwrapper.actions.GenerateAction"/>
+                <separator/>
+            </group>
+            <separator/>
+        </group>
+    </actions>
 
-  <extensions defaultExtensionNs="com.intellij">
-    <projectService serviceImplementation="ru.itbasis.plugins.intellij.jvmwrapper.JvmWrapperService"/>
-    <projectService serviceImplementation="ru.itbasis.plugins.intellij.jvmwrapper.ProjectSdkUpdater"/>
-    <postStartupActivity implementation="ru.itbasis.plugins.intellij.jvmwrapper.WrapperStartupActivity"/>
-  </extensions>
+    <extensions defaultExtensionNs="com.intellij">
+        <projectService serviceImplementation="ru.itbasis.plugins.intellij.jvmwrapper.JvmWrapperService"/>
+        <projectService serviceImplementation="ru.itbasis.plugins.intellij.jvmwrapper.ProjectSdkUpdater"/>
+        <postStartupActivity implementation="ru.itbasis.plugins.intellij.jvmwrapper.WrapperStartupActivity"/>
+    </extensions>
 </idea-plugin>

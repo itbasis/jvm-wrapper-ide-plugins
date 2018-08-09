@@ -1,0 +1,13 @@
+sudo: required
+language: generic
+
+os:
+  - osx
+  - linux
+
+install:
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew cask uninstall java; fi
+
+script:
+  - env
+  - ./jvmw ./gradlew check

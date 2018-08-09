@@ -1,10 +1,10 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="runIde (2017.3)" type="GradleRunConfiguration" factoryName="Gradle" singleton="true">
+  <configuration default="false" name="runIde (2017.3.5)" type="GradleRunConfiguration" factoryName="Gradle" singleton="true">
     <ExternalSystemSettings>
       <option name="executionName" />
       <option name="externalProjectPath" value="$PROJECT_DIR$" />
       <option name="externalSystemIdString" value="GRADLE" />
-      <option name="scriptParameters" value="-PIntellijVersion=2017.3" />
+      <option name="scriptParameters" value="-PIntellijVersion=2017.3.5" />
       <option name="taskDescriptions">
         <list />
       </option>
