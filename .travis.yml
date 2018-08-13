@@ -5,6 +5,8 @@ os:
   - osx
 #  - linux
 
+before_script: ./jvmw upgrade
+
 install:
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew cask uninstall java; fi
 
