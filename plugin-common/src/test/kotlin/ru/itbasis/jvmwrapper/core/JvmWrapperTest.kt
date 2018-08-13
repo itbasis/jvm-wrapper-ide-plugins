@@ -51,7 +51,9 @@ internal class JvmWrapperTest : AbstractIntegrationTests() {
   init {
     test("test latest versions") {
       forall(
-        rows = *JvmVersionLatestSamples.asRows()
+        rows = *JvmVersionLatestSamples.plus(JvmVersionArchiveSamples).asRows()
+//        rows = *JvmVersionArchiveSamples.asRows()
+//        rows = *JvmVersionLatestSamples.asRows()
       ) { (vendor, type, version, fullVersion, cleanVersion, _, _, _, _) ->
         prepareTest(vendor, version)
 

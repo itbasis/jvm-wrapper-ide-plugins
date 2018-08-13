@@ -22,8 +22,8 @@ val jvmVersionSample__oracle_jdk_10_0_1 = JvmVersionSample(
   cleanVersion = "10.0.1",
   versionMajor = "10",
   versionUpdate = null,
-  downloadPageUrl = "/technetwork/java/javase/downloads/jdk10-downloads-4416644.html",
-  downloadArchiveUrlPart = "http://download.oracle.com/otn-pub/java/jdk/10.0.1+10/fb4372174a714e6b8c52526dc134031e/jdk-10.0.1_"
+  downloadPageUrl = "/technetwork/java/javase/downloads/java-archive-javase10-4425482.html",
+  downloadArchiveUrlPart = "http://download.oracle.com/otn/java/jdk/10.0.1+10/fb4372174a714e6b8c52526dc134031e/jdk-10.0.1_"
 )
 val jvmVersionSample__oracle_jdk_10_0_2 = JvmVersionSample(
   vendor = "oracle",
@@ -45,8 +45,8 @@ val jvmVersionSample__oracle_jdk_8u171 = JvmVersionSample(
   cleanVersion = "8u171",
   versionMajor = "8",
   versionUpdate = "171",
-  downloadPageUrl = "/technetwork/java/javase/downloads/jdk8-downloads-2133151.html",
-  downloadArchiveUrlPart = "http://download.oracle.com/otn-pub/java/jdk/8u171-b11/512cd62ec5174c3487ac17c61aaa89e8/jdk-8u171-"
+  downloadPageUrl = "/technetwork/java/javase/downloads/java-archive-javase8-2177648.html",
+  downloadArchiveUrlPart = "http://download.oracle.com/otn/java/jdk/8u171-b11/512cd62ec5174c3487ac17c61aaa89e8/jdk-8u171-"
 )
 val jvmVersionSample__oracle_jdk_8u172 = JvmVersionSample(
   vendor = "oracle",
@@ -56,8 +56,8 @@ val jvmVersionSample__oracle_jdk_8u172 = JvmVersionSample(
   cleanVersion = "8u172",
   versionMajor = "8",
   versionUpdate = "172",
-  downloadPageUrl = "/technetwork/java/javase/downloads/jdk8-downloads-2133151.html",
-  downloadArchiveUrlPart = "http://download.oracle.com/otn-pub/java/jdk/8u172-b11/a58eab1ec242421181065cdc37240b08/jdk-8u172-"
+  downloadPageUrl = "/technetwork/java/javase/downloads/java-archive-javase8-2177648.html",
+  downloadArchiveUrlPart = "http://download.oracle.com/otn/java/jdk/8u172-b11/a58eab1ec242421181065cdc37240b08/jdk-8u172-"
 )
 
 val jvmVersionSample__oracle_jdk_8u181 = JvmVersionSample(
@@ -73,4 +73,7 @@ val jvmVersionSample__oracle_jdk_8u181 = JvmVersionSample(
 )
 val JvmVersionLatestSamples = arrayOf(
   jvmVersionSample__oracle_jdk_10_0_2, jvmVersionSample__oracle_jdk_8u181
+)
+val JvmVersionArchiveSamples = arrayOf(
+  jvmVersionSample__oracle_jdk_10_0_1, jvmVersionSample__oracle_jdk_8u171, jvmVersionSample__oracle_jdk_8u172
 )

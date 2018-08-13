@@ -5,7 +5,7 @@ import org.apache.commons.lang3.SystemUtils.IS_OS_MAC
 import ru.itbasis.jvmwrapper.core.unarchiver.UnarchiverFactory
 import ru.itbasis.jvmwrapper.core.vendor.DownloadProcessListener
 import ru.itbasis.jvmwrapper.core.vendor.JvmVendor
-import ru.itbasis.jvmwrapper.core.vendor.OracleProvider
+import ru.itbasis.jvmwrapper.core.vendor.oracle.OracleProvider
 import java.io.File
 
 class JvmWrapper(
@@ -36,7 +36,7 @@ class JvmWrapper(
 
         "download remote archive: ${remoteFile.url}".step(stepListener) {
           File(JVMW_HOME_DIR, "$jvmName.${provider.archiveExtension}").apply {
-            provider.download(remoteArchiveFile = remoteFile, target = this, downloadProcessListener = downloadProcessListener)
+            provider.download(target = this, downloadProcessListener = downloadProcessListener)
           }
         }
       }.let { archiveFile ->

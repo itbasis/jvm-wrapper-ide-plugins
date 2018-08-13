@@ -15,3 +15,7 @@ internal fun File.extension(): String {
 internal fun File.archiveNameWithoutExtension(): String {
   return this.name.substringBefore("." + extension())
 }
+
+internal fun Regex.findOne(content: String): String? {
+  return find(content)?.groupValues?.get(1)
+}

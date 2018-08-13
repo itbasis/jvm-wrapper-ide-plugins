@@ -1,6 +1,12 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="check" type="GradleRunConfiguration" factoryName="Gradle" singleton="true">
     <ExternalSystemSettings>
+      <option name="env">
+        <map>
+          <entry key="ORACLE_PASSWORD" value="sd77a9cK9TwFh6g9" />
+          <entry key="ORACLE_USER" value="jvm.wrapper.itbasis@gmail.com" />
+        </map>
+      </option>
       <option name="executionName" />
       <option name="externalProjectPath" value="$PROJECT_DIR$" />
       <option name="externalSystemIdString" value="GRADLE" />
@@ -17,6 +23,6 @@
       </option>
       <option name="vmOptions" value="" />
     </ExternalSystemSettings>
-    <method />
+    <method v="2" />
   </configuration>
 </component>
