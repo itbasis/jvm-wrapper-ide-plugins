@@ -9,6 +9,7 @@ class OracleAuthenticator(httpClient: HttpClient) : AbstractAuthenticator(httpCl
     private const val OTN_URL_INDEX = "https://www.oracle.com/index.html"
     private const val OTN_HOST_LOGIN = "https://login.oracle.com"
     private const val OTN_URL_SIGNON = "http://www.oracle.com/webapps/redirect/signon?nexturl=$OTN_URL_INDEX"
+    private const val OTN_URL_SIGNOUT = "https://login.oracle.com/sso/logout?p_done_url=$OTN_URL_INDEX"
 
     private val FORM_REGEX = "(?is)(<form.+?>.*?</form>)".toRegex(option = RegexOption.IGNORE_CASE)
     private val FORM_ACTION_REGEX = "action=\"([^\"]+)".toRegex(option = RegexOption.IGNORE_CASE)
@@ -31,6 +32,16 @@ class OracleAuthenticator(httpClient: HttpClient) : AbstractAuthenticator(httpCl
   private var content = ""
 
   override fun execute(): Boolean {
+    otnGetRequest(OTN_URL_INDEX)
+    httpClient.httpCookieStore.cookies.find { it.name == "ORA_UCM_INFO" }?.let { cookie ->
+      if (cookie.value.endsWith(suffix = username, ignoreCase = true)) {
+        return true
+      }
+      otnGetRequest(OTN_URL_SIGNOUT)
+      httpClient.httpCookieStore.clear()
+    }
+
+
     otnGetRequest(OTN_URL_SIGNON)
     otnPostRequest()
     otnPostRequest()
@@ -50,17 +61,17 @@ class OracleAuthenticator(httpClient: HttpClient) : AbstractAuthenticator(httpCl
     content = httpClient.getContent(url)
   }
 
-  private fun otnPostRequest() {
-    val formParser = formParser()
+  private fun otnPostRequest(): Boolean {
+    val formParser = formParser() ?: return false
     content = httpClient.post(formParser.first, formParser.second)
+    return true
   }
 
-  private fun formParser(): Pair<String, Map<String, String>> {
-    val form = FORM_REGEX.findOne(content)
-    val formContent = form!!
-    val formAction: String = FORM_ACTION_REGEX.findOne(formContent)!!.fixUrl()
+  private fun formParser(): Pair<String, Map<String, String>>? {
+    val form = FORM_REGEX.findOne(content) ?: return null
+    val formAction: String = FORM_ACTION_REGEX.findOne(form)!!.fixUrl()
 
-    val f = FORM_INPUTS_REGEX.findAll(formContent)
+    val f = FORM_INPUTS_REGEX.findAll(form)
     val fields = f.mapNotNull {
       with(it.groupValues[1]) {
         val fieldName = FORM_INPUT_NAME_REGEX.findOne(this) ?: ""
