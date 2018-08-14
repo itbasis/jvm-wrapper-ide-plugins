@@ -54,6 +54,11 @@ class OracleProvider(private val jvmVersion: JvmVersion) : AbstractProvider() {
       }
       fos.flush()
     }
+    require(target.isFile) {
+      val msg = "$target is not a file"
+      println(msg)
+      msg
+    }
   }
 
   override fun auth() {
