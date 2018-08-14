@@ -11,18 +11,22 @@ class MacUnarchiver(sourceFile: File, targetDir: File, stepListener: ProcessStep
   }
 
   override fun doUnpack() {
-    "Detaching a previously attached dmg archive".step(stepListener) { detach(quiet = true).run() }
+    "Detaching a previously attached dmg archive...".step(stepListener) { detach(quiet = true).run() }
 
     try {
-      "Attaching the dmg archive".step(stepListener) {
+      "Attaching the dmg archive...".step(stepListener) {
         attach().run()
-        require(File(volumePath).isDirectory)
+        require(File(volumePath).isDirectory) {
+          val msg = "$volumePath is not a directory"
+          println(msg)
+          msg
+        }
       }
 
-      "Search for PKG file".step(stepListener) { findPkgFile() }.let { pkgFile ->
+      "Search for PKG file...".step(stepListener) { findPkgFile() }.let { pkgFile ->
 
-        "Unpacking the PKG file".step(stepListener) { unpackPkg(pkgFile) }
-        "Unpacking the CPIO file".step(stepListener) { unpackCpio() }
+        "Unpacking the PKG file...".step(stepListener) { unpackPkg(pkgFile) }
+        "Unpacking the CPIO file...".step(stepListener) { unpackCpio() }
       }
     } finally {
       "Detaching a previously attached dmg archive...".step(stepListener) { detach().run() }
@@ -53,7 +57,7 @@ class MacUnarchiver(sourceFile: File, targetDir: File, stepListener: ProcessStep
   private fun attach(): Process {
     require(sourceFile.isFile)
 
-    "attach $sourceFile to $volumePath".step(stepListener) {
+    "attach $sourceFile to $volumePath...".step(stepListener) {
       return runtime.exec(
         arrayOf(
           CMD_HDIUTIL, "attach", sourceFile.absolutePath, "-mountpoint", volumePath
@@ -63,7 +67,7 @@ class MacUnarchiver(sourceFile: File, targetDir: File, stepListener: ProcessStep
   }
 
   private fun detach(quiet: Boolean = false): Process {
-    "detach $volumePath".step(stepListener) {
+    "detach $volumePath...".step(stepListener) {
       return runtime.exec(arrayOf(
         CMD_HDIUTIL, "detach", volumePath, "-force"
       ).apply {

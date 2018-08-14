@@ -18,8 +18,8 @@ abstract class AbstractUnarchiver(
 
   fun unpack() {
     try {
-      "Unpacking archive: $sourceFile".step(stepListener) { doUnpack() }
-      "Moving unpacked content".step(stepListener) { doMovingToDest() }
+      "Running unpack the archive: $sourceFile".step(stepListener) { doUnpack() }
+      "Moving unpacked content...".step(stepListener) { doMovingToDest() }
     } finally {
       doFinalize()
     }
