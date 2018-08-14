@@ -16,11 +16,11 @@ class MacUnarchiver(sourceFile: File, targetDir: File, stepListener: ProcessStep
     try {
       "Attaching the dmg archive...".step(stepListener) {
         attach().run()
-//        require(File(volumePath).isDirectory) {
-//          val msg = "$volumePath is not a directory"
-//          println(msg)
-//          msg
-//        }
+        require(File(volumePath).isDirectory) {
+          val msg = "$volumePath is not a directory"
+          println(msg)
+          msg
+        }
       }
 
       "Search for PKG file...".step(stepListener) { findPkgFile() }.let { pkgFile ->
@@ -55,7 +55,11 @@ class MacUnarchiver(sourceFile: File, targetDir: File, stepListener: ProcessStep
   }
 
   private fun attach(): Process {
-    require(sourceFile.isFile)
+    require(sourceFile.isFile) {
+      val msg = "$sourceFile is not a file"
+      println(msg)
+      msg
+    }
 
     "attach $sourceFile to $volumePath...".step(stepListener) {
       return runtime.exec(
