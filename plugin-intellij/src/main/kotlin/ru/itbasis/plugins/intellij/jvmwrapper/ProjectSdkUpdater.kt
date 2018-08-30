@@ -6,6 +6,7 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.roots.ProjectRootManager
 import com.intellij.openapi.roots.impl.LanguageLevelProjectExtensionImpl
 import com.intellij.openapi.roots.impl.ProjectRootManagerImpl
+import ru.itbasis.jvmwrapper.core.SystemInfo.isSupportedOS
 
 class ProjectSdkUpdater(private val project: Project, private val jvmWrapperService: JvmWrapperService) {
   companion object {
@@ -14,6 +15,8 @@ class ProjectSdkUpdater(private val project: Project, private val jvmWrapperServ
   }
 
   fun update() {
+    if (!isSupportedOS) return
+
     if (!jvmWrapperService.hasWrapper()) return
 
     val wrapperSdk = jvmWrapperService.getSdk() ?: return

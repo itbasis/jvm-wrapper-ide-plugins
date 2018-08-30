@@ -16,6 +16,7 @@ import com.intellij.openapi.projectRoots.impl.SdkConfigurationUtil
 import com.twelvemonkeys.io.FileUtil
 import ru.itbasis.jvmwrapper.core.JvmWrapper
 import ru.itbasis.jvmwrapper.core.ProcessStepListener
+import ru.itbasis.jvmwrapper.core.SystemInfo.isSupportedOS
 import ru.itbasis.jvmwrapper.core.vendor.DownloadProcessListener
 import java.io.File
 
@@ -33,7 +34,7 @@ class JvmWrapperService(
   }
 
   fun hasWrapper(): Boolean {
-    return project.baseDir.findFileByRelativePath(JvmWrapper.SCRIPT_FILE_NAME)?.exists() ?: false
+    return isSupportedOS && project.baseDir.findFileByRelativePath(JvmWrapper.SCRIPT_FILE_NAME)?.exists() ?: false
   }
 
   private fun getWrapper(): JvmWrapper? {
