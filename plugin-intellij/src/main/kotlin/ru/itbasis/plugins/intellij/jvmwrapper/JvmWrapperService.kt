@@ -14,10 +14,11 @@ import com.intellij.openapi.projectRoots.Sdk
 import com.intellij.openapi.projectRoots.impl.ProjectJdkImpl
 import com.intellij.openapi.projectRoots.impl.SdkConfigurationUtil
 import com.twelvemonkeys.io.FileUtil
-import ru.itbasis.jvmwrapper.core.JvmWrapper
 import ru.itbasis.jvmwrapper.core.ProcessStepListener
 import ru.itbasis.jvmwrapper.core.SystemInfo.isSupportedOS
 import ru.itbasis.jvmwrapper.core.vendor.DownloadProcessListener
+import ru.itbasis.jvmwrapper.core.wrapper.JvmWrapper
+import ru.itbasis.jvmwrapper.core.wrapper.SCRIPT_FILE_NAME
 import java.io.File
 
 class JvmWrapperService(
@@ -34,7 +35,7 @@ class JvmWrapperService(
   }
 
   fun hasWrapper(): Boolean {
-    return isSupportedOS && project.baseDir.findFileByRelativePath(JvmWrapper.SCRIPT_FILE_NAME)?.exists() ?: false
+    return isSupportedOS && project.baseDir.findFileByRelativePath(SCRIPT_FILE_NAME)?.exists() ?: false
   }
 
   private fun getWrapper(): JvmWrapper? {
@@ -58,7 +59,7 @@ class JvmWrapperService(
     override fun run(result: Result<Sdk?>) {
       val wrapper = getWrapper() ?: return
 
-      val sdkName = "${JvmWrapper.SCRIPT_FILE_NAME}-${wrapper.jvmName}"
+      val sdkName = wrapper.sdkName
 
       var findJdk = projectJdkTable.findJdk(sdkName)
       while (findJdk != null) {

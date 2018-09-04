@@ -1,4 +1,4 @@
-package ru.itbasis.jvmwrapper.core
+package ru.itbasis.jvmwrapper.core.wrapper
 
 import asRows
 import io.kotlintest.Description
@@ -8,7 +8,10 @@ import io.kotlintest.matchers.file.startWithPath
 import io.kotlintest.should
 import io.kotlintest.shouldBe
 import org.junit.rules.TemporaryFolder
-import ru.itbasis.jvmwrapper.core.JvmWrapper.Companion.JVMW_HOME_DIR
+import ru.itbasis.jvmwrapper.core.AbstractIntegrationTests
+import ru.itbasis.jvmwrapper.core.JvmVersionArchiveSamples
+import ru.itbasis.jvmwrapper.core.JvmVersionLatestSamples
+import ru.itbasis.jvmwrapper.core.wrapper.JvmWrapper.Companion.JVMW_HOME_DIR
 import java.io.File
 import java.math.BigDecimal
 import java.math.RoundingMode

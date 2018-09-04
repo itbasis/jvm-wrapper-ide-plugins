@@ -12,7 +12,7 @@ import com.intellij.openapi.vfs.VirtualFileContentsChangedAdapter
 import com.intellij.openapi.vfs.VirtualFileListener
 import com.intellij.openapi.vfs.VirtualFileManager
 import com.intellij.openapi.vfs.VirtualFilePropertyEvent
-import ru.itbasis.jvmwrapper.core.JvmWrapper
+import ru.itbasis.jvmwrapper.core.wrapper.SCRIPT_FILE_NAME
 
 class WrapperProjectComponent(
   project: Project, private val virtualFileManager: VirtualFileManager, private val projectSdkUpdater: ProjectSdkUpdater
@@ -25,7 +25,7 @@ class WrapperProjectComponent(
     override fun onBeforeFileChange(p0: VirtualFile) {}
 
     private fun refresh(virtualFile: VirtualFile) {
-      if (virtualFile.nameWithoutExtension == JvmWrapper.SCRIPT_FILE_NAME) {
+      if (virtualFile.nameWithoutExtension == SCRIPT_FILE_NAME) {
         projectSdkUpdater.update()
       }
     }

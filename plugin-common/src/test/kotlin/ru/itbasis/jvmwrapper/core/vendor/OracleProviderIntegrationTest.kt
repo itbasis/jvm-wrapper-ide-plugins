@@ -2,10 +2,8 @@ package ru.itbasis.jvmwrapper.core.vendor
 
 import asRows
 import io.kotlintest.data.forall
-import io.kotlintest.matchers.beGreaterThan
 import io.kotlintest.matchers.startWith
 import io.kotlintest.should
-import io.kotlintest.shouldBe
 import io.kotlintest.shouldNotBe
 import io.kotlintest.specs.FunSpec
 import ru.itbasis.jvmwrapper.core.JvmVersion

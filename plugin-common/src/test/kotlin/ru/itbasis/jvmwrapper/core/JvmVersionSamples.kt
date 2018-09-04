@@ -75,5 +75,7 @@ val JvmVersionLatestSamples = arrayOf(
   jvmVersionSample__oracle_jdk_10_0_2, jvmVersionSample__oracle_jdk_8u181
 )
 val JvmVersionArchiveSamples = arrayOf(
-  jvmVersionSample__oracle_jdk_10_0_1, jvmVersionSample__oracle_jdk_8u171, jvmVersionSample__oracle_jdk_8u172
+  jvmVersionSample__oracle_jdk_10_0_1,
+  jvmVersionSample__oracle_jdk_8u171,
+  jvmVersionSample__oracle_jdk_8u172
 )
