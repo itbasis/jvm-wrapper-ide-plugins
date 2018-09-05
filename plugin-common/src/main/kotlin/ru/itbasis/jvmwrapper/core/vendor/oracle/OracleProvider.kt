@@ -1,6 +1,7 @@
 package ru.itbasis.jvmwrapper.core.vendor.oracle
 
 import com.google.gson.JsonParser
+import mu.KotlinLogging
 import org.apache.commons.codec.digest.DigestUtils
 import org.apache.http.cookie.ClientCookie
 import org.apache.http.impl.cookie.BasicClientCookie2
@@ -14,6 +15,8 @@ import java.io.File
 import kotlin.text.RegexOption.IGNORE_CASE
 
 class OracleProvider(private val jvmVersion: JvmVersion) : AbstractProvider() {
+  private val logger = KotlinLogging.logger {}
+
   override val remoteArchiveFile: RemoteArchiveFile by lazy {
     latestDownloadPageUrl.getRemoteArchiveFile() ?: archiveDownloadPageUrl.getRemoteArchiveFile()
     ?: throw IllegalStateException("it was not succeeded to define URL for version $jvmVersion")
@@ -22,7 +25,11 @@ class OracleProvider(private val jvmVersion: JvmVersion) : AbstractProvider() {
   override fun String.urlWithinHost() = (if (startsWith("/")) "http://www.oracle.com$this" else this)
 
   override fun String?.getRemoteArchiveFile(): RemoteArchiveFile? {
-    require(!this.isNullOrBlank()) { "request url null or empty" }
+    require(!this.isNullOrBlank()) {
+      val msg = "request url null or empty"
+      logger.error { msg }
+      msg
+    }
     val result = regexDownloadFile.findOne(this!!.htmlContent(httpClient = httpClient)) ?: return null
 
     return JsonParser().parse(result).asJsonObject.let { jsonObject ->
@@ -56,7 +63,7 @@ class OracleProvider(private val jvmVersion: JvmVersion) : AbstractProvider() {
     }
     require(target.isFile) {
       val msg = "$target is not a file"
-      println(msg)
+      logger.error { msg }
       msg
     }
   }

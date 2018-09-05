@@ -1,5 +1,6 @@
 package ru.itbasis.jvmwrapper.core
 
+import mu.KotlinLogging
 import org.apache.http.HttpEntity
 import org.apache.http.HttpResponse
 import org.apache.http.client.CookieStore
@@ -19,6 +20,8 @@ import org.apache.http.protocol.HttpContext
 import org.apache.http.util.EntityUtils
 
 class HttpClient {
+  private val logger = KotlinLogging.logger {}
+
   val httpCookieStore: CookieStore = BasicCookieStore()
 
   private val httpContext: HttpContext = BasicHttpContext().also {
@@ -36,17 +39,18 @@ class HttpClient {
   }
 
   fun getContent(url: String): String {
+    logger.debug { "get.url: $url" }
     return client.execute(HttpGet(url), httpContext).content()
   }
 
   fun getEntity(url: String): HttpEntity {
-    println("get.entity.url: $url")
+    logger.debug { "get.entity.url: $url" }
     val execute = client.execute(HttpGet(url), httpContext)
     return execute.entity
   }
 
   fun post(url: String, params: Map<String, String>): String {
-    println("post.url: $url")
+    logger.debug { "post.url: $url" }
     val httpPost = HttpPost(url)
     httpPost.entity = UrlEncodedFormEntity(params.map { (key, value) -> BasicNameValuePair(key, value) })
     return client.execute(httpPost, httpContext).content()

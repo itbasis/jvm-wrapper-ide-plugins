@@ -7,6 +7,7 @@ import io.kotlintest.data.forall
 import io.kotlintest.matchers.file.startWithPath
 import io.kotlintest.should
 import io.kotlintest.shouldBe
+import mu.KotlinLogging
 import org.junit.rules.TemporaryFolder
 import ru.itbasis.jvmwrapper.core.AbstractIntegrationTests
 import ru.itbasis.jvmwrapper.core.JvmVersionArchiveSamples
@@ -19,10 +20,12 @@ import java.nio.charset.Charset
 import java.util.concurrent.TimeUnit
 
 internal class JvmWrapperTest : AbstractIntegrationTests() {
-  private val stepListener: (String) -> Unit = { msg -> println(msg) }
+  private val logger = KotlinLogging.logger {}
+
+  private val stepListener: (String) -> Unit = { msg -> logger.info { msg } }
   private val downloadProcessListener: (String, Long, Long) -> Boolean = { _, sizeCurrent, sizeTotal ->
     val percentage = BigDecimal(sizeCurrent.toDouble() / sizeTotal * 100).setScale(2, RoundingMode.HALF_UP)
-    println("$sizeCurrent / $sizeTotal :: $percentage%")
+    logger.info { "$sizeCurrent / $sizeTotal :: $percentage%" }
     true
   }
   private var temporaryFolder = TemporaryFolder()
@@ -36,8 +39,8 @@ internal class JvmWrapperTest : AbstractIntegrationTests() {
   }
 
   private fun prepareTest(vendor: String, version: String) {
-    println("temporaryFolder: ${temporaryFolder.root}")
-    println("version: $version")
+    logger.info { "temporaryFolder: ${temporaryFolder.root}" }
+    logger.info { "version: $version" }
     temporaryFolder.root.listFiles().forEach { it.deleteRecursively() }
 
     val propertiesFile = temporaryFolder.newFile("jvmw.properties").apply {
@@ -47,8 +50,7 @@ internal class JvmWrapperTest : AbstractIntegrationTests() {
     val workingDir = propertiesFile.parentFile
     workingDir.absolutePath shouldBe temporaryFolder.root.absolutePath
 
-    File(System.getProperty("user.dir")).parentFile.resolve(JvmWrapper.SCRIPT_FILE_NAME)
-      .copyTo(File(workingDir, JvmWrapper.SCRIPT_FILE_NAME))
+    File(System.getProperty("user.dir")).parentFile.resolve(SCRIPT_FILE_NAME).copyTo(File(workingDir, SCRIPT_FILE_NAME))
   }
 
   init {
@@ -66,11 +68,11 @@ internal class JvmWrapperTest : AbstractIntegrationTests() {
           downloadProcessListener = if (!launchedInCI()) downloadProcessListener else null
         )
         val jvmHomeDir = jvmWrapper.jvmHomeDir
-        println("jvmHomeDir: $jvmHomeDir")
+        logger.info { "jvmHomeDir: $jvmHomeDir" }
         jvmHomeDir should startWithPath(JVMW_HOME_DIR.resolve("$vendor-$type-$cleanVersion"))
 
         val jvmBinDir = jvmHomeDir.resolve("bin")
-        println("jvmBinDir: $jvmBinDir")
+        logger.info { "jvmBinDir: $jvmBinDir" }
         jvmBinDir.exists() shouldBe true
 
         val process = ProcessBuilder(File(jvmBinDir, "java").absolutePath, "-fullversion").start()

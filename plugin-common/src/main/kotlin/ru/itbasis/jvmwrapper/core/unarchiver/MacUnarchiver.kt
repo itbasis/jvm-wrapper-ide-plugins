@@ -1,11 +1,15 @@
 package ru.itbasis.jvmwrapper.core.unarchiver
 
+import mu.KotlinLogging
 import ru.itbasis.jvmwrapper.core.ProcessStepListener
 import ru.itbasis.jvmwrapper.core.step
 import java.io.File
 
 class MacUnarchiver(sourceFile: File, targetDir: File, stepListener: ProcessStepListener? = null, removeOriginal: Boolean = false) :
   AbstractUnarchiver(sourceFile, targetDir, stepListener, removeOriginal) {
+
+  private val logger = KotlinLogging.logger {}
+
   override fun doMovingToDest() {
     tempDir.resolve("Contents").renameTo(targetDir)
   }
@@ -18,7 +22,7 @@ class MacUnarchiver(sourceFile: File, targetDir: File, stepListener: ProcessStep
         attach().run()
         require(File(volumePath).isDirectory) {
           val msg = "$volumePath is not a directory"
-          println(msg)
+          logger.error { msg }
           msg
         }
       }
@@ -57,7 +61,7 @@ class MacUnarchiver(sourceFile: File, targetDir: File, stepListener: ProcessStep
   private fun attach(): Process {
     require(sourceFile.isFile) {
       val msg = "$sourceFile is not a file"
-      println(msg)
+      logger.error { msg }
       msg
     }
 

@@ -105,9 +105,9 @@ allprojects {
       }
       dependencies {
         "compile"(kotlin("stdlib-jdk8"))
-//        "compile"("io.github.microutils:kotlin-logging")
+        "implementation"("io.github.microutils:kotlin-logging")
 
-        "testCompile"("org.slf4j:slf4j-simple")
+        "testImplementation"("org.slf4j:slf4j-log4j12")
 
         arrayOf(
           kotlin("test-junit"),
