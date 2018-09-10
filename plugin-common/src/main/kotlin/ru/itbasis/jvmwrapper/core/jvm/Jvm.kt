@@ -61,9 +61,11 @@ data class Jvm(
       path.resolve("bin").getExecutable("java").toFile().takeIf { it.canExecute() }?.let { javaExec ->
         val process = ProcessBuilder(javaExec.absolutePath, "-fullversion").redirectErrorStream(true).start()
         val text = process.inputStream.use { it.reader().readText() }
-        return """.*"(.*)".*""".toPattern().matcher(text).apply { find() }.group(1)
+        val matcher = """.*"(.*)".*""".toPattern().matcher(text)
+        if (matcher.find()) {
+          return matcher.group(1)
+        }
       }
-
 
       throw IllegalStateException("version not detected from path: $path")
     }

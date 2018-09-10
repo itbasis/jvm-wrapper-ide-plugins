@@ -16,7 +16,7 @@ internal class MacSystemJvmScannerTest : FunSpec() {
     test("list jvm paths").config(enabled = IS_OS_MAC) {
       val actualPaths = SystemJvmScanner.getInstance().listJvmPaths()
 
-      actualPaths.shouldContainAll(arrayOf("jdk-10.0.2", "jdk1.8.0_181", "1.6.0").map {
+      actualPaths.shouldContainAll(arrayOf("1.6.0", "jdk1.8.0_181", "jdk-10.0.2", "jdk-11").map {
         Paths.get("/Library/Java/JavaVirtualMachines/$it.jdk/Contents/Home")
       })
     }
@@ -24,7 +24,7 @@ internal class MacSystemJvmScannerTest : FunSpec() {
     test(name = "list jvm").config(enabled = IS_OS_MAC) {
       val actualJvmList = SystemJvmScanner.getInstance().listJvm()
 
-      actualJvmList.map { it.toString() }.shouldContainAll("oracle-jdk-10.0.2", "oracle-jdk-8u181", "oracle-jdk-6u65")
+      actualJvmList.map { it.toString() }.shouldContainAll("oracle-jdk-6u65", "oracle-jdk-8u181", "oracle-jdk-10.0.2", "oracle-jdk-11")
     }
   }
 }

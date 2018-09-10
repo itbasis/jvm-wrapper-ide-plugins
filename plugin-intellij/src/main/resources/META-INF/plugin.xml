@@ -20,11 +20,11 @@
 
     <actions>
         <group id="WrapperBuildMenu" compact="true">
-            <add-to-group group-id="BuildMenu" anchor="after" relative-to-action="CompileProject"/>
+            <add-to-group group-id="ToolsMenu" anchor="last"/>
             <separator/>
             <group text="JVM Wrapper" popup="true">
                 <separator/>
-                <action id="jvmUpdaterAction" class="ru.itbasis.plugins.intellij.jvmwrapper.actions.JvmUpdaterAction"/>
+                <action id="jvmUpdaterAction" class="ru.itbasis.plugins.intellij.jvmwrapper.actions.SdkUpdater"/>
                 <action id="generateAction" class="ru.itbasis.plugins.intellij.jvmwrapper.actions.GenerateAction"/>
                 <separator/>
             </group>
@@ -38,6 +38,6 @@
 
         <applicationService serviceImplementation="ru.itbasis.plugins.intellij.jvmwrapper.ProjectSdkScanner"/>
 
-        <postStartupActivity implementation="ru.itbasis.plugins.intellij.jvmwrapper.WrapperStartupActivity"/>
+        <postStartupActivity implementation="ru.itbasis.plugins.intellij.jvmwrapper.actions.SdkUpdater"/>
     </extensions>
 </idea-plugin>
