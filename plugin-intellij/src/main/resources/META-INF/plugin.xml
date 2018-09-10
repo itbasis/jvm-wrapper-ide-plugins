@@ -35,6 +35,9 @@
     <extensions defaultExtensionNs="com.intellij">
         <projectService serviceImplementation="ru.itbasis.plugins.intellij.jvmwrapper.JvmWrapperService"/>
         <projectService serviceImplementation="ru.itbasis.plugins.intellij.jvmwrapper.ProjectSdkUpdater"/>
+
+        <applicationService serviceImplementation="ru.itbasis.plugins.intellij.jvmwrapper.ProjectSdkScanner"/>
+
         <postStartupActivity implementation="ru.itbasis.plugins.intellij.jvmwrapper.WrapperStartupActivity"/>
     </extensions>
 </idea-plugin>

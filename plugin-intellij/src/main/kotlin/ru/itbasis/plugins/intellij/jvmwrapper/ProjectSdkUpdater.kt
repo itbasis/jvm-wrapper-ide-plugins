@@ -8,13 +8,8 @@ import com.intellij.openapi.roots.impl.LanguageLevelProjectExtensionImpl
 import com.intellij.openapi.roots.impl.ProjectRootManagerImpl
 import ru.itbasis.jvmwrapper.core.SystemInfo.isSupportedOS
 
-class ProjectSdkUpdater(private val project: Project, private val jvmWrapperService: JvmWrapperService) {
-  companion object {
-    @JvmStatic
-    fun getInstance(project: Project): ProjectSdkUpdater = ServiceManager.getService(project, ProjectSdkUpdater::class.java)
-  }
-
-  fun update() {
+class ProjectSdkUpdater(private val project: Project, private val jvmWrapperService: JvmWrapperService) : Runnable {
+  override fun run() {
     if (!isSupportedOS) return
 
     if (!jvmWrapperService.hasWrapper()) return
@@ -27,5 +22,10 @@ class ProjectSdkUpdater(private val project: Project, private val jvmWrapperServ
       LanguageLevelProjectExtensionImpl.getInstanceImpl(project).default = true
       LanguageLevelProjectExtensionImpl.MyProjectExtension(project).projectSdkChanged(wrapperSdk)
     }
+  }
+
+  companion object {
+    @JvmStatic
+    fun getInstance(project: Project): ProjectSdkUpdater = ServiceManager.getService(project, ProjectSdkUpdater::class.java)
   }
 }

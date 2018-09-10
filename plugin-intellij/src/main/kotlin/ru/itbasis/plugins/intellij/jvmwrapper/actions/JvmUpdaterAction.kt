@@ -10,5 +10,7 @@ class JvmUpdaterAction : AnAction("Refresh") {
     event.presentation.isEnabledAndVisible = JvmWrapperService.getInstance(event.project!!).hasWrapper()
   }
 
-  override fun actionPerformed(event: AnActionEvent) = ProjectSdkUpdater.getInstance(event.project!!).update()
+  override fun actionPerformed(event: AnActionEvent) {
+    ProjectSdkUpdater.getInstance(event.project!!).run()
+  }
 }

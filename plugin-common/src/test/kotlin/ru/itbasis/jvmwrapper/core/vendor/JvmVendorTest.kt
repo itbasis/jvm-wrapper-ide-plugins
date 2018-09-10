@@ -12,18 +12,14 @@ internal class JvmVendorTest : FunSpec({
     forall(
       row("oracle", ORACLE), row("Oracle", ORACLE), row("Oracle Corporation", ORACLE)
     ) { value, expected ->
-      JvmVendor.parse(value) shouldBe expected
+      value.toJvmVendor() shouldBe expected
     }
-  }
-
-  test("runtime") {
-    JvmVendor.runtime() shouldBe ORACLE
   }
 
   test("Unsuccessful parsing of vendors") {
     forall(row("oracle "), row("o")) { value ->
       shouldThrow<IllegalArgumentException> {
-        JvmVendor.parse(value)
+        value.toJvmVendor()
       }
     }
   }

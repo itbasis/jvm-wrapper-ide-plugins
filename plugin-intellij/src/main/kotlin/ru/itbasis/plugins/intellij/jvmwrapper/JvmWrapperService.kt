@@ -1,31 +1,23 @@
 package ru.itbasis.plugins.intellij.jvmwrapper
 
 import com.intellij.execution.ExecutionException
-import com.intellij.openapi.application.Result
-import com.intellij.openapi.application.WriteAction
 import com.intellij.openapi.components.ServiceManager
 import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.openapi.progress.ProgressManager
 import com.intellij.openapi.progress.Task
 import com.intellij.openapi.project.Project
-import com.intellij.openapi.projectRoots.JavaSdk
-import com.intellij.openapi.projectRoots.ProjectJdkTable
 import com.intellij.openapi.projectRoots.Sdk
-import com.intellij.openapi.projectRoots.impl.ProjectJdkImpl
-import com.intellij.openapi.projectRoots.impl.SdkConfigurationUtil
 import com.twelvemonkeys.io.FileUtil
 import ru.itbasis.jvmwrapper.core.ProcessStepListener
 import ru.itbasis.jvmwrapper.core.SystemInfo.isSupportedOS
 import ru.itbasis.jvmwrapper.core.vendor.DownloadProcessListener
 import ru.itbasis.jvmwrapper.core.wrapper.JvmWrapper
 import ru.itbasis.jvmwrapper.core.wrapper.SCRIPT_FILE_NAME
+import ru.itbasis.plugins.intellij.jvmwrapper.actions.SdkReceiver
 import java.io.File
 
 class JvmWrapperService(
-  private val project: Project,
-  private val javaSdk: JavaSdk,
-  private val projectJdkTable: ProjectJdkTable,
-  private val progressManager: ProgressManager
+  private val project: Project, private val progressManager: ProgressManager
 ) {
   companion object {
     @JvmStatic
@@ -39,7 +31,7 @@ class JvmWrapperService(
   }
 
   private fun getWrapper(): JvmWrapper? {
-    return progressManager.run(object : Task.WithResult<JvmWrapper, ExecutionException>(project, "JVM Wrapper", true) {
+    return progressManager.run(object : Task.WithResult<JvmWrapper, ExecutionException>(project, "JRE Wrapper", true) {
       override fun compute(progressIndicator: ProgressIndicator): JvmWrapper? {
         return if (!hasWrapper()) null
         else JvmWrapper(
@@ -52,26 +44,8 @@ class JvmWrapperService(
   }
 
   fun getSdk(): Sdk? {
-    return actionGetSdk.execute().resultObject
-  }
-
-  private val actionGetSdk = object : WriteAction<Sdk?>() {
-    override fun run(result: Result<Sdk?>) {
-      val wrapper = getWrapper() ?: return
-
-      val sdkName = wrapper.sdkName
-
-      var findJdk = projectJdkTable.findJdk(sdkName)
-      while (findJdk != null) {
-        projectJdkTable.removeJdk(findJdk)
-        findJdk = projectJdkTable.findJdk(sdkName)
-      }
-//
-      val sdk = SdkConfigurationUtil.createAndAddSDK(wrapper.jvmHomeDir.absolutePath, javaSdk) as ProjectJdkImpl
-      val wrapperSdk = sdk.clone().apply { name = sdkName }
-      projectJdkTable.updateJdk(sdk, wrapperSdk)
-      result.setResult(wrapperSdk)
-    }
+    val wrapper = getWrapper() ?: return null
+    return SdkReceiver(sdkName = wrapper.sdkName, sdkPath = wrapper.jvmHomeDir.toPath(), override = true).execute().resultObject
   }
 
   private fun stepListener(progressIndicator: ProgressIndicator): ProcessStepListener = { msg ->

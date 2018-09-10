@@ -26,14 +26,18 @@ class WrapperProjectComponent(
 
     private fun refresh(virtualFile: VirtualFile) {
       if (virtualFile.nameWithoutExtension == SCRIPT_FILE_NAME) {
-        projectSdkUpdater.update()
+        projectSdkUpdater.run()
       }
     }
   }
 
-  override fun projectOpened() = virtualFileManager.addVirtualFileListener(jvmwWrapperListener)
+  override fun projectOpened() {
+    virtualFileManager.addVirtualFileListener(jvmwWrapperListener)
+  }
 
-  override fun projectClosed() = virtualFileManager.removeVirtualFileListener(jvmwWrapperListener)
+  override fun projectClosed() {
+    virtualFileManager.removeVirtualFileListener(jvmwWrapperListener)
+  }
 
   private fun updateModulesSdk(wrapperSdk: Sdk) {
     ApplicationManager.getApplication().runWriteAction {

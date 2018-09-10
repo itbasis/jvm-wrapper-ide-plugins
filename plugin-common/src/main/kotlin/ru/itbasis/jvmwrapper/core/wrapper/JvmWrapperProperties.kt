@@ -1,8 +1,9 @@
 package ru.itbasis.jvmwrapper.core.wrapper
 
-import ru.itbasis.jvmwrapper.core.JvmType
-import ru.itbasis.jvmwrapper.core.toJvmType
+import ru.itbasis.jvmwrapper.core.jvm.JvmType
+import ru.itbasis.jvmwrapper.core.jvm.toJvmType
 import ru.itbasis.jvmwrapper.core.vendor.JvmVendor
+import ru.itbasis.jvmwrapper.core.vendor.toJvmVendor
 import ru.itbasis.kotlin.utils.toBoolean
 import java.io.File
 import java.util.Properties
@@ -50,7 +51,7 @@ class JvmWrapperProperties(
       if (key !is String || value !is String) return
 
       when (key.toUpperCase()) {
-        JvmWrapperPropertyKeys.JVM_VENDOR.name -> if (vendor == null) vendor = JvmVendor.parse(value)
+        JvmWrapperPropertyKeys.JVM_VENDOR.name -> if (vendor == null) vendor = value.toJvmVendor()
         JvmWrapperPropertyKeys.JVM_TYPE.name -> if (type == null) type = value.toJvmType()
         JvmWrapperPropertyKeys.JVM_VERSION.name -> if (version == null) version = value
         JvmWrapperPropertyKeys.JVM_REQUIRED_UPDATE.name -> if (requiredUpdate == null) requiredUpdate = value.toBoolean()

@@ -2,9 +2,9 @@ package ru.itbasis.jvmwrapper.core.wrapper
 
 import org.apache.commons.lang3.SystemUtils
 import org.apache.commons.lang3.SystemUtils.IS_OS_MAC
-import ru.itbasis.jvmwrapper.core.JvmType.JDK
-import ru.itbasis.jvmwrapper.core.JvmVersion
 import ru.itbasis.jvmwrapper.core.ProcessStepListener
+import ru.itbasis.jvmwrapper.core.jvm.Jvm
+import ru.itbasis.jvmwrapper.core.jvm.JvmType.JDK
 import ru.itbasis.jvmwrapper.core.step
 import ru.itbasis.jvmwrapper.core.unarchiver.UnarchiverFactory
 import ru.itbasis.jvmwrapper.core.vendor.DownloadProcessListener
@@ -29,9 +29,9 @@ class JvmWrapper(
     "Adding default properties".step(stepListener) { append(DEFAULT_PROPERTIES) }
   }
 
-  private val jvmVersion = JvmVersion(type = wrapperProperties.type!!, version = wrapperProperties.version!!)
+  private val jvmVersion = Jvm(vendor = wrapperProperties.vendor!!, type = wrapperProperties.type!!, version = wrapperProperties.version!!)
 
-  val jvmName: String = "${wrapperProperties.vendor}-${jvmVersion.type}-${jvmVersion.cleanVersion}".toLowerCase()
+  private val jvmName: String = "${wrapperProperties.vendor}-${jvmVersion.type}-${jvmVersion.cleanVersion}".toLowerCase()
 
   val sdkName: String by lazy { "$SCRIPT_FILE_NAME-$jvmName" }
 
@@ -39,8 +39,8 @@ class JvmWrapper(
     "check exists jvm home directory: $jvmHomeDir".step(stepListener) {
       if (jvmHomeDir.isDirectory) return@step
       "download jvm archive...".step(stepListener) {
-        val provider = OracleProvider(jvmVersion = jvmVersion)
-        val remoteFile = "specifying the URL for the JVM archive...".step(stepListener) { provider.remoteArchiveFile }
+        val provider = OracleProvider(jvm = jvmVersion)
+        val remoteFile = "specifying the URL for the JRE archive...".step(stepListener) { provider.remoteArchiveFile }
 
         "download remote archive: ${remoteFile.url}".step(stepListener) {
           File(JVMW_HOME_DIR, "$jvmName.${provider.archiveExtension}").apply {
@@ -48,7 +48,7 @@ class JvmWrapper(
           }
         }
       }.let { archiveFile ->
-        "unpack JVM archive file".step(stepListener) {
+        "unpack JRE archive file".step(stepListener) {
           UnarchiverFactory.getInstance(archiveFile, jvmHomeDir, stepListener).unpack()
         }
       }

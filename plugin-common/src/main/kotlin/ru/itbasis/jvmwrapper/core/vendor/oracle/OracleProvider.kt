@@ -5,21 +5,21 @@ import mu.KotlinLogging
 import org.apache.commons.codec.digest.DigestUtils
 import org.apache.http.cookie.ClientCookie
 import org.apache.http.impl.cookie.BasicClientCookie2
-import ru.itbasis.jvmwrapper.core.JvmVersion
 import ru.itbasis.jvmwrapper.core.RemoteArchiveFile
 import ru.itbasis.jvmwrapper.core.findOne
+import ru.itbasis.jvmwrapper.core.jvm.Jvm
 import ru.itbasis.jvmwrapper.core.vendor.AbstractProvider
 import ru.itbasis.jvmwrapper.core.vendor.DownloadProcessListener
 import ru.itbasis.kotlin.utils.copyTo
 import java.io.File
 import kotlin.text.RegexOption.IGNORE_CASE
 
-class OracleProvider(private val jvmVersion: JvmVersion) : AbstractProvider() {
+class OracleProvider(private val jvm: Jvm) : AbstractProvider() {
   private val logger = KotlinLogging.logger {}
 
   override val remoteArchiveFile: RemoteArchiveFile by lazy {
     latestDownloadPageUrl.getRemoteArchiveFile() ?: archiveDownloadPageUrl.getRemoteArchiveFile()
-    ?: throw IllegalStateException("it was not succeeded to define URL for version $jvmVersion")
+    ?: throw IllegalStateException("it was not succeeded to define URL for version $jvm")
   }
 
   override fun String.urlWithinHost() = (if (startsWith("/")) "http://www.oracle.com$this" else this)
@@ -86,7 +86,7 @@ class OracleProvider(private val jvmVersion: JvmVersion) : AbstractProvider() {
   }
 
   private val regexDownloadFile: Regex by lazy {
-    """downloads\['${jvmVersion.type}-${jvmVersion.cleanVersion}-oth-JPR']\['files']\['.*${jvmVersion.os}.*$archiveArchitecture.*\.$archiveExtension'] = (.*);""".toRegex(
+    """downloads\['${jvm.type}-${jvm.cleanVersion}-oth-JPR']\['files']\['.*${jvm.os}.*$archiveArchitecture.*\.$archiveExtension'] = (.*);""".toRegex(
       IGNORE_CASE
     )
   }
@@ -94,7 +94,7 @@ class OracleProvider(private val jvmVersion: JvmVersion) : AbstractProvider() {
   private val indexPage: String by lazy { httpClient.getContent("/technetwork/java/javase/downloads/index.html".urlWithinHost()) }
 
   private val latestDownloadPageUrl: String? by lazy {
-    """<a name="${jvmVersion.type}${jvmVersion.major}" href="(.*)"""".toRegex(
+    """<a name="${jvm.type}${jvm.major}" href="(.*)"""".toRegex(
       IGNORE_CASE
     ).findOne(indexPage)
   }
@@ -104,7 +104,7 @@ class OracleProvider(private val jvmVersion: JvmVersion) : AbstractProvider() {
       return@let httpClient.getContent(it.urlWithinHost())
     } ?: throw IllegalStateException("not found previous releases page")
 
-    val regex = """<a.*href="(.*java-archive-javase${jvmVersion.major}-\d+\.html)".*>\s*Java SE ${jvmVersion.major}\s*</a>""".toRegex(
+    val regex = """<a.*href="(.*java-archive-javase${jvm.major}-\d+\.html)".*>\s*Java SE ${jvm.major}\s*</a>""".toRegex(
       IGNORE_CASE
     )
 
