@@ -18,7 +18,7 @@ import java.time.format.DateTimeFormatter
 
 tasks.withType<Wrapper> {
   distributionType = Wrapper.DistributionType.ALL
-  gradleVersion = "4.10"
+  gradleVersion = "4.10.1"
 }
 
 group = "ru.itbasis.jvm-wrapper"
@@ -105,7 +105,10 @@ allprojects {
       }
       dependencies {
         "compile"(kotlin("stdlib-jdk8"))
-        "implementation"("io.github.microutils:kotlin-logging")
+        "implementation"("io.github.microutils:kotlin-logging") {
+          exclude(group = "org.slf4j")
+        }
+        "compileOnly"("org.slf4j:slf4j-api")
 
         "testImplementation"("org.slf4j:slf4j-log4j12")
 

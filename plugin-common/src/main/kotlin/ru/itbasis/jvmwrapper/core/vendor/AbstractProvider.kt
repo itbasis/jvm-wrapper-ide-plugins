@@ -3,7 +3,7 @@ package ru.itbasis.jvmwrapper.core.vendor
 import org.apache.commons.lang3.SystemUtils.IS_OS_MAC
 import org.apache.commons.lang3.SystemUtils.IS_OS_WINDOWS
 import ru.itbasis.jvmwrapper.core.HttpClient
-import ru.itbasis.jvmwrapper.core.RemoteArchiveFile
+import ru.itbasis.jvmwrapper.core.downloader.RemoteArchiveFile
 import ru.itbasis.jvmwrapper.core.SystemInfo.is32Bit
 import java.io.File
 

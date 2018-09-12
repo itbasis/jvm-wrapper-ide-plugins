@@ -5,7 +5,7 @@ import mu.KotlinLogging
 import org.apache.commons.codec.digest.DigestUtils
 import org.apache.http.cookie.ClientCookie
 import org.apache.http.impl.cookie.BasicClientCookie2
-import ru.itbasis.jvmwrapper.core.RemoteArchiveFile
+import ru.itbasis.jvmwrapper.core.downloader.RemoteArchiveFile
 import ru.itbasis.jvmwrapper.core.findOne
 import ru.itbasis.jvmwrapper.core.jvm.Jvm
 import ru.itbasis.jvmwrapper.core.vendor.AbstractProvider
