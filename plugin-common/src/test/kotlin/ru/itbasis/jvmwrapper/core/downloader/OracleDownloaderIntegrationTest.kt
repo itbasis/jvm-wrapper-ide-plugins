@@ -1,4 +1,4 @@
-package ru.itbasis.jvmwrapper.core.vendor
+package ru.itbasis.jvmwrapper.core.downloader
 
 import asRows
 import io.kotlintest.data.forall
@@ -10,12 +10,13 @@ import io.kotlintest.specs.FunSpec
 import mu.KotlinLogging
 import ru.itbasis.jvmwrapper.core.JvmVersionArchiveSamples
 import ru.itbasis.jvmwrapper.core.JvmVersionLatestSamples
+import ru.itbasis.jvmwrapper.core.downloader.oracle.OracleDownloader
 import ru.itbasis.jvmwrapper.core.jvm.Jvm
 import ru.itbasis.jvmwrapper.core.jvm.toJvmType
-import ru.itbasis.jvmwrapper.core.vendor.oracle.OracleProvider
+import ru.itbasis.jvmwrapper.core.jvm.toJvmVendor
 import java.io.File
 
-internal class OracleProviderIntegrationTest : FunSpec() {
+internal class OracleDownloaderIntegrationTest : FunSpec() {
   private val logger = KotlinLogging.logger {}
 
   init {
@@ -25,7 +26,11 @@ internal class OracleProviderIntegrationTest : FunSpec() {
 //      rows = *JvmVersionArchiveSamples.asRows()
       ) { (vendor, type, version, _, _, _, _, _, downloadArchiveUrlPart) ->
         logger.info { "version: $version" }
-        val oracleProvider = OracleProvider(Jvm(vendor = vendor.toJvmVendor(), type = type.toJvmType(), version = version))
+        val oracleProvider = OracleDownloader(
+          Jvm(
+            vendor = vendor.toJvmVendor(), type = type.toJvmType(), version = version
+          )
+        )
 
         val remoteArchiveFile = oracleProvider.remoteArchiveFile
         remoteArchiveFile shouldNotBe null

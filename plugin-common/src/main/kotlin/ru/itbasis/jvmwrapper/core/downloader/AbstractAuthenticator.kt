@@ -1,4 +1,4 @@
-package ru.itbasis.jvmwrapper.core.vendor
+package ru.itbasis.jvmwrapper.core.downloader
 
 import ru.itbasis.jvmwrapper.core.HttpClient
 

@@ -7,7 +7,6 @@ import io.kotlintest.should
 import io.kotlintest.shouldBe
 import io.kotlintest.specs.FunSpec
 import ru.itbasis.jvmwrapper.core.JvmVersionLatestSamples
-import ru.itbasis.jvmwrapper.core.vendor.toJvmVendor
 
 internal class JvmTest : FunSpec() {
   init {

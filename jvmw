@@ -65,7 +65,7 @@ function write_last_update() {
 	if [[ -z "${ARCHIVE_JVM_URL}" ]]; then
 		printf "%s\\n%s" "${now}" "$(tail -n2 "${LAST_UPDATE_FILE}")" >"${LAST_UPDATE_FILE}"
 	else
-		printf "%s\\n%s\\n%s" "${now}" "${ARCHIVE_JVM_URL}" "${ARCHIVE_JVM_CHECKSUM}" >"${LAST_UPDATE_FILE}"
+		printf "%s\\n%s\\n%s\\n" "${now}" "${ARCHIVE_JVM_URL}" "${ARCHIVE_JVM_CHECKSUM}" >"${LAST_UPDATE_FILE}"
 	fi
 }
 function whereis() {
@@ -167,7 +167,6 @@ function oracle_otn_form_parser() {
 	fi
 }
 function oracle_otn_curl_redirect() {
-	# FIXME https://github.com/koalaman/shellcheck/issues/1089
 	# shellcheck disable=SC2155
 	local host=$(awk '{ if (match($0, "http-equiv=\"refresh\".*")) print substr($0, RSTART, RLENGTH) }' <"${OTN_CONTENT_FILE}" | awk -F';' '{ if (match($0, "URL=[^\"]+")) print substr($0, RSTART+4, RLENGTH-4)}')
 	if [[ "${host:0:1}" == "/" ]]; then
@@ -299,6 +298,7 @@ function oracle_unpack_darwin() {
 	for dir in ./*jdk*; do
 		cpio -i <"${dir}/Payload" || exit 1
 	done
+	rm -Rf "${JDK_ROOT_DIR}"
 	mv Contents "${JDK_ROOT_DIR}" 1> /dev/null 2>&1 || die
 	cd - || die
 	rm -Rf "${tmp_dir}" "${ARCHIVE_FILE}"

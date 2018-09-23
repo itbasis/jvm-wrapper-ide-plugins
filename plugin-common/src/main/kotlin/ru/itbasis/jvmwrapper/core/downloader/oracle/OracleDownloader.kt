@@ -1,20 +1,20 @@
-package ru.itbasis.jvmwrapper.core.vendor.oracle
+package ru.itbasis.jvmwrapper.core.downloader.oracle
 
 import com.google.gson.JsonParser
 import mu.KotlinLogging
 import org.apache.commons.codec.digest.DigestUtils
 import org.apache.http.cookie.ClientCookie
 import org.apache.http.impl.cookie.BasicClientCookie2
+import ru.itbasis.jvmwrapper.core.downloader.DownloadProcessListener
+import ru.itbasis.jvmwrapper.core.downloader.Downloader
 import ru.itbasis.jvmwrapper.core.downloader.RemoteArchiveFile
 import ru.itbasis.jvmwrapper.core.findOne
 import ru.itbasis.jvmwrapper.core.jvm.Jvm
-import ru.itbasis.jvmwrapper.core.vendor.AbstractProvider
-import ru.itbasis.jvmwrapper.core.vendor.DownloadProcessListener
 import ru.itbasis.kotlin.utils.copyTo
 import java.io.File
 import kotlin.text.RegexOption.IGNORE_CASE
 
-class OracleProvider(private val jvm: Jvm) : AbstractProvider() {
+class OracleDownloader(private val jvm: Jvm) : Downloader() {
   private val logger = KotlinLogging.logger {}
 
   override val remoteArchiveFile: RemoteArchiveFile by lazy {

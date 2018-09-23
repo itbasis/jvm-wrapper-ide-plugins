@@ -11,7 +11,7 @@
       <option name="taskNames">
         <list>
           <option value="clean" />
-          <option value="detektCheck" />
+          <option value="check" />
           <option value=":plugin-intellij:runIde" />
         </list>
       </option>

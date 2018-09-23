@@ -2,8 +2,8 @@ package ru.itbasis.jvmwrapper.core.wrapper
 
 import ru.itbasis.jvmwrapper.core.jvm.JvmType
 import ru.itbasis.jvmwrapper.core.jvm.toJvmType
-import ru.itbasis.jvmwrapper.core.vendor.JvmVendor
-import ru.itbasis.jvmwrapper.core.vendor.toJvmVendor
+import ru.itbasis.jvmwrapper.core.jvm.JvmVendor
+import ru.itbasis.jvmwrapper.core.jvm.toJvmVendor
 import ru.itbasis.kotlin.utils.toBoolean
 import java.io.File
 import java.util.Properties

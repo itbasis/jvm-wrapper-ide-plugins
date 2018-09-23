@@ -10,8 +10,11 @@ before_script: ./jvmw upgrade
 install:
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew cask uninstall java; fi
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew tap caskroom/versions; fi
-  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew update-reset && brew upgrade && brew cask upgrade; fi
-  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew cask install java6 java8 java java-beta; fi
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew tap AdoptOpenJDK/openjdk; fi
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew update-reset; fi
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew upgrade; fi
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew cask upgrade; fi
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew cask install java6 java8 java java-beta adoptopenjdk-openjdk8 adoptopenjdk-openjdk10; fi
 
 script:
   - env

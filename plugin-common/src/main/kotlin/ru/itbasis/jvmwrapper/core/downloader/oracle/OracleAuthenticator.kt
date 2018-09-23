@@ -1,8 +1,8 @@
-package ru.itbasis.jvmwrapper.core.vendor.oracle
+package ru.itbasis.jvmwrapper.core.downloader.oracle
 
 import ru.itbasis.jvmwrapper.core.HttpClient
 import ru.itbasis.jvmwrapper.core.findOne
-import ru.itbasis.jvmwrapper.core.vendor.AbstractAuthenticator
+import ru.itbasis.jvmwrapper.core.downloader.AbstractAuthenticator
 
 class OracleAuthenticator(httpClient: HttpClient) : AbstractAuthenticator(httpClient) {
   companion object {

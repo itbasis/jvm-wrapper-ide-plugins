@@ -5,7 +5,8 @@ import io.kotlintest.shouldBe
 import io.kotlintest.shouldThrow
 import io.kotlintest.specs.FunSpec
 import io.kotlintest.tables.row
-import ru.itbasis.jvmwrapper.core.vendor.JvmVendor.ORACLE
+import ru.itbasis.jvmwrapper.core.jvm.JvmVendor.ORACLE
+import ru.itbasis.jvmwrapper.core.jvm.toJvmVendor
 
 internal class JvmVendorTest : FunSpec({
   test("Successful parsing of vendors") {

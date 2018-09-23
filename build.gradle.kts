@@ -1,10 +1,6 @@
 import com.gradle.scan.plugin.BuildScanExtension
-import nebula.plugin.responsible.FacetDefinition
-import nebula.plugin.responsible.NebulaFacetPlugin
-import nebula.plugin.responsible.TestFacetDefinition
-import io.gitlab.arturbosch.detekt.DetektCheckTask
+import io.gitlab.arturbosch.detekt.Detekt
 import io.gitlab.arturbosch.detekt.DetektPlugin
-import io.gitlab.arturbosch.detekt.extensions.DEFAULT_PROFILE_NAME
 import io.gitlab.arturbosch.detekt.extensions.DetektExtension
 import org.gradle.plugins.ide.idea.model.IdeaModel
 import org.jetbrains.kotlin.gradle.dsl.Coroutines
@@ -17,8 +13,8 @@ import org.jetbrains.kotlin.utils.addToStdlib.ifNotEmpty
 import java.time.format.DateTimeFormatter
 
 tasks.withType<Wrapper> {
-  distributionType = Wrapper.DistributionType.ALL
-  gradleVersion = "4.10.1"
+  distributionType = Wrapper.DistributionType.BIN
+  gradleVersion = "4.10.2"
 }
 
 group = "ru.itbasis.jvm-wrapper"
@@ -29,7 +25,7 @@ buildscript {
   dependencies {
     classpath(kotlin("gradle-plugin", kotlinVersion))
     classpath("gradle.plugin.io.gitlab.arturbosch.detekt:detekt-gradle-plugin:latest.release")
-    classpath("com.netflix.nebula:nebula-project-plugin:latest.release")
+//    classpath("com.netflix.nebula:nebula-project-plugin:latest.release")
     classpath("gradle.plugin.org.jlleitschuh.gradle:ktlint-gradle:latest.release")
   }
 }
@@ -66,15 +62,13 @@ allprojects {
     from("$rootDir/gradle/dependencies.gradle.kts")
     plugin<BasePlugin>()
     plugin<DetektPlugin>()
-    plugin<NebulaFacetPlugin>()
+//    plugin<NebulaFacetPlugin>()
     // FIXME https://github.com/shyiko/ktlint/issues/226
 //    plugin("org.jlleitschuh.gradle.ktlint")
   }
 
   configure<DetektExtension> {
-    this.profile(DEFAULT_PROFILE_NAME, Action {
-      config = rootDir.resolve("detekt-config.yml")
-    })
+      config = files(rootDir.resolve("detekt-config.yml"))
   }
 
   afterEvaluate {
@@ -82,15 +76,15 @@ allprojects {
       configure<JavaPluginConvention> {
         sourceCompatibility = JavaVersion.VERSION_1_8
       }
-      tasks.withType(DetektCheckTask::class.java) {
+      tasks.withType(Detekt::class.java) {
         dependsOn(tasks.withType(Test::class.java))
         tasks.getByName(JavaBasePlugin.CHECK_TASK_NAME).dependsOn(this)
       }
-      plugins.withType(NebulaFacetPlugin::class.java) {
-        TestFacetDefinition("integrationTest").also {
-          extension.add(it)
-        }
-      }
+//      plugins.withType(NebulaFacetPlugin::class.java) {
+//        TestFacetDefinition("integrationTest").also {
+//          extension.add(it)
+//        }
+//      }
     }
 
     tasks.withType(KotlinCompile::class.java) {
@@ -119,7 +113,7 @@ allprojects {
           "io.kotlintest:kotlintest-runner-junit4"
         ).forEach {
           "testCompile"(it)
-          "integrationTestCompile"(it)
+//          "integrationTestCompile"(it)
         }
       }
     }
