@@ -6,7 +6,6 @@ enum class JvmVendor(val code: String) {
 
 internal fun String.toJvmVendor(): JvmVendor {
 	val lowerCase = toLowerCase()
-	println("21vendor: $lowerCase")
 	return when (lowerCase) {
 		JvmVendor.ORACLE.code, "oracle corporation"       -> JvmVendor.ORACLE
 

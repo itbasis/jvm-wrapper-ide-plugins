@@ -45,7 +45,7 @@ class JvmWrapperService(
 
 	fun getSdk(): Sdk? {
 		val wrapper = getWrapper() ?: return null
-		return SdkReceiver(sdkName = wrapper.sdkName, sdkPath = wrapper.jvmHomeDir.toPath(), override = true).execute().resultObject
+		return SdkReceiver(sdkName = wrapper.sdkName, sdkPath = wrapper.jvmHomeDir.toPath(), overrideAll = true).execute().resultObject
 	}
 
 	private fun stepListener(progressIndicator: ProgressIndicator): ProcessStepListener = { msg ->

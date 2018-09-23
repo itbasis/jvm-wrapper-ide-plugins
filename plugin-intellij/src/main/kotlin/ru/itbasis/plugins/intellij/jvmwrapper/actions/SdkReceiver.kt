@@ -10,30 +10,35 @@ import com.intellij.openapi.projectRoots.SdkType
 import com.intellij.openapi.projectRoots.impl.ProjectJdkImpl
 import java.nio.file.Path
 
-class SdkReceiver(private val sdkName: String, private val sdkPath: Path, private val override: Boolean = false) : WriteAction<Sdk>() {
-  override fun run(result: Result<Sdk>) {
-    val sdkHome = sdkPath.toFile().absolutePath
+class SdkReceiver(
+	private val sdkName: String,
+	private val sdkPath: Path,
+	private val overrideAll: Boolean = false,
+	private val overrideOnlyByName: Boolean = overrideAll,
+	private val overrideOnlyByPath: Boolean = overrideAll
+) : WriteAction<Sdk>() {
+	override fun run(result: Result<Sdk>) {
+		val sdkHome = sdkPath.toFile().absolutePath
 
-    if (override) {
-      projectJdkTable.allJdks.filter {
-        sdkName == it.name || sdkHome == it.homePath
-      }.forEach {
-        projectJdkTable.removeJdk(it)
-      }
-    }
+		projectJdkTable.allJdks.filter {
+			(overrideOnlyByName && sdkName == it.name) || (overrideOnlyByPath && sdkHome == it.homePath)
+		}.forEach {
+			projectJdkTable.removeJdk(it)
+		}
 
-    val sdk = projectJdkTable.findJdk(sdkName, javaSdk.name) ?: run {
-      val projectJdk = ProjectJdkImpl(sdkName, javaSdk, sdkHome, javaSdk.getVersionString(sdkHome))
-      val sdkType = projectJdk.sdkType as SdkType
-      sdkType.setupSdkPaths(projectJdk)
-      projectJdkTable.addJdk(projectJdk)
-      projectJdk
-    }
-    result.setResult(sdk)
-  }
+		val sdk = projectJdkTable.findJdk(sdkName, javaSdk.name)
+		          ?: run {
+			          val projectJdk = ProjectJdkImpl(sdkName, javaSdk, sdkHome, javaSdk.getVersionString(sdkHome))
+			          val sdkType = projectJdk.sdkType as SdkType
+			          sdkType.setupSdkPaths(projectJdk)
+			          projectJdkTable.addJdk(projectJdk)
+			          projectJdk
+		          }
+		result.setResult(sdk)
+	}
 
-  companion object {
-    private val projectJdkTable = ServiceManager.getService(ProjectJdkTable::class.java)
-    private val javaSdk = JavaSdk.getInstance()
-  }
+	companion object {
+		private val projectJdkTable = ServiceManager.getService(ProjectJdkTable::class.java)
+		private val javaSdk = JavaSdk.getInstance()
+	}
 }
