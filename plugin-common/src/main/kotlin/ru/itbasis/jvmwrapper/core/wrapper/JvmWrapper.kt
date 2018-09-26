@@ -11,6 +11,7 @@ import ru.itbasis.jvmwrapper.core.jvm.JvmVendor.ORACLE
 import ru.itbasis.jvmwrapper.core.step
 import ru.itbasis.jvmwrapper.core.unarchiver.UnarchiverFactory
 import java.io.File
+import java.net.URL
 
 const val SCRIPT_FILE_NAME = "jvmw"
 val JVMW_HOME_DIR: File = File(SystemUtils.USER_HOME, ".jvm")
@@ -73,5 +74,12 @@ class JvmWrapper(
 		)
 
 		const val REMOTE_SCRIPT_URL = "https://raw.githubusercontent.com/itbasis/jvm-wrapper/master/jvmw"
+
+		fun upgrade(targetDir: File) {
+			File(targetDir, SCRIPT_FILE_NAME).run {
+				URL(REMOTE_SCRIPT_URL).openStream().copyTo(outputStream())
+				setExecutable(true)
+			}
+		}
 	}
 }

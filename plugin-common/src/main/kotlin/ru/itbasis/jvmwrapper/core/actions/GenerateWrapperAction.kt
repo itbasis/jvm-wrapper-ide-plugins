@@ -3,12 +3,10 @@ package ru.itbasis.jvmwrapper.core.actions
 import ru.itbasis.jvmwrapper.core.SystemInfo.NEW_LINE
 import ru.itbasis.jvmwrapper.core.jvm.Jvm
 import ru.itbasis.jvmwrapper.core.wrapper.JVMW_PROPERTY_FILE_NAME
+import ru.itbasis.jvmwrapper.core.wrapper.JvmWrapper
 import ru.itbasis.jvmwrapper.core.wrapper.JvmWrapper.Companion.DEFAULT_PROPERTIES
-import ru.itbasis.jvmwrapper.core.wrapper.JvmWrapper.Companion.REMOTE_SCRIPT_URL
 import ru.itbasis.jvmwrapper.core.wrapper.JvmWrapperPropertyKeys
-import ru.itbasis.jvmwrapper.core.wrapper.SCRIPT_FILE_NAME
 import java.io.File
-import java.net.URL
 import java.util.Properties
 
 class GenerateWrapperAction(
@@ -16,11 +14,7 @@ class GenerateWrapperAction(
 ) : Runnable {
 
 	override fun run() {
-		File(parentDir, SCRIPT_FILE_NAME).run {
-			URL(REMOTE_SCRIPT_URL).openStream().copyTo(outputStream())
-			setExecutable(true)
-		}
-
+		JvmWrapper.upgrade(parentDir)
 
 		File(parentDir, JVMW_PROPERTY_FILE_NAME).apply {
 			Properties().toString()
