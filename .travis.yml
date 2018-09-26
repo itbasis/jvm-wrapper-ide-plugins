@@ -14,10 +14,11 @@ install:
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew update-reset; fi
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew upgrade; fi
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew cask upgrade; fi
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew search openjdk; fi
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew install adoptopenjdk-openjdk8 && brew unlink adoptopenjdk-openjdk8; fi
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew install adoptopenjdk-openjdk10 && brew unlink adoptopenjdk-openjdk10; fi
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew search java; fi
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew cask install java6 java8 java10 java java-beta; fi
-  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew search openjdk; fi
-  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew install adoptopenjdk-openjdk8 adoptopenjdk-openjdk10; fi
 
 script:
   - env
