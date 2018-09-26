@@ -65,7 +65,7 @@ function write_last_update() {
 	if [[ -z "${ARCHIVE_JVM_URL}" ]]; then
 		printf "%s\\n%s" "${now}" "$(tail -n2 "${LAST_UPDATE_FILE}")" >"${LAST_UPDATE_FILE}"
 	else
-		printf "%s\\n%s\\n%s\\n" "${now}" "${ARCHIVE_JVM_URL}" "${ARCHIVE_JVM_CHECKSUM}" >"${LAST_UPDATE_FILE}"
+		printf "%s\\n%s\\n%s" "${now}" "${ARCHIVE_JVM_URL}" "${ARCHIVE_JVM_CHECKSUM}" >"${LAST_UPDATE_FILE}"
 	fi
 }
 function whereis() {
@@ -202,7 +202,7 @@ function oracle_otn_login() {
 	OTN_CONTENT_FILE=$(mktemp -t oracle_otn_CONTENT_XXXXX.tmp)
 	OTN_URL_INDEX=https://www.oracle.com/index.html
 	OTN_HOST_LOGIN=https://login.oracle.com
-	OTN_URL_SIGNON="http://www.oracle.com/webapps/redirect/signon?nexturl=${OTN_URL_INDEX}"
+	OTN_URL_SIGNON="https://www.oracle.com/webapps/redirect/signon?nexturl=${OTN_URL_INDEX}"
 	oracle_otn_curl_send_request "${OTN_URL_SIGNON}"
 	oracle_otn_curl_post
 	oracle_otn_curl_post
@@ -249,15 +249,15 @@ function oracle_check_the_need_for_downloading() {
 	fi
 }
 function oracle_otn_page_latest_version_jdk_page_parser() {
-	JVM_PAGE_URL=http://www.oracle.com$(curl -s http://www.oracle.com/technetwork/java/javase/downloads/index.html | awk 'match($0, /(\/technetwork\/java\/javase\/downloads\/jdk'"${JVM_VERSION_MAJOR}"'-downloads-[^\"]+)/) { print substr($0, RSTART, RLENGTH) }' | head -1)
-	if [[ "${JVM_PAGE_URL}" != "http://www.oracle.com" ]]; then
+	JVM_PAGE_URL=https://www.oracle.com$(curl -s https://www.oracle.com/technetwork/java/javase/downloads/index.html | awk 'match($0, /(\/technetwork\/java\/javase\/downloads\/jdk'"${JVM_VERSION_MAJOR}"'-downloads-[^\"]+)/) { print substr($0, RSTART, RLENGTH) }' | head -1)
+	if [[ "${JVM_PAGE_URL}" != "https://www.oracle.com" ]]; then
 		oracle_otn_page_archive_jdk_parser
 		if [[ ! -z "${ARCHIVE_JVM_URL}" ]]; then
 			return 0
 		fi
 	fi
-	local -r url_archive=http://www.oracle.com$(curl -sS http://www.oracle.com/technetwork/java/javase/downloads/index.html | awk 'match($0, /(\/technetwork\/java\/javase\/archive-[^\"]+)/) { print substr($0, RSTART, RLENGTH) }' | head -1)
-	JVM_PAGE_URL=http://www.oracle.com$(curl -sS "${url_archive}" | awk 'match($0, /(\/technetwork\/java\/javase\/downloads\/java-archive-[^'"${JVM_VERSION_MAJOR}"']+'"${JVM_VERSION_MAJOR}"'-[^\"]+)/) { print substr($0, RSTART, RLENGTH) }' 2>&1 | head -1)
+	local -r url_archive=https://www.oracle.com$(curl -sS https://www.oracle.com/technetwork/java/javase/downloads/index.html | awk 'match($0, /(\/technetwork\/java\/javase\/archive-[^\"]+)/) { print substr($0, RSTART, RLENGTH) }' | head -1)
+	JVM_PAGE_URL=https://www.oracle.com$(curl -sS "${url_archive}" | awk 'match($0, /(\/technetwork\/java\/javase\/downloads\/java-archive-[^'"${JVM_VERSION_MAJOR}"']+'"${JVM_VERSION_MAJOR}"'-[^\"]+)/) { print substr($0, RSTART, RLENGTH) }' 2>&1 | head -1)
 	oracle_otn_page_archive_jdk_parser
 }
 function oracle_otn_page_archive_jdk_parser() {
