@@ -8,7 +8,7 @@ class OracleAuthenticator(httpClient: HttpClient) : AbstractAuthenticator(httpCl
   companion object {
     private const val OTN_URL_INDEX = "https://www.oracle.com/index.html"
     private const val OTN_HOST_LOGIN = "https://login.oracle.com"
-    private const val OTN_URL_SIGNON = "http://www.oracle.com/webapps/redirect/signon?nexturl=$OTN_URL_INDEX"
+    private const val OTN_URL_SIGNON = "https://www.oracle.com/webapps/redirect/signon?nexturl=$OTN_URL_INDEX"
     private const val OTN_URL_SIGNOUT = "https://login.oracle.com/sso/logout?p_done_url=$OTN_URL_INDEX"
 
     private val FORM_REGEX = "(?is)(<form.+?>.*?</form>)".toRegex(option = RegexOption.IGNORE_CASE)

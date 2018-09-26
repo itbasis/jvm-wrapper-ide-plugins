@@ -22,7 +22,7 @@ class OracleDownloader(private val jvm: Jvm) : Downloader() {
     ?: throw IllegalStateException("it was not succeeded to define URL for version $jvm")
   }
 
-  override fun String.urlWithinHost() = (if (startsWith("/")) "http://www.oracle.com$this" else this)
+  override fun String.urlWithinHost() = (if (startsWith("/")) "https://www.oracle.com$this" else this)
 
   override fun String?.getRemoteArchiveFile(): RemoteArchiveFile? {
     require(!this.isNullOrBlank()) {

@@ -7,6 +7,8 @@ import com.intellij.openapi.projectRoots.ProjectJdkTable
 import com.intellij.openapi.projectRoots.impl.JavaHomeFinder
 import com.intellij.openapi.projectRoots.impl.ProjectJdkImpl
 import ru.itbasis.jvmwrapper.core.jvm.Jvm
+import ru.itbasis.jvmwrapper.core.wrapper.JVMW_HOME_DIR
+import ru.itbasis.jvmwrapper.core.wrapper.SCRIPT_FILE_NAME
 import ru.itbasis.plugins.intellij.jvmwrapper.actions.SdkReceiver
 import java.io.File
 import java.nio.file.Paths
@@ -20,11 +22,23 @@ class ProjectSdkScanner : Runnable {
 		}.map { dir ->
 			dir.listFiles().first().toPath()
 		}
+		val jvmwJvmDirs = JVMW_HOME_DIR.listFiles { dir ->
+			dir?.isDirectory
+			?: false
+		}.map { dir ->
+			dir.toPath()
+		}
 
 		listOf(defaultSystemJvm, adoptOpenJdk).flatten().map { path ->
 			Jvm(system = true, path = Jvm.adjustPath(path))
 		}.onEach { jvm ->
 			SdkReceiver(sdkName = "system-$jvm", sdkPath = jvm.path!!, overrideOnlyByName = true).execute()
+		}
+
+		listOf(jvmwJvmDirs).flatten().map { path ->
+			Jvm(path = Jvm.adjustPath(path))
+		}.onEach { jvm ->
+			SdkReceiver(sdkName = "$SCRIPT_FILE_NAME-$jvm", sdkPath = jvm.path!!, overrideAll = true).execute()
 		}
 
 		projectJdkTable.getSdksOfType(javaSdk).map { it -> it as ProjectJdkImpl }.filter {
