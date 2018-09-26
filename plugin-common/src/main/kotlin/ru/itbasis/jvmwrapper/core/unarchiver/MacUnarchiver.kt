@@ -20,6 +20,8 @@ class MacUnarchiver(sourceFile: File, targetDir: File, stepListener: ProcessStep
     try {
       "Attaching the dmg archive...".step(stepListener) {
         attach().run()
+        Thread.sleep(500)
+
         require(File(volumePath).isDirectory) {
           val msg = "$volumePath is not a directory"
           logger.error { msg }
