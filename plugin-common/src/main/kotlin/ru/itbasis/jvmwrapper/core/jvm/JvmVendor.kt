@@ -1,7 +1,7 @@
 package ru.itbasis.jvmwrapper.core.jvm
 
 enum class JvmVendor(val code: String) {
-	ORACLE("oracle"), OPEN_JDK("openjdk");
+	OPEN_JDK("openjdk"), ORACLE("oracle");
 }
 
 internal fun String.toJvmVendor(): JvmVendor {

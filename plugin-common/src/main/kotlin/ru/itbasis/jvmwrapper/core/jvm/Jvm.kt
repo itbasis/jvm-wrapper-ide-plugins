@@ -7,6 +7,7 @@ import ru.itbasis.jvmwrapper.core.jvm.detectors.JvmTypeDetector
 import ru.itbasis.jvmwrapper.core.jvm.detectors.JvmVendorDetector
 import ru.itbasis.jvmwrapper.core.jvm.detectors.JvmVersionDetector
 import java.nio.file.Path
+import java.nio.file.Paths
 
 data class Jvm(
 	val system: Boolean = false,
@@ -14,25 +15,32 @@ data class Jvm(
 	val version: String = JvmVersionDetector.detect(path!!),
 	val type: JvmType = JvmTypeDetector.detect(path!!),
 	val vendor: JvmVendor = JvmVendorDetector.detect(path!!)
-) {
-	val major: String
+) : Comparable<Jvm> {
+
+	val major: Int
 		get() {
-			return version.substringBefore("_").substringBefore("u").substringAfter("1.").substringBefore(".")
+			return version.substringBefore("_").substringBefore("u").substringAfter("1.").substringBefore(".").toInt()
 		}
 
-	val update: String?
+	val update: Int?
 		get() {
-			return if (version.contains("u") or version.contains("_")) version.substringAfter("_").substringAfter("u").substringAfterLast(".").substringBefore(
-				"-"
-			) else null
+			return (when {
+				version.contains("u") -> /* 8u172 */ version.substringAfter("u")
+				version.contains("_") -> /* 1.8.0_172-b11 */ version.substringAfter("_").substringBefore("-")
+				version.contains(".") -> /* 10.0.1 */ version.substringAfterLast(".")
+				else                  -> null
+			})?.toIntOrNull()?.takeIf { it != 0 }
 		}
 
-	val cleanVersion: String = if (update == null) version.substringBefore("+") else "${major}u$update"
+	val cleanVersion: String
+		get() {
+			return arrayOf(major, update).filterNotNull().joinToString(if (major > 8) ".0." else "u")
+		}
 
 	val os: String
 		get() {
 			return when {
-				IS_OS_MAC     -> if (major.toInt() > 8) "osx" else "macosx"
+				IS_OS_MAC     -> if (major > 8) "osx" else "macosx"
 				IS_OS_WINDOWS -> "windows"
 				else          -> "linux"
 			}
@@ -45,6 +53,27 @@ data class Jvm(
 		}
 	}
 
+	override fun compareTo(other: Jvm): Int {
+		major.compareTo(other.major).takeIf { it != 0 }?.let {
+			return it
+		}
+
+		if (update != null && other.update == null) {
+			return 1
+		}
+		if (update == null && other.update != null) {
+			return -1
+		}
+		if (other.update == null && update == null) {
+			return 0
+		}
+		update!!.compareTo(other.update!!).takeIf { it != 0 }?.let {
+			return it
+		}
+
+		return vendor.compareTo(other.vendor)
+	}
+
 	companion object {
 		fun adjustPath(path: Path?): Path? {
 			return arrayOf(path?.resolve("Home"), path?.resolve("Contents/Home"), path).firstOrNull {
@@ -54,4 +83,12 @@ data class Jvm(
 			       ?: return null
 		}
 	}
+}
+
+fun String?.toJvm(system: Boolean = false): Jvm {
+	return Paths.get(this).toJvm(system = system)
+}
+
+fun Path?.toJvm(system: Boolean = false): Jvm {
+	return Jvm(system = system, path = this)
 }

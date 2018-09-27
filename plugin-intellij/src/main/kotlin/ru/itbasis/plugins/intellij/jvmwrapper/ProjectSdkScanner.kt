@@ -2,11 +2,12 @@ package ru.itbasis.plugins.intellij.jvmwrapper
 
 import com.intellij.openapi.components.ServiceManager
 import com.intellij.openapi.projectRoots.JavaSdk
-import com.intellij.openapi.projectRoots.JavaSdkVersion
 import com.intellij.openapi.projectRoots.ProjectJdkTable
+import com.intellij.openapi.projectRoots.SdkType
 import com.intellij.openapi.projectRoots.impl.JavaHomeFinder
 import com.intellij.openapi.projectRoots.impl.ProjectJdkImpl
 import ru.itbasis.jvmwrapper.core.jvm.Jvm
+import ru.itbasis.jvmwrapper.core.jvm.toJvm
 import ru.itbasis.jvmwrapper.core.wrapper.JVMW_HOME_DIR
 import ru.itbasis.jvmwrapper.core.wrapper.SCRIPT_FILE_NAME
 import ru.itbasis.plugins.intellij.jvmwrapper.actions.SdkReceiver
@@ -30,23 +31,30 @@ class ProjectSdkScanner : Runnable {
 		}
 
 		listOf(defaultSystemJvm, adoptOpenJdk).flatten().map { path ->
-			Jvm(system = true, path = Jvm.adjustPath(path))
+			path.toJvm(system = true)
 		}.onEach { jvm ->
-			SdkReceiver(sdkName = "system-$jvm", sdkPath = jvm.path!!, overrideOnlyByName = true).execute()
+			SdkReceiver(sdkName = "system-$jvm", sdkPath = jvm.path!!, overrideAll = true).execute()
 		}
 
 		listOf(jvmwJvmDirs).flatten().map { path ->
-			Jvm(path = Jvm.adjustPath(path))
+			Jvm.adjustPath(path).toJvm()
 		}.onEach { jvm ->
 			SdkReceiver(sdkName = "$SCRIPT_FILE_NAME-$jvm", sdkPath = jvm.path!!, overrideAll = true).execute()
 		}
 
-		projectJdkTable.getSdksOfType(javaSdk).map { it -> it as ProjectJdkImpl }.filter {
+		val m = mutableMapOf<String, MutableList<Jvm>>()
+		projectJdkTable.getSdksOfType(javaSdk).map { it ->
+			it as ProjectJdkImpl
+		}.filter {
 			it.versionString != null
-		}.associateBy({ JavaSdkVersion.fromVersionString(it.versionString!!) }, { it }).filterKeys {
-			it != null
 		}.forEach {
-			SdkReceiver(sdkName = it.key!!.description, sdkPath = Paths.get(it.value.homePath), overrideOnlyByName = true).execute()
+			val jvmHomePath = it.homePath
+			val suggestSdkName = (it.sdkType as SdkType).suggestSdkName(it.sdkType.name, jvmHomePath)
+			m.getOrPut(suggestSdkName) { mutableListOf() }.add(jvmHomePath.toJvm())
+		}
+		m.forEach { suggestSdkName, sdkList ->
+			sdkList.sortDescending()
+			SdkReceiver(sdkName = suggestSdkName, sdkPath = sdkList.first().path!!, overrideOnlyByName = true).execute()
 		}
 	}
 

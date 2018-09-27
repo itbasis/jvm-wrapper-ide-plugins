@@ -7,13 +7,13 @@ import ru.itbasis.plugins.intellij.jvmwrapper.JvmWrapperService
 import java.io.File
 
 class GenerateAction : AnAction("Generate") {
-  override fun update(event: AnActionEvent) {
-    event.presentation.isEnabledAndVisible = !JvmWrapperService.getInstance(event.project!!).hasWrapper()
-  }
+	override fun update(event: AnActionEvent) {
+		event.presentation.isEnabledAndVisible = !JvmWrapperService.getInstance(event.project!!).hasWrapper()
+	}
 
-  override fun actionPerformed(event: AnActionEvent) {
-    GenerateWrapperAction(
-      parentDir = File(event.project!!.baseDir.canonicalPath)
-    ).run()
-  }
+	override fun actionPerformed(event: AnActionEvent) {
+		GenerateWrapperAction(
+			parentDir = File(event.project!!.basePath)
+		).run()
+	}
 }

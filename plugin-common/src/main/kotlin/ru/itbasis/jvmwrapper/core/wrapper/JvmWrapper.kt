@@ -26,8 +26,8 @@ class JvmWrapper(
 	}
 
 	private val wrapperProperties: JvmWrapperProperties = JvmWrapperProperties().apply {
-		"Reading properties from the working directory".step(stepListener) { workingDir.resolve(JVMW_PROPERTY_FILE_NAME).let { append(it) } }
-		"Reading properties from the shared directory".step(stepListener) { JVMW_HOME_DIR.resolve(JVMW_PROPERTY_FILE_NAME).let { append(it) } }
+		"Reading properties from the working directory".step(stepListener) { append(workingDir.resolve(JVMW_PROPERTY_FILE_NAME)) }
+		"Reading properties from the shared directory".step(stepListener) { append(JVMW_HOME_DIR.resolve(JVMW_PROPERTY_FILE_NAME)) }
 		"Adding default properties".step(stepListener) { append(DEFAULT_PROPERTIES) }
 	}
 
@@ -73,7 +73,7 @@ class JvmWrapper(
 			vendor = ORACLE, jvmType = JDK, version = DEFAULT_JVM_VERSION, debug = false, oracleKeychainName = ORACLE_KEYCHAIN_DEFAULT_NAME
 		)
 
-		const val REMOTE_SCRIPT_URL = "https://raw.githubusercontent.com/itbasis/jvm-wrapper/master/jvmw"
+		private const val REMOTE_SCRIPT_URL = "https://raw.githubusercontent.com/itbasis/jvm-wrapper/master/jvmw"
 
 		fun upgrade(targetDir: File) {
 			File(targetDir, SCRIPT_FILE_NAME).run {

@@ -10,62 +10,64 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import org.jetbrains.kotlin.gradle.plugin.KotlinPlatformJvmPlugin
 
 buildscript {
-  repositories {
-    jcenter()
-    gradlePluginPortal()
-  }
-  dependencies {
-    classpath("gradle.plugin.org.jetbrains.intellij.plugins:gradle-intellij-plugin:latest.release")
-  }
+	repositories {
+		jcenter()
+		gradlePluginPortal()
+		maven(url = "https://dl.bintray.com/kotlin/kotlin-eap")
+	}
+	dependencies {
+		classpath("gradle.plugin.org.jetbrains.intellij.plugins:gradle-intellij-plugin:latest.release")
+	}
 }
 
 apply {
-  plugin<KotlinPlatformJvmPlugin>()
-  plugin("org.jetbrains.intellij")
+	plugin<KotlinPlatformJvmPlugin>()
+	plugin("org.jetbrains.intellij")
 }
 
 configure<JavaPluginConvention> {
-  sourceCompatibility = JavaVersion.VERSION_1_8
+	sourceCompatibility = JavaVersion.VERSION_1_8
 }
 
 tasks.withType(KotlinCompile::class.java).all {
-  kotlinOptions {
-    jvmTarget = JavaVersion.VERSION_1_8.toString()
-  }
+	kotlinOptions {
+		jvmTarget = JavaVersion.VERSION_1_8.toString()
+	}
 }
 
 tasks.getByPath("check").dependsOn(tasks.withType(VerifyPluginTask::class.java))
 
 configure<IntelliJPluginExtension> {
-  version = if (hasProperty("IntellijVersion")) {
-    property("IntellijVersion") as String
-  } else {
-    "2017.3.5"
+	version = if (hasProperty("IntellijVersion")) {
+		property("IntellijVersion") as String
+	} else {
+		"2018.1.6"
+//    "2017.3.5"
 //    "LATEST-EAP-SNAPSHOT"
-  }
-  logger.info("IntelliJ version: $version")
+	}
+	logger.info("IntelliJ version: $version")
 
-  sandboxDirectory = FilenameUtils.concat(rootDir.canonicalPath, ".sandbox-$version")
+	sandboxDirectory = FilenameUtils.concat(rootDir.canonicalPath, ".sandbox-$version")
 
-  pluginName = rootProject.name
+	pluginName = rootProject.name
 }
 
 tasks.withType(PatchPluginXmlTask::class.java).all {
-  untilBuild("183.*")
+	untilBuild("184.*")
 }
 
 tasks.withType(PrepareSandboxTask::class.java) {
-  doFirst {
-    File(configDirectory.parentFile, "/system/log").takeIf { it.isDirectory }?.deleteRecursively()
-  }
+	doFirst {
+		File(configDirectory.parentFile, "/system/log").takeIf { it.isDirectory }?.deleteRecursively()
+	}
 }
 
 tasks.withType(PublishTask::class.java).all {
-  setChannels("dev")
-  setUsername(project.findProperty("jetbrains.username") as String?)
-  setPassword(project.findProperty("jetbrains.password") as String?)
+	setChannels("dev")
+	setUsername(project.findProperty("jetbrains.username") as String?)
+	setPassword(project.findProperty("jetbrains.password") as String?)
 }
 
 dependencies {
-  "compile"(project(":plugin-common"))
+	"compile"(project(":plugin-common"))
 }

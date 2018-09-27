@@ -3,6 +3,7 @@
     <vendor email="Victor@Alenkov.name" url="https://github.com/itbasis/jvm-wrapper-ide-plugins"/>
 
     <category>Tools Integration</category>
+    <version/>
 
     <description>
         JVM Wrapper support

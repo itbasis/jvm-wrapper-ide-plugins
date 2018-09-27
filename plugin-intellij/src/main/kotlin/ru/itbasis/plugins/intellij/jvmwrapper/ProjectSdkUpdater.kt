@@ -19,7 +19,7 @@ class ProjectSdkUpdater(private val project: Project, private val jvmWrapperServ
 		val wrapperSdk = jvmWrapperService.getSdk()
 		                 ?: return
 
-		JvmWrapper.upgrade(File(project.baseDir.canonicalPath))
+		JvmWrapper.upgrade(File(project.basePath))
 
 		ApplicationManager.getApplication().runWriteAction {
 			(ProjectRootManager.getInstance(project) as ProjectRootManagerImpl).projectSdk = wrapperSdk
