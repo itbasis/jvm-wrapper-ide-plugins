@@ -18,17 +18,19 @@ class ProjectSdkScanner : Runnable {
 	override fun run() {
 		val defaultSystemJvm = JavaHomeFinder.suggestHomePaths().map { path -> Paths.get(path) }
 
-		val adoptOpenJdk = File("/usr/local/Cellar").listFiles { _, name ->
+		val adoptOpenJdk = File("/usr/local/Cellar").takeIf { it.isDirectory }?.listFiles { _, name ->
 			name.startsWith("adoptopenjdk-openjdk")
-		}.map { dir ->
+		}?.map { dir ->
 			dir.listFiles().first().toPath()
 		}
-		val jvmwJvmDirs = JVMW_HOME_DIR.listFiles { dir ->
+		                   ?: emptyList()
+		val jvmwJvmDirs = JVMW_HOME_DIR.takeIf { it.isDirectory }?.listFiles { dir ->
 			dir?.isDirectory
 			?: false
-		}.map { dir ->
+		}?.map { dir ->
 			dir.toPath()
 		}
+		                  ?: emptyList()
 
 		listOf(defaultSystemJvm, adoptOpenJdk).flatten().map { path ->
 			path.toJvm(system = true)
@@ -42,6 +44,12 @@ class ProjectSdkScanner : Runnable {
 			SdkReceiver(sdkName = "$SCRIPT_FILE_NAME-$jvm", sdkPath = jvm.path!!, overrideAll = true).execute()
 		}
 
+		if (defaultSystemJvm.isNotEmpty() || jvmwJvmDirs.isNotEmpty() || adoptOpenJdk.isNotEmpty()) {
+			regenerateSuggestSdkName()
+		}
+	}
+
+	private fun regenerateSuggestSdkName() {
 		val m = mutableMapOf<String, MutableList<Jvm>>()
 		projectJdkTable.getSdksOfType(javaSdk).map { it ->
 			it as ProjectJdkImpl
