@@ -1,12 +1,7 @@
 package ru.itbasis.plugins.intellij.jvmwrapper
 
-import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.components.ProjectComponent
-import com.intellij.openapi.externalSystem.service.project.IdeModifiableModelsProviderImpl
-import com.intellij.openapi.module.ModuleManager
 import com.intellij.openapi.project.Project
-import com.intellij.openapi.projectRoots.Sdk
-import com.intellij.openapi.roots.LanguageLevelModuleExtensionImpl
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.openapi.vfs.VirtualFileContentsChangedAdapter
 import com.intellij.openapi.vfs.VirtualFileListener
@@ -28,7 +23,7 @@ class WrapperProjectComponent(
 		override fun onBeforeFileChange(p0: VirtualFile) {}
 
 		private fun refresh(virtualFile: VirtualFile) {
-			if (virtualFile.nameWithoutExtension == SCRIPT_FILE_NAME) {
+			if (virtualFile.name.startsWith(SCRIPT_FILE_NAME)) {
 				projectSdkUpdater.run()
 			}
 		}
@@ -42,24 +37,25 @@ class WrapperProjectComponent(
 		virtualFileManager.removeVirtualFileListener(jvmwWrapperListener)
 	}
 
-	private fun updateModulesSdk(wrapperSdk: Sdk) {
-		ApplicationManager.getApplication().runWriteAction {
-			val moduleModel = ModuleManager.getInstance(project).modifiableModel
-			moduleModel.apply {
-				modules.forEach { module ->
-					IdeModifiableModelsProviderImpl(project).getModifiableRootModel(module).apply {
-						sdk = wrapperSdk
-						inheritSdk()
-						commit()
-					}
-//
-					(LanguageLevelModuleExtensionImpl.getInstance(module).getModifiableModel(true) as LanguageLevelModuleExtensionImpl).apply {
-						languageLevel = null
-						commit()
-					}
-				}
-				commit()
-			}
-		}
-	}
+	// FIXME
+//	private fun updateModulesSdk(wrapperSdk: Sdk) {
+//		ApplicationManager.getApplication().runWriteAction {
+//			val moduleModel = ModuleManager.getInstance(project).modifiableModel
+//			moduleModel.apply {
+//				modules.forEach { module ->
+//					IdeModifiableModelsProviderImpl(project).getModifiableRootModel(module).apply {
+//						sdk = wrapperSdk
+//						inheritSdk()
+//						commit()
+//					}
+////
+//					(LanguageLevelModuleExtensionImpl.getInstance(module).getModifiableModel(true) as LanguageLevelModuleExtensionImpl).apply {
+//						languageLevel = null
+//						commit()
+//					}
+//				}
+//				commit()
+//			}
+//		}
+//	}
 }

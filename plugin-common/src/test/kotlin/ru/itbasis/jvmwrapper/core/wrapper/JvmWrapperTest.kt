@@ -9,6 +9,7 @@ import io.kotlintest.matchers.string.containIgnoringCase
 import io.kotlintest.should
 import io.kotlintest.shouldBe
 import mu.KotlinLogging
+import org.apache.commons.lang3.SystemUtils
 import org.junit.rules.TemporaryFolder
 import ru.itbasis.jvmwrapper.core.AbstractIntegrationTests
 import ru.itbasis.jvmwrapper.core.jvm.Jvm
@@ -51,7 +52,7 @@ internal class JvmWrapperTest : AbstractIntegrationTests() {
 	}
 
 	init {
-		test("test all versions") {
+		test("test all versions").config(enabled = SystemUtils.IS_OS_LINUX || SystemUtils.IS_OS_MAC) {
 			forall(
 				rows = *JvmVersionSamples.asRows()
 //				rows = *OpenJDKJvmVersionLatestSamples.asRows()

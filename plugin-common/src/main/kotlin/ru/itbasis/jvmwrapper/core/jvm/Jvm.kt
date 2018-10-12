@@ -9,6 +9,7 @@ import ru.itbasis.jvmwrapper.core.jvm.detectors.JvmVersionDetector
 import ru.itbasis.jvmwrapper.core.unarchiver.UnarchiverFactory.FileArchiveType.DMG
 import ru.itbasis.jvmwrapper.core.unarchiver.UnarchiverFactory.FileArchiveType.EXE
 import ru.itbasis.jvmwrapper.core.unarchiver.UnarchiverFactory.FileArchiveType.TAR_GZ
+import ru.itbasis.jvmwrapper.core.unarchiver.UnarchiverFactory.FileArchiveType.ZIP
 import java.nio.file.Path
 
 data class Jvm(
@@ -50,10 +51,11 @@ data class Jvm(
 
 	val archiveFileExtension: String by lazy {
 		when {
-			vendor == OPEN_JDK && major >= 9 -> TAR_GZ
-			IS_OS_MAC                        -> DMG
-			IS_OS_WINDOWS                    -> EXE
-			else                             -> TAR_GZ
+			vendor == OPEN_JDK && major >= 11 && IS_OS_WINDOWS -> ZIP
+			vendor == OPEN_JDK && major >= 9                   -> TAR_GZ
+			IS_OS_MAC                                          -> DMG
+			IS_OS_WINDOWS                                      -> EXE
+			else                                               -> TAR_GZ
 		}.extension
 	}
 

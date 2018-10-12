@@ -70,12 +70,14 @@ class JvmWrapper(
 			if (jvmHomeDir.isDirectory && !lastUpdateFile.isExpired()) {
 				return
 			}
+
 			val remoteArchiveFile = "download jvm archive...".step(stepListener) {
 				"specifying the URL for the JRE archive...".step(stepListener) {
 					provider.remoteArchiveFile
 				}
 			}
 			if (lastUpdateFile.equals(remoteArchiveFile = remoteArchiveFile)) {
+				lastUpdateFile.update(remoteArchiveFile = remoteArchiveFile)
 				return
 			}
 			val archiveFile = "download remote archive: ${remoteArchiveFile.url}".step(stepListener) {
@@ -86,7 +88,7 @@ class JvmWrapper(
 			"unpack JRE archive file".step(stepListener) {
 				UnarchiverFactory.getInstance(archiveFile, jvmHomeDir, stepListener).unpack()
 			}
-			lastUpdateFile.update(provider.remoteArchiveFile)
+			lastUpdateFile.update(remoteArchiveFile)
 		}
 	}
 

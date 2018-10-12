@@ -10,11 +10,11 @@ import ru.itbasis.jvmwrapper.core.jvm.Jvm
 import ru.itbasis.jvmwrapper.core.jvm.toJvm
 import ru.itbasis.jvmwrapper.core.wrapper.JVMW_HOME_DIR
 import ru.itbasis.jvmwrapper.core.wrapper.SCRIPT_FILE_NAME
-import ru.itbasis.plugins.intellij.jvmwrapper.actions.SdkReceiver
+import ru.itbasis.plugins.intellij.jvmwrapper.services.SdkReceiverService
 import java.io.File
 import java.nio.file.Paths
 
-class ProjectSdkScanner : Runnable {
+class ProjectSdkScanner(private val sdkReceiverService: SdkReceiverService) : Runnable {
 	override fun run() {
 		val initJdkCount = projectJdkTable.allJdks.size
 
@@ -37,13 +37,13 @@ class ProjectSdkScanner : Runnable {
 		listOf(defaultSystemJvm, adoptOpenJdk).flatten().map { path ->
 			path.toJvm(system = true)
 		}.onEach { jvm ->
-			SdkReceiver(sdkName = "system-$jvm", sdkPath = jvm.path!!, overrideAll = true).execute()
+			sdkReceiverService.apply(sdkName = "system-$jvm", sdkPath = jvm.path!!, overrideAll = true)
 		}
 
 		listOf(jvmwJvmDirs).flatten().map { path ->
 			Jvm.adjustPath(path).toJvm()
 		}.onEach { jvm ->
-			SdkReceiver(sdkName = "$SCRIPT_FILE_NAME-$jvm", sdkPath = jvm.path!!, overrideAll = true).execute()
+			sdkReceiverService.apply(sdkName = "$SCRIPT_FILE_NAME-$jvm", sdkPath = jvm.path!!, overrideAll = true)
 		}
 
 		if (initJdkCount != projectJdkTable.allJdks.size) {
@@ -66,7 +66,7 @@ class ProjectSdkScanner : Runnable {
 		}
 		m.forEach { suggestSdkName, sdkList ->
 			sdkList.sortDescending()
-			SdkReceiver(sdkName = suggestSdkName, sdkPath = sdkList.first().path!!, overrideOnlyByName = true).execute()
+			sdkReceiverService.apply(sdkName = suggestSdkName, sdkPath = sdkList.first().path!!, overrideOnlyByName = true)
 		}
 	}
 

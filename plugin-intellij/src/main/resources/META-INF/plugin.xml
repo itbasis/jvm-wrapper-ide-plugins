@@ -41,7 +41,8 @@
 
         <applicationService serviceImplementation="ru.itbasis.plugins.intellij.jvmwrapper.ProjectSdkScanner"/>
         <applicationService serviceImplementation="ru.itbasis.plugins.intellij.jvmwrapper.services.InvalidSdkCleanerService"/>
+        <applicationService serviceImplementation="ru.itbasis.plugins.intellij.jvmwrapper.services.SdkReceiverService"/>
 
-        <postStartupActivity implementation="ru.itbasis.plugins.intellij.jvmwrapper.actions.SdkUpdater"/>
+        <postStartupActivity implementation="ru.itbasis.plugins.intellij.jvmwrapper.extensionPoints.StartupActivity"/>
     </extensions>
 </idea-plugin>
