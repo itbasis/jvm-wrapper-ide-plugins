@@ -9,15 +9,12 @@ abstract class AbstractUnarchiver(
 	protected val sourceFile: File,
 	private val targetDir: File,
 	protected val stepListener: ProcessStepListener? = null,
-	private val removeOriginal: Boolean = true
+	private val removeOriginal: Boolean = true,
+	private val fileNameExtension: UnarchiverFactory.FileArchiveType
 ) {
-	protected abstract val fileNameExtension: UnarchiverFactory.FileArchiveType
+	protected val sourceFileName: String = sourceFile.name.substringBeforeLast("." + this.fileNameExtension.extension)
 
-	protected val sourceFileName: String by lazy {
-		sourceFile.name.substringBeforeLast("." + fileNameExtension.extension)
-	}
-
-	protected val tempDir by lazy { createTempDir(suffix = sourceFileName) }
+	protected val tempDir: File = createTempDir(suffix = sourceFileName)
 
 	fun unpack() {
 		try {

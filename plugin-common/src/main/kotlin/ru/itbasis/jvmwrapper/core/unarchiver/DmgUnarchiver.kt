@@ -7,11 +7,15 @@ import ru.itbasis.jvmwrapper.core.unarchiver.UnarchiverFactory.FileArchiveType.D
 import java.io.File
 
 class DmgUnarchiver(sourceFile: File, targetDir: File, stepListener: ProcessStepListener? = null, removeOriginal: Boolean = false) :
-	AbstractUnarchiver(sourceFile, targetDir, stepListener, removeOriginal) {
+	AbstractUnarchiver(
+		sourceFile = sourceFile,
+		targetDir = targetDir,
+		stepListener = stepListener,
+		removeOriginal = removeOriginal,
+		fileNameExtension = DMG
+	) {
 
 	private val logger = KotlinLogging.logger {}
-
-	override val fileNameExtension = DMG
 
 	override fun doUnpack() {
 		"Detaching a previously attached dmg archive...".step(stepListener) { detach(quiet = true).run() }

@@ -13,7 +13,7 @@ object UnarchiverFactory {
 			sourceFileName.endsWith("." + FileArchiveType.TAR_GZ.extension) -> TarGzUnarchiver(
 				sourceFile, targetDir, stepListener, removeOriginal
 			)
-			else                                                             -> throw IllegalArgumentException("unsupported archive type: $sourceFile")
+			else                                                            -> throw IllegalArgumentException("unsupported archive type: $sourceFile")
 		}
 	}
 

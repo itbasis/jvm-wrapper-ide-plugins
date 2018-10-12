@@ -3,7 +3,7 @@ language: generic
 
 os:
   - osx
-#  - linux
+  - linux
 
 before_script: ./jvmw upgrade
 

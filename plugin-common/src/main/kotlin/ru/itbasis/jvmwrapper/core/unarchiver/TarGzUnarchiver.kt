@@ -7,9 +7,13 @@ import ru.itbasis.jvmwrapper.core.unarchiver.UnarchiverFactory.FileArchiveType.T
 import java.io.File
 
 class TarGzUnarchiver(sourceFile: File, targetDir: File, stepListener: ProcessStepListener? = null, removeOriginal: Boolean = false) :
-	AbstractUnarchiver(sourceFile, targetDir, stepListener, removeOriginal) {
-
-	override val fileNameExtension = TAR_GZ
+	AbstractUnarchiver(
+		sourceFile = sourceFile,
+		targetDir = targetDir,
+		stepListener = stepListener,
+		removeOriginal = removeOriginal,
+		fileNameExtension = TAR_GZ
+	) {
 
 	private val unpackLogger = Slf4jLoggerManager().run {
 		this.initialize()
