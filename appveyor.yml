@@ -10,7 +10,7 @@ cache:
 
 init:
   - cmd: java -version
-  - cmd: dir ":\Program Files\Java\"
+  - cmd: dir "C:\Program Files\Java\"
 
 build:
   verbosity: detailed
