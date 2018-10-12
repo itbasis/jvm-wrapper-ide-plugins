@@ -1,0 +1,16 @@
+image: Visual Studio 2017
+
+platform: x64
+configuration: Release
+
+build:
+  verbosity: detailed
+
+install:
+  - cmd: gradlew clean --no-daemon
+
+build_script:
+  - cmd: gradlew clean assemble -s --no-daemon
+
+test_script:
+  - cmd: gradlew clean check -s --no-daemon
