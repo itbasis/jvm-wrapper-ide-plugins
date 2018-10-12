@@ -36,9 +36,9 @@ internal class DownloaderIntegrationTest : AbstractIntegrationTests() {
 				rows = *rows
 			) { (vendor, type, version, _, _, _, _, _, downloadArchiveUrlPart) ->
 				logger.info { "version: $version" }
-				val downloader = Jvm(
-					vendor = vendor.toJvmVendor(), type = type.toJvmType(), version = version
-				).downloader()
+				val jvm = Jvm(vendor = vendor.toJvmVendor(), type = type.toJvmType(), version = version)
+				logger.info { "jvm: $jvm" }
+				val downloader = jvm.downloader()
 
 				val remoteArchiveFile = downloader.remoteArchiveFile
 				remoteArchiveFile shouldNotBe null
@@ -59,9 +59,9 @@ internal class DownloaderIntegrationTest : AbstractIntegrationTests() {
 				rows = *rows
 			) { (vendor, type, version, _, _, _, _, _, downloadArchiveUrlPart) ->
 				logger.info { "version: $version" }
-				val downloader = Jvm(
-					vendor = vendor.toJvmVendor(), type = type.toJvmType(), version = version
-				).downloader()
+				val jvm = Jvm(vendor = vendor.toJvmVendor(), type = type.toJvmType(), version = version)
+				logger.info { "jvm: $jvm" }
+				val downloader = jvm.downloader()
 
 				val remoteArchiveFile = downloader.remoteArchiveFile
 				remoteArchiveFile shouldNotBe null

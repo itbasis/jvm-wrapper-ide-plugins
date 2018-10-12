@@ -53,8 +53,10 @@ data class Jvm(
 		when {
 			vendor == OPEN_JDK && major >= 11 && IS_OS_WINDOWS -> ZIP
 			vendor == OPEN_JDK && major >= 9                   -> TAR_GZ
+
 			IS_OS_MAC                                          -> DMG
 			IS_OS_WINDOWS                                      -> EXE
+
 			else                                               -> TAR_GZ
 		}.extension
 	}
