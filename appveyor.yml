@@ -8,6 +8,11 @@ configuration: Release
 cache:
   - C:\Users\appveyor\.gradle
 
+environment:
+  ORACLE_USER: jvm.wrapper.itbasis@gmail.com
+  ORACLE_PASSWORD:
+    secure: C/g5UQyGDtB+FnJsj+fBLHQfOo6MrFVt7yDoHixRoIo=
+
 init:
   - cmd: java -version
   - cmd: dir /w "C:\Program Files\Java\"

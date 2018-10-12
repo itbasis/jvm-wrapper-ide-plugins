@@ -63,9 +63,7 @@ internal class JvmWrapperTest : AbstractIntegrationTests() {
 					vendor = vendor.toJvmVendor(), type = type.toJvmType(), version = version
 				)
 				val jvmWrapper = JvmWrapper(
-					workingDir = temporaryFolder.root,
-					stepListener = stepListener,
-					downloadProcessListener = if (!launchedInCI()) downloadProcessListener else null
+					workingDir = temporaryFolder.root, stepListener = stepListener, downloadProcessListener = downloadProcessListener
 				)
 				val jvmHomeDir = jvmWrapper.jvmHomeDir
 				logger.info { "jvmHomeDir: $jvmHomeDir" }
