@@ -14,7 +14,7 @@ import java.time.format.DateTimeFormatter
 
 tasks.withType<Wrapper> {
 	distributionType = Wrapper.DistributionType.BIN
-	gradleVersion = "4.10.2"
+	gradleVersion = "5.0-milestone-1"
 }
 
 group = "ru.itbasis.jvm-wrapper"
@@ -25,13 +25,10 @@ buildscript {
 	repositories {
 		jcenter()
 		gradlePluginPortal()
-		maven(url = "https://dl.bintray.com/kotlin/kotlin-eap")
 	}
 	dependencies {
 		classpath(kotlin("gradle-plugin", kotlinVersion))
-		classpath("gradle.plugin.io.gitlab.arturbosch.detekt:detekt-gradle-plugin:latest.release")
-//    classpath("com.netflix.nebula:nebula-project-plugin:latest.release")
-		classpath("gradle.plugin.org.jlleitschuh.gradle:ktlint-gradle:latest.release")
+		classpath("gradle.plugin.io.gitlab.arturbosch.detekt:detekt-gradle-plugin:+")
 	}
 }
 
@@ -53,12 +50,6 @@ configure<BuildScanExtension> {
 	}
 }
 
-configure<IdeaModel> {
-	project {
-		vcs = "Git"
-	}
-}
-
 allprojects {
 
 	version = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmm"))
@@ -67,9 +58,6 @@ allprojects {
 		from("$rootDir/gradle/dependencies.gradle.kts")
 		plugin<BasePlugin>()
 		plugin<DetektPlugin>()
-//    plugin<NebulaFacetPlugin>()
-		// FIXME https://github.com/shyiko/ktlint/issues/226
-//    plugin("org.jlleitschuh.gradle.ktlint")
 	}
 
 	configure<DetektExtension> {
@@ -99,9 +87,9 @@ allprojects {
 		}
 
 		plugins.withType(KotlinPlatformPluginBase::class.java) {
-			configure<KotlinProjectExtension> {
-				experimental.coroutines = Coroutines.ENABLE
-			}
+//			configure<KotlinProjectExtension> {
+//				experimental.coroutines = Coroutines.ENABLE
+//			}
 			dependencies {
 				"compile"(kotlin("stdlib-jdk8"))
 				"implementation"("io.github.microutils:kotlin-logging") {

@@ -18,41 +18,47 @@ import org.apache.http.message.BasicNameValuePair
 import org.apache.http.protocol.BasicHttpContext
 import org.apache.http.protocol.HttpContext
 import org.apache.http.util.EntityUtils
+import java.net.UnknownHostException
 
 class HttpClient {
-  private val logger = KotlinLogging.logger {}
+	private val logger = KotlinLogging.logger {}
 
-  val httpCookieStore: CookieStore = BasicCookieStore()
+	val httpCookieStore: CookieStore = BasicCookieStore()
 
-  private val httpContext: HttpContext = BasicHttpContext().also {
-    it.setAttribute(HttpClientContext.COOKIE_STORE, httpCookieStore)
-  }
-  private val requestConfig = RequestConfig.custom().setCircularRedirectsAllowed(true).build()
+	private val httpContext: HttpContext = BasicHttpContext().also {
+		it.setAttribute(HttpClientContext.COOKIE_STORE, httpCookieStore)
+	}
+	private val requestConfig = RequestConfig.custom().setCircularRedirectsAllowed(true).build()
 
-  private val client: CloseableHttpClient =
-    HttpClients.custom().setUserAgent("Mozilla/5.0 https://github.com/itbasis/jvm-wrapper").setConnectionManager(
-      PoolingHttpClientConnectionManager()
-    ).setRedirectStrategy(LaxRedirectStrategy()).setDefaultRequestConfig(requestConfig).build()!!
+	private val client: CloseableHttpClient =
+		HttpClients.custom().setUserAgent("Mozilla/5.0 https://github.com/itbasis/jvm-wrapper").setConnectionManager(
+			PoolingHttpClientConnectionManager()
+		).setRedirectStrategy(LaxRedirectStrategy()).setDefaultRequestConfig(requestConfig).build()!!
 
-  private fun HttpResponse.content(): String {
-    return EntityUtils.toString(entity)
-  }
+	private fun HttpResponse.content(): String {
+		return EntityUtils.toString(entity)
+	}
 
-  fun getContent(url: String): String {
-    logger.debug { "get.url: $url" }
-    return client.execute(HttpGet(url), httpContext).content()
-  }
+	fun getContent(url: String): String {
+		logger.debug { "get.url: $url" }
+		return try {
+			client.execute(HttpGet(url), httpContext).content()
+		} catch (e: UnknownHostException) {
+			logger.error(e) { e.message }
+			""
+		}
+	}
 
-  fun getEntity(url: String): HttpEntity {
-    logger.debug { "get.entity.url: $url" }
-    val execute = client.execute(HttpGet(url), httpContext)
-    return execute.entity
-  }
+	fun getEntity(url: String): HttpEntity {
+		logger.debug { "get.entity.url: $url" }
+		val execute = client.execute(HttpGet(url), httpContext)
+		return execute.entity
+	}
 
-  fun post(url: String, params: Map<String, String>): String {
-    logger.debug { "post.url: $url" }
-    val httpPost = HttpPost(url)
-    httpPost.entity = UrlEncodedFormEntity(params.map { (key, value) -> BasicNameValuePair(key, value) })
-    return client.execute(httpPost, httpContext).content()
-  }
+	fun post(url: String, params: Map<String, String>): String {
+		logger.debug { "post.url: $url" }
+		val httpPost = HttpPost(url)
+		httpPost.entity = UrlEncodedFormEntity(params.map { (key, value) -> BasicNameValuePair(key, value) })
+		return client.execute(httpPost, httpContext).content()
+	}
 }

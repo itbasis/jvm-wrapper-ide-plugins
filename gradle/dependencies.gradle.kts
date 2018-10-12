@@ -3,52 +3,62 @@ import org.gradle.plugins.ide.idea.model.IdeaModel
 val kotlinVersion: String by extra
 
 repositories {
-  mavenLocal()
-  jcenter()
-  mavenCentral()
-  maven(url = "https://jitpack.io")
-  maven(url = "https://dl.bintray.com/kotlin/kotlin-eap")
+	jcenter()
+	mavenCentral()
+	maven(url = "https://jitpack.io")
+	maven(url = "https://dl.bintray.com/kotlin/ktor")
+	maven(url = "https://kotlin.bintray.com/kotlinx")
+	mavenLocal()
 }
 
 configurations.all {
-  resolutionStrategy {
-    failOnVersionConflict()
+	resolutionStrategy {
+		failOnVersionConflict()
 
-    eachDependency {
-      when (requested.group) {
-        "org.slf4j" -> useVersion("1.7.25")
-        "junit" -> useVersion("4.12")
-        "org.junit.platform" -> useVersion("1.3.1")
-        "org.junit.jupiter" -> useVersion("5.3.1")
-        "org.mockito" -> useVersion("2.22.0")
-        "org.opentest4j" -> useVersion("1.1.1")
-        "org.objenesis" -> useVersion("2.6")
-        "org.jetbrains.kotlin" -> useVersion(kotlinVersion)
-        "io.kotlintest" -> useVersion("3.1.10")
-        "io.github.glytching" -> useVersion("2.3.0")
-        "org.apache.commons" -> when (requested.name) {
-          "commons-lang3" -> useVersion("3.8.1")
-          "commons-compress" -> useVersion("1.18")
-        }
-        "org.apache.httpcomponents" -> when (requested.name) {
-          "httpclient" -> useVersion("4.5.6")
-          "httpcore" -> useVersion("4.4.10")
-        }
-        "com.google.code.gson" -> useVersion("2.8.5")
-        "io.github.microutils" -> useVersion("1.6.10")
-        "com.github.itbasis.kotlin-utils" -> useVersion("v20180618_1139")
-      }
-    }
-  }
+		eachDependency {
+			when (requested.group) {
+				"org.slf4j"                       -> useVersion("+")
+				"junit"                           -> useVersion("+")
+				"org.junit.platform"              -> useVersion("+")
+				"org.junit.jupiter"               -> useVersion("+")
+				"org.mockito"                     -> useVersion("+")
+				"org.opentest4j"                  -> useVersion("+")
+				"org.objenesis"                   -> useVersion("+")
+				"org.jetbrains.kotlin"            -> useVersion(kotlinVersion)
+//				"org.jetbrains.kotlinx"           -> when {
+//					requested.name.startsWith("kotlinx-io")                -> useVersion("0.1.0-alpha-9-eap13")
+//					requested.name.startsWith("kotlinx.atomicfu-")         -> useVersion("0.11.9-eap13")
+//					requested.name.startsWith("kotlinx-coroutines-io-jvm") -> useVersion("0.1.0-alpha-9-eap13")
+//					requested.name.startsWith("kotlinx-coroutines-io")     -> useVersion("0.24.0-eap13")
+//					requested.name.startsWith("kotlinx-coroutines-")       -> useVersion("0.30.1-eap13")
+//					else                                                   -> useVersion("+")
+//				}
+				"io.kotlintest"                   -> useVersion("+")
+				"io.ktor"                         -> useVersion("+")
+				"io.github.glytching"             -> useVersion("+")
+				"org.apache.commons"              -> when (requested.name) {
+					"commons-lang3"    -> useVersion("+")
+					"commons-compress" -> useVersion("+")
+				}
+				"org.apache.httpcomponents"       -> when (requested.name) {
+					"httpclient" -> useVersion("+")
+					"httpcore"   -> useVersion("+")
+				}
+				"com.google.code.gson"            -> useVersion("+")
+				"io.github.microutils"            -> useVersion("+")
+				"com.github.itbasis.kotlin-utils" -> useVersion("v20180618_1139")
+			}
+		}
+	}
 }
 
 apply {
-  plugin<IdeaPlugin>()
+	plugin<IdeaPlugin>()
 }
 
 configure<IdeaModel> {
-  module {
-    isDownloadJavadoc = false
-    isDownloadSources = false
-  }
+	module {
+		isDownloadJavadoc = false
+		isDownloadSources = false
+	}
 }

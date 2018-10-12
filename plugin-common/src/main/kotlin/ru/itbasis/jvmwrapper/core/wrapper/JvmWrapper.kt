@@ -4,7 +4,7 @@ import org.apache.commons.lang3.SystemUtils
 import org.apache.commons.lang3.SystemUtils.IS_OS_MAC
 import ru.itbasis.jvmwrapper.core.ProcessStepListener
 import ru.itbasis.jvmwrapper.core.downloader.DownloadProcessListener
-import ru.itbasis.jvmwrapper.core.downloader.Downloader
+import ru.itbasis.jvmwrapper.core.downloader.DownloaderFactory
 import ru.itbasis.jvmwrapper.core.jvm.Jvm
 import ru.itbasis.jvmwrapper.core.jvm.JvmType.JDK
 import ru.itbasis.jvmwrapper.core.jvm.JvmVendor.ORACLE
@@ -27,45 +27,67 @@ class JvmWrapper(
 
 	private val wrapperProperties: JvmWrapperProperties = JvmWrapperProperties().apply {
 		"Reading properties from the working directory".step(stepListener) { append(workingDir.resolve(JVMW_PROPERTY_FILE_NAME)) }
-		"Reading properties from the shared directory".step(stepListener) { append(JVMW_HOME_DIR.resolve(JVMW_PROPERTY_FILE_NAME)) }
+		"Reading properties from the shared directory".step(stepListener) {
+			append(
+				JVMW_HOME_DIR.resolve(
+					JVMW_PROPERTY_FILE_NAME
+				)
+			)
+		}
 		"Adding default properties".step(stepListener) { append(DEFAULT_PROPERTIES) }
 	}
 
-	private val jvmVersion = Jvm(vendor = wrapperProperties.vendor!!, type = wrapperProperties.type!!, version = wrapperProperties.version!!)
+	private val jvm by lazy {
+		Jvm(
+			vendor = wrapperProperties.vendor!!, type = wrapperProperties.type!!, version = wrapperProperties.version!!
+		)
+	}
 
-	private val jvmName: String = "${wrapperProperties.vendor}-${jvmVersion.type}-${jvmVersion.cleanVersion}".toLowerCase()
+	private val jvmName: String by lazy { jvm.toString().toLowerCase() }
 
 	val sdkName: String by lazy { "$SCRIPT_FILE_NAME-$jvmName" }
 
 	private val lastUpdateFile = LastUpdateFile(jvmName)
 
-	val jvmHomeDir: File = JVMW_HOME_DIR.resolve(jvmName).also { jvmHomeDir ->
-		val provider = Downloader.getInstance(jvmVersion)
-
-		"check exists jvm home directory: $jvmHomeDir".step(stepListener) {
-			if (jvmHomeDir.isDirectory) {
-				lastUpdateFile.update()
-				return@step
-			}
-			"download jvm archive...".step(stepListener) {
-				val remoteFile = "specifying the URL for the JRE archive...".step(stepListener) { provider.remoteArchiveFile }
-
-				"download remote archive: ${remoteFile.url}".step(stepListener) {
-					File(JVMW_HOME_DIR, "$jvmName.${provider.archiveExtension}").apply {
-						provider.download(target = this, downloadProcessListener = downloadProcessListener)
-					}
-				}
-			}.let { archiveFile ->
-				"unpack JRE archive file".step(stepListener) {
-					UnarchiverFactory.getInstance(archiveFile, jvmHomeDir, stepListener).unpack()
-				}
-				lastUpdateFile.update(provider.remoteArchiveFile)
-			}
-		}
+	val jvmHomeDir: File = JVMW_HOME_DIR.resolve(jvmName).run {
+		checkAndDownloadJvm(this)
+		return@run this
 	}.run {
-		if (IS_OS_MAC) this.resolve("Home") else this
+		return@run if (IS_OS_MAC) {
+			this.resolve("Home")
+		} else {
+			this
+		}
 	}.apply {
-		check(isDirectory) { "jvm home directory is not exists: $this" }
+		check(isDirectory) {
+			"jvm home directory is not exists: $this"
+		}
+	}
+
+	private fun checkAndDownloadJvm(jvmHomeDir: File) {
+		val provider = DownloaderFactory.getInstance(jvm)
+		"check exists jvm home directory: $jvmHomeDir".step(stepListener) {
+			if (jvmHomeDir.isDirectory && !lastUpdateFile.isExpired()) {
+				return
+			}
+			val remoteArchiveFile = "download jvm archive...".step(stepListener) {
+				"specifying the URL for the JRE archive...".step(stepListener) {
+					provider.remoteArchiveFile
+				}
+			}
+			if (lastUpdateFile.equals(remoteArchiveFile = remoteArchiveFile)) {
+				return
+			}
+			val archiveFile = "download remote archive: ${remoteArchiveFile.url}".step(stepListener) {
+				File(JVMW_HOME_DIR, "$jvmName.${jvm.archiveFileExtension}").apply {
+					provider.download(target = this, downloadProcessListener = downloadProcessListener)
+				}
+			}
+			"unpack JRE archive file".step(stepListener) {
+				UnarchiverFactory.getInstance(archiveFile, jvmHomeDir, stepListener).unpack()
+			}
+			lastUpdateFile.update(provider.remoteArchiveFile)
+		}
 	}
 
 	companion object {
@@ -78,7 +100,7 @@ class JvmWrapper(
 		fun upgrade(targetDir: File) {
 			File(targetDir, SCRIPT_FILE_NAME).run {
 				URL(REMOTE_SCRIPT_URL).openStream().copyTo(outputStream())
-				setExecutable(true)
+				return@run setExecutable(true)
 			}
 		}
 	}

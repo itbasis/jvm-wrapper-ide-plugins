@@ -5,9 +5,11 @@
       <w>alenkov</w>
       <w>arturbosch</w>
       <w>asctime</w>
+      <w>atomicfu</w>
       <w>caskroom</w>
       <w>centos</w>
       <w>cmds</w>
+      <w>coroutines</w>
       <w>cpio</w>
       <w>debian</w>
       <w>detekt</w>
@@ -25,9 +27,12 @@
       <w>jlleitschuh</w>
       <w>jvmw</w>
       <w>jvmwrapper</w>
+      <w>kittinunf</w>
       <w>klogging</w>
       <w>kotlintest</w>
+      <w>kotlinx</w>
       <w>ktlint</w>
+      <w>ktor</w>
       <w>levelname</w>
       <w>lineno</w>
       <w>macosx</w>

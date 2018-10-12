@@ -28,6 +28,8 @@
                 <action id="jvmUpdaterAction" class="ru.itbasis.plugins.intellij.jvmwrapper.actions.SdkUpdater"/>
                 <action id="generateAction" class="ru.itbasis.plugins.intellij.jvmwrapper.actions.GenerateAction"/>
                 <separator/>
+                <action id="invalidSdkCleanerAction" class="ru.itbasis.plugins.intellij.jvmwrapper.actions.InvalidSdkCleanerAction"/>
+                <separator/>
             </group>
             <separator/>
         </group>
@@ -38,6 +40,7 @@
         <projectService serviceImplementation="ru.itbasis.plugins.intellij.jvmwrapper.ProjectSdkUpdater"/>
 
         <applicationService serviceImplementation="ru.itbasis.plugins.intellij.jvmwrapper.ProjectSdkScanner"/>
+        <applicationService serviceImplementation="ru.itbasis.plugins.intellij.jvmwrapper.services.InvalidSdkCleanerService"/>
 
         <postStartupActivity implementation="ru.itbasis.plugins.intellij.jvmwrapper.actions.SdkUpdater"/>
     </extensions>

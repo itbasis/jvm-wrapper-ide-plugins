@@ -8,6 +8,10 @@ import java.util.jar.JarFile
 object JvmVersionDetector {
 	@Throws(IllegalStateException::class)
 	fun detect(path: Path): String {
+		path.toFile().takeUnless { it.isDirectory && it.list().isNotEmpty() }?.let {
+			throw IllegalArgumentException("path not found or empty directory: $path")
+		}
+
 		path.resolve("release").toFile().takeIf { it.isFile }?.let { releaseFile ->
 			val properties = Properties().apply {
 				releaseFile.inputStream().use { load(it) }

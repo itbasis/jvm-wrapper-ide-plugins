@@ -42,7 +42,6 @@ configure<IntelliJPluginExtension> {
 		property("IntellijVersion") as String
 	} else {
 		"2018.1.6"
-//    "2017.3.5"
 //    "LATEST-EAP-SNAPSHOT"
 	}
 	logger.info("IntelliJ version: $version")

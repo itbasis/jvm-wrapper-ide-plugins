@@ -1,17 +1,18 @@
 import io.kotlintest.tables.Row1
 import io.kotlintest.tables.row
-import ru.itbasis.jvmwrapper.core.JvmVersionSample
+import samples.JvmVersionSample
 
-internal fun Array<JvmVersionSample>.asRows(): Array<Row1<JvmVersionRow>> {
-	return this.flatMap { (vendor, type, versions, fullVersion, cleanVersion, versionMajor, versionUpdate, downloadPageUrl, downloadArchiveUrlPart) ->
-		versions.map {
-			row(
-				JvmVersionRow(
-					vendor, type, it, fullVersion, cleanVersion, versionMajor, versionUpdate, downloadPageUrl, downloadArchiveUrlPart
+internal fun List<JvmVersionSample?>.asRows(): Array<Row1<JvmVersionRow>> {
+	return this.filterNotNull()
+		.flatMap { (vendor, type, versions, fullVersion, cleanVersion, versionMajor, versionUpdate, downloadPageUrl, downloadArchiveUrlPart) ->
+			versions.map {
+				row(
+					JvmVersionRow(
+						vendor, type, it, fullVersion, cleanVersion, versionMajor, versionUpdate, downloadPageUrl, downloadArchiveUrlPart
+					)
 				)
-			)
-		}
-	}.toTypedArray()
+			}
+		}.toTypedArray()
 }
 
 data class JvmVersionRow(

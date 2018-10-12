@@ -3,12 +3,15 @@ package ru.itbasis.jvmwrapper.core.unarchiver
 import mu.KotlinLogging
 import ru.itbasis.jvmwrapper.core.ProcessStepListener
 import ru.itbasis.jvmwrapper.core.step
+import ru.itbasis.jvmwrapper.core.unarchiver.UnarchiverFactory.FileArchiveType.DMG
 import java.io.File
 
-class MacUnarchiver(sourceFile: File, targetDir: File, stepListener: ProcessStepListener? = null, removeOriginal: Boolean = false) :
+class DmgUnarchiver(sourceFile: File, targetDir: File, stepListener: ProcessStepListener? = null, removeOriginal: Boolean = false) :
 	AbstractUnarchiver(sourceFile, targetDir, stepListener, removeOriginal) {
 
 	private val logger = KotlinLogging.logger {}
+
+	override val sourceFileName: String = sourceFile.name.substringBeforeLast(DMG.extension)
 
 	override fun doMovingToDest() {
 		tempDir.resolve("Contents").renameTo(targetDir)

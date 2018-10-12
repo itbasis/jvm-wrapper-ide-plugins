@@ -6,8 +6,10 @@ import ru.itbasis.jvmwrapper.core.jvm.JvmVendor.OPEN_JDK
 import ru.itbasis.jvmwrapper.core.jvm.detectors.JvmTypeDetector
 import ru.itbasis.jvmwrapper.core.jvm.detectors.JvmVendorDetector
 import ru.itbasis.jvmwrapper.core.jvm.detectors.JvmVersionDetector
+import ru.itbasis.jvmwrapper.core.unarchiver.UnarchiverFactory.FileArchiveType.DMG
+import ru.itbasis.jvmwrapper.core.unarchiver.UnarchiverFactory.FileArchiveType.EXE
+import ru.itbasis.jvmwrapper.core.unarchiver.UnarchiverFactory.FileArchiveType.TAR_GZ
 import java.nio.file.Path
-import java.nio.file.Paths
 
 data class Jvm(
 	val system: Boolean = false,
@@ -46,11 +48,17 @@ data class Jvm(
 			}
 		}
 
+	val archiveFileExtension: String by lazy {
+		when {
+			vendor == OPEN_JDK && major >= 9 -> TAR_GZ
+			IS_OS_MAC                        -> DMG
+			IS_OS_WINDOWS                    -> EXE
+			else                             -> TAR_GZ
+		}.extension
+	}
+
 	override fun toString(): String {
-		return when (vendor) {
-			OPEN_JDK -> "${vendor.code}-$cleanVersion"
-			else     -> "${vendor.code}-$type-$cleanVersion"
-		}
+		return "${vendor.code}-$type-$cleanVersion"
 	}
 
 	override fun compareTo(other: Jvm): Int {
@@ -75,6 +83,7 @@ data class Jvm(
 	}
 
 	companion object {
+
 		fun adjustPath(path: Path?): Path? {
 			return arrayOf(path?.resolve("Home"), path?.resolve("Contents/Home"), path).firstOrNull {
 				it?.toFile()?.isDirectory
@@ -83,12 +92,4 @@ data class Jvm(
 			       ?: return null
 		}
 	}
-}
-
-fun String?.toJvm(system: Boolean = false): Jvm {
-	return Paths.get(this).toJvm(system = system)
-}
-
-fun Path?.toJvm(system: Boolean = false): Jvm {
-	return Jvm(system = system, path = this)
 }

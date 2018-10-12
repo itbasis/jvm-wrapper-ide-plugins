@@ -20,9 +20,21 @@ class SdkReceiver(
 	override fun run(result: Result<Sdk>) {
 		val sdkHome = sdkPath.toFile().absolutePath
 
-		projectJdkTable.allJdks.filter {
-			(overrideOnlyByName && sdkName == it.name) || (overrideOnlyByPath && sdkHome == it.homePath)
-		}.forEach {
+		val sdkList = projectJdkTable.getSdksOfType(javaSdk)
+		val sdkFilteredList = when {
+			overrideOnlyByName && !overrideOnlyByPath -> sdkList.filter {
+				sdkName == it.name
+			}
+			!overrideOnlyByName && overrideOnlyByPath -> sdkList.filter {
+				sdkHome == it.homePath
+			}
+			else                                      -> sdkList.filter {
+				sdkName == it.name || sdkHome == it.homePath
+			}
+		}
+		sdkFilteredList.takeIf {
+			it.size > 1
+		}?.forEach {
 			projectJdkTable.removeJdk(it)
 		}
 

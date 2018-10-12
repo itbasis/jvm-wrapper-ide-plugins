@@ -1,18 +1,4 @@
-@file:Suppress("MatchingDeclarationName")
-
-package ru.itbasis.jvmwrapper.core
-
-data class JvmVersionSample(
-	val vendor: String,
-	val type: String,
-	val versions: List<String>,
-	val fullVersion: String,
-	val cleanVersion: String,
-	val versionMajor: Int,
-	val versionUpdate: Int?,
-	val downloadPageUrl: String,
-	val downloadArchiveUrlPart: String
-)
+package samples
 
 val jvmVersionSample__oracle_jdk_11 = JvmVersionSample(
 	vendor = "oracle",
@@ -25,6 +11,7 @@ val jvmVersionSample__oracle_jdk_11 = JvmVersionSample(
 	downloadPageUrl = "/technetwork/java/javase/downloads/jdk11-downloads-5066655.html",
 	downloadArchiveUrlPart = "http://download.oracle.com/otn-pub/java/jdk/11+28/55eed80b163941c8885ad9298e6d786a/jdk-11"
 )
+
 val jvmVersionSample__oracle_jdk_10_0_2 = JvmVersionSample(
 	vendor = "oracle",
 	type = "jdk",
@@ -36,6 +23,7 @@ val jvmVersionSample__oracle_jdk_10_0_2 = JvmVersionSample(
 	downloadPageUrl = "/technetwork/java/javase/downloads/jdk10-downloads-4416644.html",
 	downloadArchiveUrlPart = "http://download.oracle.com/otn-pub/java/jdk/10.0.2+13/19aef61b38124481863b1413dce1855f/jdk-10.0.2"
 )
+
 val jvmVersionSample__oracle_jdk_10_0_1 = JvmVersionSample(
 	vendor = "oracle",
 	type = "jdk",
@@ -82,9 +70,11 @@ val jvmVersionSample__oracle_jdk_8u181 = JvmVersionSample(
 	downloadPageUrl = "/technetwork/java/javase/downloads/jdk8-downloads-2133151.html",
 	downloadArchiveUrlPart = "http://download.oracle.com/otn-pub/java/jdk/8u181-b13/96a7b8442fe848ef90c96a2fad6ed6d1/jdk-8u181-"
 )
-val JvmVersionLatestSamples = arrayOf(
+
+val OracleJvmVersionLatestSamples = listOf(
 	jvmVersionSample__oracle_jdk_11, jvmVersionSample__oracle_jdk_10_0_2, jvmVersionSample__oracle_jdk_8u181
 )
-val JvmVersionArchiveSamples = arrayOf(
+
+val OracleJvmVersionArchiveSamples = listOf(
 	jvmVersionSample__oracle_jdk_10_0_1, jvmVersionSample__oracle_jdk_8u171, jvmVersionSample__oracle_jdk_8u172
 )

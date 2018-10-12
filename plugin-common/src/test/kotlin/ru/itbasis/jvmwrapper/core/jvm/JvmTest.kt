@@ -6,12 +6,14 @@ import io.kotlintest.matchers.string.beUpperCase
 import io.kotlintest.should
 import io.kotlintest.shouldBe
 import io.kotlintest.specs.FunSpec
-import ru.itbasis.jvmwrapper.core.JvmVersionLatestSamples
+import samples.JvmVersionSamples
 
 internal class JvmTest : FunSpec() {
 	init {
 		test("version") {
-			forall(rows = *JvmVersionLatestSamples.asRows()) { (vendor, type, version, _, cleanVersion, versionMajor, versionUpdate, _, _) ->
+			forall(
+				rows = *JvmVersionSamples.asRows()
+			) { (vendor, type, version, _, cleanVersion, versionMajor, versionUpdate, _, _) ->
 				val actual = Jvm(vendor = vendor.toJvmVendor(), type = type.toJvmType(), version = version)
 
 				actual.type.name should beUpperCase()

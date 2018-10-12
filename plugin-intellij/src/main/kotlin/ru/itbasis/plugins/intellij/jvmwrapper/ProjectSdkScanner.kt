@@ -16,6 +16,8 @@ import java.nio.file.Paths
 
 class ProjectSdkScanner : Runnable {
 	override fun run() {
+		val initJdkCount = projectJdkTable.allJdks.size
+
 		val defaultSystemJvm = JavaHomeFinder.suggestHomePaths().map { path -> Paths.get(path) }
 
 		val adoptOpenJdk = File("/usr/local/Cellar").takeIf { it.isDirectory }?.listFiles { _, name ->
@@ -44,8 +46,10 @@ class ProjectSdkScanner : Runnable {
 			SdkReceiver(sdkName = "$SCRIPT_FILE_NAME-$jvm", sdkPath = jvm.path!!, overrideAll = true).execute()
 		}
 
-		if (defaultSystemJvm.isNotEmpty() || jvmwJvmDirs.isNotEmpty() || adoptOpenJdk.isNotEmpty()) {
-			regenerateSuggestSdkName()
+		if (initJdkCount != projectJdkTable.allJdks.size) {
+			if (defaultSystemJvm.isNotEmpty() || jvmwJvmDirs.isNotEmpty() || adoptOpenJdk.isNotEmpty()) {
+				regenerateSuggestSdkName()
+			}
 		}
 	}
 
@@ -72,7 +76,7 @@ class ProjectSdkScanner : Runnable {
 			return ServiceManager.getService(ProjectSdkScanner::class.java)
 		}
 
-		private val projectJdkTable = ServiceManager.getService(ProjectJdkTable::class.java)
-		private val javaSdk = JavaSdk.getInstance()
+		private val projectJdkTable = ServiceManager.getService(ProjectJdkTable::class.java)!!
+		private val javaSdk = JavaSdk.getInstance()!!
 	}
 }

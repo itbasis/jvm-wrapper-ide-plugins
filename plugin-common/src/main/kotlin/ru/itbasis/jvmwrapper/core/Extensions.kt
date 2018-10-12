@@ -1,21 +1,15 @@
 package ru.itbasis.jvmwrapper.core
 
-import org.apache.commons.lang3.SystemUtils.IS_OS_MAC
-import org.apache.commons.lang3.SystemUtils.IS_OS_WINDOWS
+import org.apache.commons.codec.digest.DigestUtils
 import java.io.File
 
-internal fun extension(): String {
-  return when {
-    IS_OS_MAC -> "dmg"
-    IS_OS_WINDOWS -> "exe"
-    else -> "tar.gz"
-  }
-}
-
-internal fun File.archiveNameWithoutExtension(): String {
-  return this.name.substringBefore("." + extension())
+fun File.checksum256(checksum: String?): Boolean {
+	if (checksum.isNullOrBlank()) {
+		return true
+	}
+	return DigestUtils.sha256Hex(inputStream()) == checksum
 }
 
 internal fun Regex.findOne(content: String): String? {
-  return find(content)?.groupValues?.get(1)
+	return find(content)?.groupValues?.get(1)
 }

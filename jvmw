@@ -1,4 +1,21 @@
 #!/usr/bin/env bash
+# Hack for code verification
+JVM_VERSION_MAJOR=${JVM_VERSION_MAJOR}
+JVMW_DEBUG=${JVMW_DEBUG}
+JVMW_HOME=${JVMW_HOME}
+JVM_VERSION=${JVM_VERSION}
+JVM_VENDOR=${JVM_VENDOR}
+ARCHIVE_FILE=${ARCHIVE_FILE}
+ARCHIVE_JVM_CHECKSUM=${ARCHIVE_JVM_CHECKSUM}
+ARCHIVE_JVM_URL=${ARCHIVE_JVM_URL}
+JVM_PAGE_URL=${JVM_PAGE_URL}
+CLEAR_COOKIE=${CLEAR_COOKIE}
+ORACLE_USER=${ORACLE_USER}
+ORACLE_PASSWORD=${ORACLE_PASSWORD}
+JVMW_ORACLE_KEYCHAIN=${JVMW_ORACLE_KEYCHAIN}
+LAST_UPDATE_FILE=${LAST_UPDATE_FILE}
+REQUIRED_UPDATE=${REQUIRED_UPDATE}
+#
 export JVMW=true
 #JVMW_HOME=${HOME}/.jvm
 if [[ -z "${JVMW_HOME}" ]]; then
@@ -6,10 +23,15 @@ if [[ -z "${JVMW_HOME}" ]]; then
 fi
 mkdir -p "${JVMW_HOME}"
 #
+OTN_USER_AGENT='Mozilla/5.0 https://github.com/itbasis/jvm-wrapper'
+#
+ARCHIVE_EXT_TAR_GZ="tar.gz"
+ARCHIVE_EXT_DMG="dmg"
+#
 JVMW_PROPERTY_FILE="${JVMW_PROPERTY_FILE:-./jvmw.properties}"
 OS=$(uname | tr '[:upper:]' '[:lower:]')
 ARCH=$([[ "$(uname -m)" == "x86_64" ]] && echo "x64" || echo "i586")
-ARCHIVE_EXT=$([[ "${OS}" == "darwin" ]] && echo "dmg" || echo "tar.gz")
+ARCHIVE_EXT=$([[ "${OS}" == "darwin" ]] && echo ${ARCHIVE_EXT_DMG} || echo ${ARCHIVE_EXT_TAR_GZ})
 #
 REQUIRED_COMMANDS_CORE='awk tr head rm mv cd curl readlink dirname'
 REQUIRED_COMMANDS_DARWIN='hdiutil xar cpio shasum'
@@ -91,12 +113,12 @@ function properties_parser() {
 }
 function properties_default() {
 	cat << EOF
-JVM_VERSION=9
+JVM_VERSION=11
 REQUIRED_UPDATE=Y
 CLEAR_COOKIE=Y
 JVMW_DEBUG=N
-USE_SYSTEM_JVM=Y
-JVM_VENDOR=oracle
+USE_SYSTEM_JVM=N
+JVM_VENDOR=openjdk
 JVMW_ORACLE_KEYCHAIN=JVM_WRAPPER_ORACLE
 EOF
 }
@@ -126,6 +148,93 @@ function properties_build() {
 	ARCHIVE_FILE=${JDK_ROOT_DIR}.${ARCHIVE_EXT}
 	LAST_UPDATE_FILE=${JDK_ROOT_DIR}.last_update
 	JDK_HOME_DIR=${JDK_ROOT_DIR}/$([[ "${OS}" == 'darwin' ]] && echo 'Home/')
+}
+function download_jdk() {
+	eval "${JVM_VENDOR}_check_the_need_for_downloading"
+	debug "REQUIRED_UPDATE=${REQUIRED_UPDATE}"
+	if [[ "${REQUIRED_UPDATE}" != "Y" ]]; then
+		return 0
+	fi
+	if [[ -z "${ARCHIVE_JVM_URL}" ]]; then
+		die "empty ARCHIVE_JVM_URL. Use page '${JVM_PAGE_URL}'"
+	fi
+	#
+	if [[ -f "${LAST_UPDATE_FILE}" ]] && [[ "${ARCHIVE_JVM_URL}" == "$(head -2 <"${LAST_UPDATE_FILE}" | tail -1)" ]]; then
+		return 0
+	fi
+	#
+	if [[ -f "${ARCHIVE_FILE}" ]]; then
+		if [[ ${JVM_VERSION_MAJOR} -lt 8 ]]; then
+			# TODO
+			rm -f "${ARCHIVE_FILE}"
+		elif check_checksum; then
+			unpack
+			return 0
+		fi
+	fi
+	#
+	if [[ -d "${JDK_HOME_DIR}" ]]; then
+		if [[ "$("${JVM_HOME_DIR}/bin/java" -fullversion 2>&1)" == *"${JVM_VERSION}"* ]]; then
+			write_last_update
+			return 0
+		fi
+	fi
+	#
+	eval "${JVM_VENDOR}_download_jdk"
+	unpack
+	write_last_update
+}
+function unpack() {
+	if [[ "${ARCHIVE_EXT}" == "${ARCHIVE_EXT_TAR_GZ}" ]]; then
+		unpack_tar_gz
+	elif [[ "${ARCHIVE_EXT}" == "${ARCHIVE_EXT_DMG}" ]]; then
+		unpack_dmg
+	else
+		eval "${JVM_VENDOR}_unpack_${OS}"
+	fi
+	rm -f "${ARCHIVE_FILE}"
+}
+function unpack_tar_gz() {
+	local -r tmp_dir=$(mktemp -d -t "${JVM_FULL_NAME}.XXXXXX")/
+	debug "tmp_dir=${tmp_dir}"
+	tar xf "${ARCHIVE_FILE}" -C "${tmp_dir}" || { rm -Rf "${tmp_dir}";
+		die 'error unpack archive...'; }
+	mv "$(find "${tmp_dir}" -mindepth 1 -maxdepth 1 -type d)" "${JDK_ROOT_DIR}" || { rm -Rf "${tmp_dir}";
+		die 'error move unpacked jdk...'; }
+	rm -Rf "${tmp_dir}"
+	if [[ -d "${JDK_ROOT_DIR}/Contents" ]]; then
+		mv ${JDK_ROOT_DIR}/Contents/* ${JDK_ROOT_DIR}/
+		rm -Rf ${JDK_ROOT_DIR}/Contents/
+	fi
+}
+function unpack_dmg() {
+	hdiutil detach "/Volumes/${JVM_FULL_NAME}" -quiet -force 2> /dev/null
+	hdiutil attach "${ARCHIVE_FILE}" -mountpoint "/Volumes/${JVM_FULL_NAME}" 2>&1 || die
+	local -r PKG_FILE_NAME=$(find "/Volumes/${JVM_FULL_NAME}" -mindepth 1 -maxdepth 1 -name '*.pkg')
+	local -r tmp_dir=$(mktemp -d -t "${JVM_FULL_NAME}.XXXXXX")/
+	cd "${tmp_dir}/" || { rm -Rf "${tmp_dir}";
+		die "can't change directory: ${tmp_dir}/"; }
+	xar -xf "${PKG_FILE_NAME}" . &> /dev/null || die
+	for dir in ./*jdk*; do
+		cpio -i <"${dir}/Payload" || exit 1
+	done
+	rm -Rf "${JDK_ROOT_DIR}"
+	mv Contents "${JDK_ROOT_DIR}" 1> /dev/null 2>&1 || die
+	cd - || die
+	rm -Rf "${tmp_dir}"
+	#
+	hdiutil detach "/Volumes/${JVM_FULL_NAME}" -force || die
+}
+# Hack for code verification
+OTN_HEADERS_FILE=${OTN_HEADERS_FILE}
+OTN_FORM_ACTION=${OTN_FORM_ACTION}
+OTN_COOKIE_FILE=${OTN_COOKIE_FILE}
+OTN_FORM_DATA=${OTN_FORM_DATA}
+OTN_CONTENT_FILE=${OTN_CONTENT_FILE}
+OTN_HOST_LOGIN=${OTN_HOST_LOGIN}
+#
+function oracle_prepare_actions() {
+	return 0
 }
 function oracle_otn_curl_send_request() {
 	local -r url="$1"
@@ -175,7 +284,7 @@ function oracle_otn_curl_redirect() {
 	oracle_otn_curl_send_request "${host}"
 }
 function oracle_otn_login() {
-	OTN_COOKIE_FILE="${TMPDIR}/jvm_wrapper.oracle_otn.cookie"
+	OTN_COOKIE_FILE="${TMPDIR}/jvmwrapper.oracle_otn.cookie"
 	if [[ "${CLEAR_COOKIE}" == "Y" ]]; then
 		rm -f "${OTN_COOKIE_FILE}";
 	fi
@@ -225,7 +334,7 @@ function oracle_download_jdk() {
 		ls -laFh "${ARCHIVE_FILE}"
 	fi
 	#
-	if [[ ! check_checksum ]]; then
+	if [[ ! `check_checksum` ]]; then
 		die
 	fi
 }
@@ -287,67 +396,64 @@ function oracle_otn_page_archive_jdk_parser() {
 	done
 	debug "ARCHIVE_JVM_URL='${ARCHIVE_JVM_URL}'"
 }
-function oracle_unpack_darwin() {
-	hdiutil detach "/Volumes/${JVM_FULL_NAME}" -quiet -force 2> /dev/null
-	hdiutil attach "${ARCHIVE_FILE}" -mountpoint "/Volumes/${JVM_FULL_NAME}" 2>&1 || die
-	local -r PKG_FILE_NAME=$(find "/Volumes/${JVM_FULL_NAME}" -mindepth 1 -maxdepth 1 -name '*.pkg')
-	local -r tmp_dir=$(mktemp -d -t "${JVM_FULL_NAME}.XXXXXX")/
-	cd "${tmp_dir}/" || { rm -Rf "${tmp_dir}";
-		die "can't change directory: ${tmp_dir}/"; }
-	xar -xf "${PKG_FILE_NAME}" . &> /dev/null || die
-	for dir in ./*jdk*; do
-		cpio -i <"${dir}/Payload" || exit 1
-	done
-	rm -Rf "${JDK_ROOT_DIR}"
-	mv Contents "${JDK_ROOT_DIR}" 1> /dev/null 2>&1 || die
-	cd - || die
-	rm -Rf "${tmp_dir}" "${ARCHIVE_FILE}"
-	#
-	hdiutil detach "/Volumes/${JVM_FULL_NAME}" -force || die
+function openjdk_prepare_actions() {
+	if [[ "${OS}" == "darwin" ]] && [[ ${JVM_VERSION_MAJOR} -ge 9 ]]; then
+		ARCHIVE_EXT=${ARCHIVE_EXT_TAR_GZ}
+		ARCHIVE_FILE=${JDK_ROOT_DIR}.${ARCHIVE_EXT}
+	fi
 }
-function oracle_unpack_linux() {
-	local -r tmp_dir=$(mktemp -d -t "${JVM_FULL_NAME}.XXXXXX")/
-	debug "tmp_dir=${tmp_dir}"
-	tar xf "${ARCHIVE_FILE}" -C "${tmp_dir}" || { rm -Rf "${tmp_dir}";
-		die 'error unpack archive...'; }
-	mv "$(find "${tmp_dir}" -mindepth 1 -maxdepth 1 -type d)" "${JDK_ROOT_DIR}" || { rm -Rf "${tmp_dir}";
-		die 'error move unpacked jdk...'; }
-	rm -Rf "${tmp_dir}" "${ARCHIVE_FILE}"
-}
-function download_jdk() {
-	eval "${JVM_VENDOR}_check_the_need_for_downloading"
-	debug "REQUIRED_UPDATE=${REQUIRED_UPDATE}"
+function openjdk_check_the_need_for_downloading() {
 	if [[ "${REQUIRED_UPDATE}" != "Y" ]]; then
 		return 0
 	fi
-	if [[ -z "${ARCHIVE_JVM_URL}" ]]; then
-		die "empty ARCHIVE_JVM_URL. Use page '${JVM_PAGE_URL}'"
+	if [[ ! -f "${JVM_HOME_DIR}/bin/java" ]]; then
+		REQUIRED_UPDATE=Y
+	else
+		check_is_out_of_date
 	fi
-	#
-	if [[ -f "${LAST_UPDATE_FILE}" ]] && [[ "${ARCHIVE_JVM_URL}" == "$(head -2 <"${LAST_UPDATE_FILE}" | tail -1)" ]]; then
+	if [[ "${REQUIRED_UPDATE}" != "Y" ]]; then
+		debug "not required update"
 		return 0
 	fi
-	#
-	if [[ -f "${ARCHIVE_FILE}" ]]; then
-		if [[ ${JVM_VERSION_MAJOR} -lt 8 ]]; then
-			# TODO
-			rm -f "${ARCHIVE_FILE}"
-		elif check_checksum; then
-			eval "${JVM_VENDOR}_unpack_${OS}"
-			return 0
-		fi
+	openjdk_latest_version_page_parser
+	if [[ ${ARCHIVE_JVM_URL} == *"${JVM_VERSION}"* ]] && [[ "${REQUIRED_UPDATE}" != "Y" ]]; then
+		write_last_update
+		return 0
 	fi
-	#
-	if [[ -d "${JDK_HOME_DIR}" ]]; then
-		if [[ "$("${JVM_HOME_DIR}/bin/java" -fullversion 2>&1)" == *"${JVM_VERSION}"* ]]; then
-			write_last_update
-			return 0
-		fi
+}
+function openjdk_latest_version_page_parser() {
+	JVM_PAGE_URL="https://jdk.java.net/${JVM_VERSION_MAJOR}/"
+	openjdk_archive_parser
+}
+function openjdk_archive_parser() {
+	debug "JVM_PAGE_URL='${JVM_PAGE_URL}'"
+	local os=${OS}
+	if [[ "${os}" == "darwin" ]]; then
+		os=osx
 	fi
-	#
-	eval "${JVM_VENDOR}_download_jdk"
-	eval "${JVM_VENDOR}_unpack_${OS}"
-	write_last_update
+	local -r content=$(curl -s "${JVM_PAGE_URL}")
+	local awk_mask='https://download.java.net/java/.*?jdk-'${JVM_VERSION_MAJOR}'.*?'${os}'.*?.'${ARCHIVE_EXT}''
+	# 12 - https://download.java.net/java/early_access/jdk12/14/GPL/openjdk-12-ea+14_osx-x64_bin.tar.gz
+	# 11 - https://download.java.net/java/ga/jdk11/openjdk-11_osx-x64_bin.tar.gz
+	# 10 - https://download.java.net/java/GA/jdk10/10.0.2/19aef61b38124481863b1413dce1855f/13/openjdk-10.0.2_osx-x64_bin.tar.gz
+	#  8 - https://download.java.net/java/jdk8u192/archive/b04/binaries/jdk-8u192-ea-bin-b04-macosx-x86_64-01_aug_2018.dmg
+	debug "awk_mask=${awk_mask}"
+	# shellcheck disable=SC2090
+	ARCHIVE_JVM_URL=$(echo "${content}" | awk '{ if (match($0, "\"'${awk_mask}'\"")) print substr($0,RSTART+1, RLENGTH-2)}')
+	if [[ ${JVM_VERSION_MAJOR} -ge 9 ]]; then
+		local -r content_url=$(echo "${content}" | awk '{ if (match($0, "\"'${awk_mask}'.sha256\"")) print substr($0,RSTART+1, RLENGTH-2)}')
+		ARCHIVE_JVM_CHECKSUM=$(curl -s "${content_url}")
+	fi
+}
+function openjdk_download_jdk() {
+	debug "download ${ARCHIVE_JVM_URL}..."
+	curl -kL -A "${OTN_USER_AGENT}" -o "${ARCHIVE_FILE}" "${ARCHIVE_JVM_URL}"
+	if [[ "${JVMW_DEBUG}" == "Y" ]]; then
+		ls -laFh "${ARCHIVE_FILE}"
+	fi
+	#	if [[ ! `check_checksum` ]]; then
+	#		die
+	#	fi
 }
 function main_properties() {
 	[[ -f "${JVMW_HOME}/${JVMW_PROPERTY_FILE}" ]] && { properties_parser "$(cat "${JVMW_HOME}/${JVMW_PROPERTY_FILE}")"; }
@@ -447,6 +553,7 @@ if [[ -z "$1" ]] || [[ "$1" == "info" ]]; then
 	echo "JDK_HOME=${JDK_HOME}"
 	echo "JAVA_HOME=${JAVA_HOME}"
 else
+	eval "${JVM_VENDOR}_prepare_actions"
 	download_jdk
 	if [[ -z "${JVM_HOME_DIR}" ]]; then
 		die "can't JVM_HOME_DIR"
