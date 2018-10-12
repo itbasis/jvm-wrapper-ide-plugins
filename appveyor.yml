@@ -5,8 +5,12 @@ image: Visual Studio 2017
 platform: x64
 configuration: Release
 
+cache:
+  - C:\Users\appveyor\.gradle
+
 init:
   - cmd: java -version
+  - cmd: dir ":\Program Files\Java\"
 
 build:
   verbosity: detailed
