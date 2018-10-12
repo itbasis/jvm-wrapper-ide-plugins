@@ -9,6 +9,10 @@ import java.math.RoundingMode
 abstract class AbstractIntegrationTests : FunSpec() {
 	abstract val logger: KLogger
 
+	override fun isInstancePerTest(): Boolean {
+		return true
+	}
+
 	protected val stepListener: (String) -> Unit = { msg ->
 		logger.info { msg }
 	}

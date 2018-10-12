@@ -7,9 +7,10 @@ object UnarchiverFactory {
 	fun getInstance(
 		sourceFile: File, targetDir: File, stepListener: ProcessStepListener? = null, removeOriginal: Boolean = false
 	): AbstractUnarchiver {
+		val sourceFileName = sourceFile.name.toLowerCase()
 		return when {
-			sourceFile.name.endsWith("." + FileArchiveType.DMG.extension)    -> DmgUnarchiver(sourceFile, targetDir, stepListener, removeOriginal)
-			sourceFile.name.endsWith("." + FileArchiveType.TAR_GZ.extension) -> TarGzUnarchiver(
+			sourceFileName.endsWith("." + FileArchiveType.DMG.extension)    -> DmgUnarchiver(sourceFile, targetDir, stepListener, removeOriginal)
+			sourceFileName.endsWith("." + FileArchiveType.TAR_GZ.extension) -> TarGzUnarchiver(
 				sourceFile, targetDir, stepListener, removeOriginal
 			)
 			else                                                             -> throw IllegalArgumentException("unsupported archive type: $sourceFile")

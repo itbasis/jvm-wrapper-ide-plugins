@@ -1,6 +1,8 @@
 package ru.itbasis.jvmwrapper.core.unarchiver
 
 import asRows
+import io.kotlintest.Description
+import io.kotlintest.TestResult
 import io.kotlintest.data.forall
 import io.kotlintest.matchers.file.shouldBeNonEmptyDirectory
 import io.kotlintest.matchers.file.shouldNotBeEmpty
@@ -15,35 +17,45 @@ import ru.itbasis.jvmwrapper.core.jvm.Jvm
 import ru.itbasis.jvmwrapper.core.jvm.toJvmType
 import ru.itbasis.jvmwrapper.core.jvm.toJvmVendor
 import samples.OpenJDKJvmVersionEarlyAccessSamples
-import samples.OpenJDKJvmVersionLatestSamples
-import samples.OracleJvmVersionArchiveSamples
-import samples.OracleJvmVersionLatestSamples
 import java.io.File
 
 internal class UnarchiverIntegrationTest : AbstractIntegrationTests() {
 	override val logger = KotlinLogging.logger {}
 
 	private val rows = listOf(
-		OpenJDKJvmVersionLatestSamples.firstOrNull(),
-		OracleJvmVersionLatestSamples.firstOrNull(),
-		OracleJvmVersionArchiveSamples.firstOrNull(),
+//		OpenJDKJvmVersionLatestSamples.firstOrNull(),
+//		OracleJvmVersionLatestSamples.firstOrNull(),
+//		OracleJvmVersionArchiveSamples.firstOrNull(),
 		OpenJDKJvmVersionEarlyAccessSamples.firstOrNull()
 
 	).asRows()
+
+	lateinit var jvm: Jvm
+	private val tempFile by lazy { File.createTempFile("tmp", "." + jvm.archiveFileExtension) }
+	//	private val tempFile by lazy { File("/var/folders/dg/1s_sjr9x48ddmgp0nqs_lcpm0000gn/T/tmp2428561537311746825.tar.gz") }
+	private val targetDir by lazy { File(tempFile.parentFile, "unpack") }
+
+	override fun afterTest(description: Description, result: TestResult) {
+		tempFile.deleteRecursively()
+		targetDir.deleteRecursively()
+	}
 
 	init {
 		test("unpack").config(enabled = IS_OS_LINUX || IS_OS_MAC) {
 			forall(
 				rows = *rows
 			) { (vendor, type, version, _, _, _, _, _, _) ->
-				val downloader = Jvm(
-					vendor = vendor.toJvmVendor(), type = type.toJvmType(), version = version
-				).downloader()
-				val tempFile = File.createTempFile("tmp", "tmp")
+				logger.info { "version: $version" }
+				jvm = Jvm(vendor = vendor.toJvmVendor(), type = type.toJvmType(), version = version)
+				logger.info { "jvm: $jvm" }
+				val downloader = jvm.downloader()
+
+				val tempFile = File.createTempFile("tmp", "." + jvm.archiveFileExtension)
 				downloader.download(target = tempFile, downloadProcessListener = downloadProcessListener)
 				tempFile.shouldNotBeEmpty()
 
-				val targetDir = File(tempFile.parentFile, "unpack")
+//				val targetDir = File(tempFile.parentFile, "unpack")
+				targetDir.deleteRecursively()
 				targetDir.mkdirs()
 				targetDir.shouldNotBeNonEmptyDirectory()
 
@@ -52,9 +64,6 @@ internal class UnarchiverIntegrationTest : AbstractIntegrationTests() {
 
 				val actualJvm = Jvm(path = targetDir.toPath())
 				actualJvm.version shouldBe version
-
-				targetDir.deleteRecursively()
-				tempFile.delete()
 			}
 		}
 	}

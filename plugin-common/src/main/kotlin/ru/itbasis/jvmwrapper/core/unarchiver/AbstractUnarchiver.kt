@@ -7,11 +7,15 @@ import java.util.concurrent.TimeUnit
 
 abstract class AbstractUnarchiver(
 	protected val sourceFile: File,
-	protected val targetDir: File,
+	private val targetDir: File,
 	protected val stepListener: ProcessStepListener? = null,
 	private val removeOriginal: Boolean = true
 ) {
-	protected abstract val sourceFileName: String
+	protected abstract val fileNameExtension: UnarchiverFactory.FileArchiveType
+
+	protected val sourceFileName: String by lazy {
+		sourceFile.name.substringBeforeLast("." + fileNameExtension.extension)
+	}
 
 	protected val tempDir by lazy { createTempDir(suffix = sourceFileName) }
 
@@ -34,7 +38,17 @@ abstract class AbstractUnarchiver(
 	}
 
 	protected abstract fun doUnpack()
-	protected abstract fun doMovingToDest()
+
+	protected open fun doMovingToDest() {
+		val unpackDir = tempDir.listFiles().first()
+		val macContentsDirectory = unpackDir.resolve("Contents")
+		if (macContentsDirectory.isDirectory) {
+			macContentsDirectory.renameTo(targetDir)
+		} else {
+			unpackDir.renameTo(targetDir)
+		}
+	}
+
 	protected open fun doFinalize() {}
 
 	protected fun Process.run() {

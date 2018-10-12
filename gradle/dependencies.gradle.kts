@@ -47,6 +47,7 @@ configurations.all {
 				"com.google.code.gson"            -> useVersion("+")
 				"io.github.microutils"            -> useVersion("+")
 				"com.github.itbasis.kotlin-utils" -> useVersion("v20180618_1139")
+				"org.codehaus.plexus"             -> useVersion("+")
 			}
 		}
 	}

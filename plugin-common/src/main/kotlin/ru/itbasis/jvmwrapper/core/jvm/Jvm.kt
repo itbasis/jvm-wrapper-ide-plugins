@@ -15,9 +15,9 @@ import java.nio.file.Path
 data class Jvm(
 	val system: Boolean = false,
 	val path: Path? = null,
-	val version: String = JvmVersionDetector.detect(path!!),
-	val type: JvmType = JvmTypeDetector.detect(path!!),
-	val vendor: JvmVendor = JvmVendorDetector.detect(path!!)
+	val version: String = JvmVersionDetector.detect(path!!.fixFromMac()),
+	val type: JvmType = JvmTypeDetector.detect(path!!.fixFromMac()),
+	val vendor: JvmVendor = JvmVendorDetector.detect(path!!.fixFromMac())
 ) : Comparable<Jvm> {
 
 	val major: Int
@@ -51,13 +51,13 @@ data class Jvm(
 
 	val archiveFileExtension: String by lazy {
 		when {
-			vendor == OPEN_JDK && major >= 11 && IS_OS_WINDOWS -> ZIP
-			vendor == OPEN_JDK && major >= 9                   -> TAR_GZ
+			major >= 11 && IS_OS_WINDOWS     -> ZIP
+			major >= 9 && vendor == OPEN_JDK -> TAR_GZ
 
-			IS_OS_MAC                                          -> DMG
-			IS_OS_WINDOWS                                      -> EXE
+			IS_OS_MAC                        -> DMG
+			IS_OS_WINDOWS                    -> EXE
 
-			else                                               -> TAR_GZ
+			else                             -> TAR_GZ
 		}.extension
 	}
 

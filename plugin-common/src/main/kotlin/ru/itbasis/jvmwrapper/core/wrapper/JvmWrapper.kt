@@ -1,13 +1,13 @@
 package ru.itbasis.jvmwrapper.core.wrapper
 
 import org.apache.commons.lang3.SystemUtils
-import org.apache.commons.lang3.SystemUtils.IS_OS_MAC
 import ru.itbasis.jvmwrapper.core.ProcessStepListener
 import ru.itbasis.jvmwrapper.core.downloader.DownloadProcessListener
 import ru.itbasis.jvmwrapper.core.downloader.DownloaderFactory
 import ru.itbasis.jvmwrapper.core.jvm.Jvm
 import ru.itbasis.jvmwrapper.core.jvm.JvmType.JDK
 import ru.itbasis.jvmwrapper.core.jvm.JvmVendor.ORACLE
+import ru.itbasis.jvmwrapper.core.jvm.fixFromMac
 import ru.itbasis.jvmwrapper.core.step
 import ru.itbasis.jvmwrapper.core.unarchiver.UnarchiverFactory
 import java.io.File
@@ -53,11 +53,7 @@ class JvmWrapper(
 		checkAndDownloadJvm(this)
 		return@run this
 	}.run {
-		return@run if (IS_OS_MAC) {
-			this.resolve("Home")
-		} else {
-			this
-		}
+		this.toPath().fixFromMac().toFile()
 	}.apply {
 		check(isDirectory) {
 			"jvm home directory is not exists: $this"

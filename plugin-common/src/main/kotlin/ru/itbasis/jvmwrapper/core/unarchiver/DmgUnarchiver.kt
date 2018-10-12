@@ -11,11 +11,7 @@ class DmgUnarchiver(sourceFile: File, targetDir: File, stepListener: ProcessStep
 
 	private val logger = KotlinLogging.logger {}
 
-	override val sourceFileName: String = sourceFile.name.substringBeforeLast(DMG.extension)
-
-	override fun doMovingToDest() {
-		tempDir.resolve("Contents").renameTo(targetDir)
-	}
+	override val fileNameExtension = DMG
 
 	override fun doUnpack() {
 		"Detaching a previously attached dmg archive...".step(stepListener) { detach(quiet = true).run() }
@@ -36,13 +32,21 @@ class DmgUnarchiver(sourceFile: File, targetDir: File, stepListener: ProcessStep
 				}
 			}
 
-			"Search for PKG file...".step(stepListener) { findPkgFile() }.let { pkgFile ->
+			"Search for PKG file...".step(stepListener) {
+				findPkgFile()
+			}.let { pkgFile ->
 
-				"Unpacking the PKG file...".step(stepListener) { unpackPkg(pkgFile) }
-				"Unpacking the CPIO file...".step(stepListener) { unpackCpio() }
+				"Unpacking the PKG file...".step(stepListener) {
+					unpackPkg(pkgFile)
+				}
+				"Unpacking the CPIO file...".step(stepListener) {
+					unpackCpio()
+				}
 			}
 		} finally {
-			"Detaching a previously attached dmg archive...".step(stepListener) { detach().run() }
+			"Detaching a previously attached dmg archive...".step(stepListener) {
+				detach().run()
+			}
 		}
 	}
 

@@ -5,9 +5,6 @@ image: Visual Studio 2017
 platform: x64
 configuration: Release
 
-cache:
-  - C:\Users\appveyor\.gradle
-
 environment:
   ORACLE_USER: jvm.wrapper.itbasis@gmail.com
   ORACLE_PASSWORD:

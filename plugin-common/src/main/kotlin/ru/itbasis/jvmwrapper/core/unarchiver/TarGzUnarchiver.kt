@@ -1,7 +1,7 @@
 package ru.itbasis.jvmwrapper.core.unarchiver
 
-import org.apache.commons.compress.archivers.tar.TarArchiveInputStream
-import org.apache.commons.compress.compressors.gzip.GzipCompressorInputStream
+import org.codehaus.plexus.archiver.tar.TarGZipUnArchiver
+import org.codehaus.plexus.logging.slf4j.Slf4jLoggerManager
 import ru.itbasis.jvmwrapper.core.ProcessStepListener
 import ru.itbasis.jvmwrapper.core.unarchiver.UnarchiverFactory.FileArchiveType.TAR_GZ
 import java.io.File
@@ -9,26 +9,17 @@ import java.io.File
 class TarGzUnarchiver(sourceFile: File, targetDir: File, stepListener: ProcessStepListener? = null, removeOriginal: Boolean = false) :
 	AbstractUnarchiver(sourceFile, targetDir, stepListener, removeOriginal) {
 
-	override val sourceFileName: String = sourceFile.name.substringBeforeLast(TAR_GZ.extension)
+	override val fileNameExtension = TAR_GZ
 
-	override fun doMovingToDest() {
-		tempDir.listFiles().first().renameTo(targetDir)
-	}
+	private val unpackLogger = Slf4jLoggerManager().run {
+		this.initialize()
+		return@run this.getLoggerForComponent(this::javaClass.name)
+	}!!
 
 	override fun doUnpack() {
-		TarArchiveInputStream(GzipCompressorInputStream(sourceFile.inputStream().buffered())).use { ais ->
-			var entry = ais.nextEntry
-			while (entry != null) {
-				val destPath = File(tempDir, entry.name)
-
-				if (entry.isDirectory) {
-					destPath.mkdirs()
-				} else {
-					destPath.createNewFile()
-					ais.copyTo(destPath.outputStream().buffered())
-				}
-				entry = ais.nextEntry
-			}
-		}
+		val unArchiver = TarGZipUnArchiver(sourceFile)
+		unArchiver.enableLogging(unpackLogger)
+		unArchiver.destDirectory = tempDir
+		unArchiver.extract()
 	}
 }

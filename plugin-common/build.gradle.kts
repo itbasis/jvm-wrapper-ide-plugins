@@ -6,10 +6,13 @@ apply {
 
 dependencies {
 	"compile"("com.github.itbasis.kotlin-utils:kotlin-utils-jvm")
-	"compile"(group = "org.apache.commons", name = "commons-compress")
-	"compile"(group = "org.apache.commons", name = "commons-lang3")
-	"implementation"(group = "org.apache.httpcomponents", name = "httpclient")
-	"implementation"(group = "com.google.code.gson", name = "gson")
+
+	"compile"("org.codehaus.plexus:plexus-archiver")
+	"compile"("org.codehaus.plexus:plexus-slf4j-logging")
+
+	"compile"("org.apache.commons:commons-lang3")
+	"implementation"("org.apache.httpcomponents:httpclient")
+	"implementation"("com.google.code.gson:gson")
 
 //	"implementation"("io.ktor:ktor-client-cio")
 //	"implementation"("io.ktor:ktor-client-features")
