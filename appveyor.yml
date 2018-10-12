@@ -3,11 +3,14 @@ image: Visual Studio 2017
 platform: x64
 configuration: Release
 
+init:
+  - cmd: java -version
+
 build:
   verbosity: detailed
 
 install:
-  - cmd: gradlew clean --no-daemon
+  - cmd: gradlew clean -i --no-daemon
 
 build_script:
   - cmd: gradlew clean assemble -s --no-daemon
