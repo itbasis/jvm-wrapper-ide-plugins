@@ -18,3 +18,4 @@ build: off
 
 test_script:
   - cmd: gradlew clean check -i -s --no-daemon
+  - cmd: gradlew clean check -i -s --no-daemon -PIntellijVersion=LATEST-EAP-SNAPSHOT
