@@ -1,10 +1,5 @@
 package ru.itbasis.jvmwrapper.core.jvm.detectors
 
-import io.kotlintest.specs.FunSpec
-import ru.itbasis.jvmwrapper.core.jvm.Jvm
-import ru.itbasis.jvmwrapper.core.jvm.detectors.JvmVendorDetector.detect
-import java.nio.file.Paths
-
 //internal class JvmVendorDetectorTest : FunSpec() {
 //	init {
 //		test("detect") {
