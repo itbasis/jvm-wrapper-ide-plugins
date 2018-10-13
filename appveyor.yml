@@ -14,14 +14,7 @@ init:
   - cmd: java -version
   - cmd: dir /w "C:\Program Files\Java\"
 
-build:
-  verbosity: detailed
-
-install:
-  - cmd: gradlew clean -i --no-daemon
-
-build_script:
-  - cmd: gradlew clean assemble -i -s --no-daemon
+build: off
 
 test_script:
   - cmd: gradlew clean check -i -s --no-daemon
