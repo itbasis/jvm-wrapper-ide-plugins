@@ -8,7 +8,7 @@ var jvmVersionSample__openjdk_jdk_12 = JvmVersionSample(
 	vendor = "openjdk",
 	type = "jdk",
 	versions = listOf("12"),
-	fullVersion = "12-ea+14",
+	fullVersion = "12-ea+15",
 	cleanVersion = "12",
 	versionMajor = 12,
 	versionUpdate = null,
@@ -16,17 +16,17 @@ var jvmVersionSample__openjdk_jdk_12 = JvmVersionSample(
 	downloadArchiveUrlPart = "",
 	remoteFiles = mapOf(
 		"darwin" to RemoteArchiveFile(
-			url = "https://download.java.net/java/early_access/jdk12/14/GPL/openjdk-12-ea+14_osx-x64_bin.tar.gz",
-			checksum = "8f91596d4977be9bc3487bfe9321ae00737995bc69fd8b31d3c875022e1a173a"
+			url = "https://download.java.net/java/early_access/jdk12/14/GPL/openjdk-12-ea+15_osx-x64_bin.tar.gz",
+			checksum = "25f8259e2a5ee89933f63c4cb66503a2c6e86994ca3830381a4a0a3711690085"
 		), "linux" to RemoteArchiveFile(
-		url = "https://download.java.net/java/early_access/jdk12/14/GPL/openjdk-12-ea+14_linux-x64_bin.tar.gz",
-		checksum = "791ac6f6494a587a4de9dc373cdaa3911dc25ad4c7e793fb8e4dbe1269ab534d"
+		url = "https://download.java.net/java/early_access/jdk12/14/GPL/openjdk-12-ea+15_linux-x64_bin.tar.gz",
+		checksum = "d5603ba136d07918e621c7ede56bbda8e76da4656d3d02874fa435a6bd69779f"
 	), "windows" to RemoteArchiveFile(
-		url = "https://download.java.net/java/early_access/jdk12/14/GPL/openjdk-12-ea+14_windows-x64_bin.zip",
-		checksum = "43ac13c36e6d868c55e4e5bfefa2e9ae1fa7fb4006fde49ac8b2a3e1b9ca8279"
+		url = "https://download.java.net/java/early_access/jdk12/14/GPL/openjdk-12-ea+15_windows-x64_bin.zip",
+		checksum = "b41b5b427bb51d4e0193ec448ad884be1c67092dc51c5f9bd7521e7b66c60a90"
 	), "alpine_linux" to RemoteArchiveFile(
 		url = "https://download.java.net/java/early_access/alpine/12/binaries/openjdk-12-ea+12_linux-x64-musl_bin.tar.gz",
-		checksum = "36729ff2deec675c87fefbee47b805ad1555192f424ca4debeb81f30eb1bf587"
+		checksum = "172c7d7c6859253822e03f0839f83627ffe06055f118423c6ef619a1af836b4c"
 	)
 	)
 )
