@@ -437,10 +437,6 @@ function openjdk_archive_parser() {
 	fi
 	local -r content=$(curl -s "${JVM_PAGE_URL}")
 	local awk_mask='https://download.java.net/java/.*?jdk-'${JVM_VERSION_MAJOR}'.*?'${os}'.*?-'${arch}'.*?.'${ARCHIVE_EXT}''
-	# 12 - https://download.java.net/java/early_access/jdk12/14/GPL/openjdk-12-ea+14_osx-x64_bin.tar.gz
-	# 11 - https://download.java.net/java/ga/jdk11/openjdk-11_osx-x64_bin.tar.gz
-	# 10 - https://download.java.net/java/GA/jdk10/10.0.2/19aef61b38124481863b1413dce1855f/13/openjdk-10.0.2_osx-x64_bin.tar.gz
-	#  8 - https://download.java.net/java/jdk8u192/archive/b04/binaries/jdk-8u192-ea-bin-b04-macosx-x86_64-01_aug_2018.dmg
 	debug "awk_mask=${awk_mask}"
 	# shellcheck disable=SC2090
 	ARCHIVE_JVM_URL=$(echo "${content}" | awk '{ if (match($0, "\"'${awk_mask}'\"")) print substr($0,RSTART+1, RLENGTH-2)}')

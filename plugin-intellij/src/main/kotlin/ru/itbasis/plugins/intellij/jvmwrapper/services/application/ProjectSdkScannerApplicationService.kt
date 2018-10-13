@@ -13,7 +13,9 @@ import java.io.File
 import java.nio.file.Paths
 
 class ProjectSdkScannerApplicationService(
-	private val sdkReceiverApplicationService: SdkReceiverApplicationService, private val projectJdkTable: ProjectJdkTable, private val javaSdk: JavaSdk
+	private val sdkReceiverApplicationService: SdkReceiverApplicationService,
+	private val projectJdkTable: ProjectJdkTable,
+	private val javaSdk: JavaSdk
 ) : Runnable {
 	override fun run() {
 		val initJdkCount = projectJdkTable.allJdks.size
@@ -46,11 +48,7 @@ class ProjectSdkScannerApplicationService(
 			sdkReceiverApplicationService.apply(sdkName = "$SCRIPT_FILE_NAME-$jvm", sdkPath = jvm.path!!, overrideAll = true)
 		}
 
-		if (initJdkCount != projectJdkTable.allJdks.size) {
-			if (defaultSystemJvm.isNotEmpty() || jvmwJvmDirs.isNotEmpty() || adoptOpenJdk.isNotEmpty()) {
-				regenerateSuggestSdkName()
-			}
-		}
+		regenerateSuggestSdkName()
 	}
 
 	private fun regenerateSuggestSdkName() {

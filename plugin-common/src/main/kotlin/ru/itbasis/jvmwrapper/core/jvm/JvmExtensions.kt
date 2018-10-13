@@ -5,11 +5,8 @@ import java.nio.file.Path
 import java.nio.file.Paths
 
 fun Path.fixFromMac(): Path {
-	return if (SystemUtils.IS_OS_MAC) {
-		this.resolve("Home")
-	} else {
-		this
-	}
+	return this.resolve("Home").takeIf { it.toFile().isDirectory }
+	       ?: this
 }
 
 fun Path.getExecutable(fileName: String): Path {

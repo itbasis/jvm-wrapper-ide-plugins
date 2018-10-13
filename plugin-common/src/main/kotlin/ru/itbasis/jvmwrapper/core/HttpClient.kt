@@ -19,16 +19,20 @@ import org.apache.http.protocol.BasicHttpContext
 import org.apache.http.protocol.HttpContext
 import org.apache.http.util.EntityUtils
 import java.net.UnknownHostException
+import java.time.Duration
 
 class HttpClient {
 	private val logger = KotlinLogging.logger {}
+
+	private val connectionTimeout = Duration.ofSeconds(3).toMillis().toInt()
 
 	val httpCookieStore: CookieStore = BasicCookieStore()
 
 	private val httpContext: HttpContext = BasicHttpContext().also {
 		it.setAttribute(HttpClientContext.COOKIE_STORE, httpCookieStore)
 	}
-	private val requestConfig = RequestConfig.custom().setCircularRedirectsAllowed(true).build()
+	private val requestConfig = RequestConfig.custom().setConnectTimeout(connectionTimeout).setConnectionRequestTimeout(connectionTimeout)
+		.setCircularRedirectsAllowed(true).build()
 
 	private val client: CloseableHttpClient =
 		HttpClients.custom().setUserAgent("Mozilla/5.0 https://github.com/itbasis/jvm-wrapper").setConnectionManager(
