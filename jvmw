@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Build date: 20181014_010104
+# Build date: 20181014_011932
 #
 # Hack for code verification
 JVM_VERSION_MAJOR=${JVM_VERSION_MAJOR}
@@ -434,7 +434,7 @@ function openjdk_archive_parser() {
 		os=osx
 	fi
 	local arch=${ARCH}
-	if [[ "${os}" == "darwin" ]] && [[ ${JVM_VERSION_MAJOR} -le 8 ]]; then
+	if [[ "${OS}" == "darwin" ]] && [[ ${JVM_VERSION_MAJOR} -le 8 ]]; then
 		arch="x86_64"
 	fi
 	local -r content=$(curl -s "${JVM_PAGE_URL}")
