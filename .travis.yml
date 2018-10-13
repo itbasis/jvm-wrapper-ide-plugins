@@ -21,5 +21,5 @@ install:
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew cask install java6 java8 java10 java java-beta; fi
 
 script:
-  - JVMW_DEBUG=Y ./jvmw java -version
-  - ./jvmw ./gradlew -i check
+  - JVMW_DEBUG=Y ./jvmw java -version || travis_terminate 1
+  - ./jvmw ./gradlew -i check || travis_terminate 1

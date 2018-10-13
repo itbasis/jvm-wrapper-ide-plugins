@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# Build date: 20181014_010104
+#
 # Hack for code verification
 JVM_VERSION_MAJOR=${JVM_VERSION_MAJOR}
 JVMW_DEBUG=${JVMW_DEBUG}
