@@ -12,6 +12,13 @@
 
     <depends>com.intellij.modules.java</depends>
 
+    <application-components>
+        <component>
+            <interface-class>com.intellij.openapi.components.ApplicationComponent</interface-class>
+            <implementation-class>ru.itbasis.plugins.intellij.jvmwrapper.ProjectSdkScannerApplicationComponent</implementation-class>
+        </component>
+    </application-components>
+
     <project-components>
         <component>
             <interface-class>com.intellij.openapi.components.ProjectComponent</interface-class>
@@ -25,7 +32,7 @@
             <separator/>
             <group text="JVM Wrapper" popup="true">
                 <separator/>
-                <action id="jvmUpdaterAction" class="ru.itbasis.plugins.intellij.jvmwrapper.actions.SdkUpdater"/>
+                <action id="jvmUpdaterAction" class="ru.itbasis.plugins.intellij.jvmwrapper.actions.SdkUpdaterAction"/>
                 <action id="generateAction" class="ru.itbasis.plugins.intellij.jvmwrapper.actions.GenerateAction"/>
                 <separator/>
                 <action id="invalidSdkCleanerAction" class="ru.itbasis.plugins.intellij.jvmwrapper.actions.InvalidSdkCleanerAction"/>
@@ -36,12 +43,15 @@
     </actions>
 
     <extensions defaultExtensionNs="com.intellij">
-        <projectService serviceImplementation="ru.itbasis.plugins.intellij.jvmwrapper.JvmWrapperService"/>
-        <projectService serviceImplementation="ru.itbasis.plugins.intellij.jvmwrapper.ProjectSdkUpdater"/>
+        <projectService serviceImplementation="ru.itbasis.plugins.intellij.jvmwrapper.services.project.JvmWrapperProjectService"/>
+        <projectService serviceImplementation="ru.itbasis.plugins.intellij.jvmwrapper.services.project.SdkUpdaterProjectService"/>
 
-        <applicationService serviceImplementation="ru.itbasis.plugins.intellij.jvmwrapper.ProjectSdkScanner"/>
-        <applicationService serviceImplementation="ru.itbasis.plugins.intellij.jvmwrapper.services.InvalidSdkCleanerService"/>
-        <applicationService serviceImplementation="ru.itbasis.plugins.intellij.jvmwrapper.services.SdkReceiverService"/>
+        <applicationService
+                serviceImplementation="ru.itbasis.plugins.intellij.jvmwrapper.services.application.ProjectSdkScannerApplicationService"/>
+        <applicationService
+                serviceImplementation="ru.itbasis.plugins.intellij.jvmwrapper.services.application.InvalidSdkCleanerApplicationService"/>
+        <applicationService
+                serviceImplementation="ru.itbasis.plugins.intellij.jvmwrapper.services.application.SdkReceiverApplicationService"/>
 
         <postStartupActivity implementation="ru.itbasis.plugins.intellij.jvmwrapper.extensionPoints.StartupActivity"/>
     </extensions>

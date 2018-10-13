@@ -1,6 +1,5 @@
-package ru.itbasis.plugins.intellij.jvmwrapper
+package ru.itbasis.plugins.intellij.jvmwrapper.services.application
 
-import com.intellij.openapi.components.ServiceManager
 import com.intellij.openapi.projectRoots.JavaSdk
 import com.intellij.openapi.projectRoots.ProjectJdkTable
 import com.intellij.openapi.projectRoots.SdkType
@@ -10,11 +9,12 @@ import ru.itbasis.jvmwrapper.core.jvm.Jvm
 import ru.itbasis.jvmwrapper.core.jvm.toJvm
 import ru.itbasis.jvmwrapper.core.wrapper.JVMW_HOME_DIR
 import ru.itbasis.jvmwrapper.core.wrapper.SCRIPT_FILE_NAME
-import ru.itbasis.plugins.intellij.jvmwrapper.services.SdkReceiverService
 import java.io.File
 import java.nio.file.Paths
 
-class ProjectSdkScanner(private val sdkReceiverService: SdkReceiverService) : Runnable {
+class ProjectSdkScannerApplicationService(
+	private val sdkReceiverApplicationService: SdkReceiverApplicationService, private val projectJdkTable: ProjectJdkTable, private val javaSdk: JavaSdk
+) : Runnable {
 	override fun run() {
 		val initJdkCount = projectJdkTable.allJdks.size
 
@@ -37,13 +37,13 @@ class ProjectSdkScanner(private val sdkReceiverService: SdkReceiverService) : Ru
 		listOf(defaultSystemJvm, adoptOpenJdk).flatten().map { path ->
 			path.toJvm(system = true)
 		}.onEach { jvm ->
-			sdkReceiverService.apply(sdkName = "system-$jvm", sdkPath = jvm.path!!, overrideAll = true)
+			sdkReceiverApplicationService.apply(sdkName = "system-$jvm", sdkPath = jvm.path!!, overrideAll = true)
 		}
 
 		listOf(jvmwJvmDirs).flatten().map { path ->
 			Jvm.adjustPath(path).toJvm()
 		}.onEach { jvm ->
-			sdkReceiverService.apply(sdkName = "$SCRIPT_FILE_NAME-$jvm", sdkPath = jvm.path!!, overrideAll = true)
+			sdkReceiverApplicationService.apply(sdkName = "$SCRIPT_FILE_NAME-$jvm", sdkPath = jvm.path!!, overrideAll = true)
 		}
 
 		if (initJdkCount != projectJdkTable.allJdks.size) {
@@ -66,17 +66,7 @@ class ProjectSdkScanner(private val sdkReceiverService: SdkReceiverService) : Ru
 		}
 		m.forEach { suggestSdkName, sdkList ->
 			sdkList.sortDescending()
-			sdkReceiverService.apply(sdkName = suggestSdkName, sdkPath = sdkList.first().path!!, overrideOnlyByName = true)
+			sdkReceiverApplicationService.apply(sdkName = suggestSdkName, sdkPath = sdkList.first().path!!, overrideOnlyByName = true)
 		}
-	}
-
-	companion object {
-		@JvmStatic
-		fun getInstance(): ProjectSdkScanner {
-			return ServiceManager.getService(ProjectSdkScanner::class.java)
-		}
-
-		private val projectJdkTable = ServiceManager.getService(ProjectJdkTable::class.java)!!
-		private val javaSdk = JavaSdk.getInstance()!!
 	}
 }

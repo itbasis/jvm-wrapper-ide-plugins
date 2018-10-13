@@ -1,4 +1,4 @@
-package ru.itbasis.plugins.intellij.jvmwrapper.services
+package ru.itbasis.plugins.intellij.jvmwrapper.services.application
 
 import com.intellij.openapi.application.Application
 import com.intellij.openapi.projectRoots.JavaSdk
@@ -8,7 +8,7 @@ import com.intellij.openapi.projectRoots.SdkType
 import com.intellij.openapi.projectRoots.impl.ProjectJdkImpl
 import java.nio.file.Path
 
-class SdkReceiverService(private val application: Application, private val projectJdkTable: ProjectJdkTable, private val javaSdk: JavaSdk) {
+class SdkReceiverApplicationService(private val application: Application, private val projectJdkTable: ProjectJdkTable, private val javaSdk: JavaSdk) {
 	fun apply(
 		sdkName: String,
 		sdkPath: Path,

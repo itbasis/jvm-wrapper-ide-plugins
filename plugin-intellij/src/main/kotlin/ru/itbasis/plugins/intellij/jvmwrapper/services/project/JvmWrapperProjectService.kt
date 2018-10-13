@@ -1,7 +1,6 @@
-package ru.itbasis.plugins.intellij.jvmwrapper
+package ru.itbasis.plugins.intellij.jvmwrapper.services.project
 
 import com.intellij.execution.ExecutionException
-import com.intellij.openapi.components.ServiceManager
 import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.openapi.progress.ProgressManager
 import com.intellij.openapi.progress.Task
@@ -15,20 +14,15 @@ import ru.itbasis.jvmwrapper.core.downloader.DownloadProcessListener
 import ru.itbasis.jvmwrapper.core.jvm.getExecutable
 import ru.itbasis.jvmwrapper.core.wrapper.JvmWrapper
 import ru.itbasis.jvmwrapper.core.wrapper.SCRIPT_FILE_NAME
-import ru.itbasis.plugins.intellij.jvmwrapper.services.SdkReceiverService
+import ru.itbasis.plugins.intellij.jvmwrapper.services.application.SdkReceiverApplicationService
 import java.io.File
 import java.nio.file.Paths
 
-class JvmWrapperService(
-	private val project: Project, private val progressManager: ProgressManager, private val sdkReceiverService: SdkReceiverService
+class JvmWrapperProjectService(
+	private val project: Project,
+	private val progressManager: ProgressManager,
+	private val sdkReceiverApplicationService: SdkReceiverApplicationService
 ) {
-	companion object {
-		@JvmStatic
-		fun getInstance(project: Project): JvmWrapperService {
-			return ServiceManager.getService(project, JvmWrapperService::class.java)
-		}
-	}
-
 	fun hasWrapper(): Boolean {
 		return isSupportedOS && Paths.get(project.basePath).getExecutable(SCRIPT_FILE_NAME).exists()
 	}
@@ -49,7 +43,7 @@ class JvmWrapperService(
 	fun getSdk(): Sdk? {
 		val wrapper = getWrapper()
 		              ?: return null
-		return sdkReceiverService.apply(sdkName = wrapper.sdkName, sdkPath = wrapper.jvmHomeDir.toPath(), overrideAll = true)
+		return sdkReceiverApplicationService.apply(sdkName = wrapper.sdkName, sdkPath = wrapper.jvmHomeDir.toPath(), overrideAll = true)
 	}
 
 	private fun stepListener(progressIndicator: ProgressIndicator): ProcessStepListener =
