@@ -23,11 +23,11 @@ class OracleDownloader(private val jvm: Jvm) : AbstractDownloader() {
 		(if (startsWith("/")) "https://www.oracle.com$this" else this)
 
 	override fun String?.getRemoteArchiveFile(): RemoteArchiveFile? {
-		require(!this.isNullOrBlank()) {
-			val msg = "request url null or empty"
-			logger.error { msg }
-			msg
+		logger.debug { "this: $this" }
+		if (this.isNullOrEmpty()) {
+			return null
 		}
+
 		val htmlContent = this!!.htmlContent(httpClient = httpClient)
 		val result = regexDownloadFile.findOne(htmlContent)
 		             ?: return null
