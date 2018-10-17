@@ -43,8 +43,7 @@
     </actions>
 
     <extensions defaultExtensionNs="com.intellij">
-        <projectService serviceImplementation="ru.itbasis.plugins.intellij.jvmwrapper.services.project.JvmWrapperProjectService"/>
-        <projectService serviceImplementation="ru.itbasis.plugins.intellij.jvmwrapper.services.project.SdkUpdaterProjectService"/>
+        <!--<applicationInitializedListener implementation="ru.itbasis.plugins.intellij.jvmwrapper.ProjectSdkScannerApplicationComponent" />-->
 
         <applicationService
                 serviceImplementation="ru.itbasis.plugins.intellij.jvmwrapper.services.application.ProjectSdkScannerApplicationService"/>
@@ -52,6 +51,9 @@
                 serviceImplementation="ru.itbasis.plugins.intellij.jvmwrapper.services.application.InvalidSdkCleanerApplicationService"/>
         <applicationService
                 serviceImplementation="ru.itbasis.plugins.intellij.jvmwrapper.services.application.SdkReceiverApplicationService"/>
+
+        <projectService serviceImplementation="ru.itbasis.plugins.intellij.jvmwrapper.services.project.JvmWrapperProjectService"/>
+        <projectService serviceImplementation="ru.itbasis.plugins.intellij.jvmwrapper.services.project.SdkUpdaterProjectService"/>
 
         <postStartupActivity implementation="ru.itbasis.plugins.intellij.jvmwrapper.extensionPoints.StartupActivity"/>
     </extensions>

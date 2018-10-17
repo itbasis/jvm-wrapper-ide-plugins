@@ -1,5 +1,16 @@
 package samples
 
+val jvmVersionSample__oracle_jdk_11_0_1 = JvmVersionSample(
+	vendor = "oracle",
+	type = "jdk",
+	versions = listOf("11.0.1"),
+	fullVersion = "11.0.1+13",
+	cleanVersion = "11.0.1",
+	versionMajor = 11,
+	versionUpdate = 1,
+	downloadPageUrl = "/technetwork/java/javase/downloads/jdk11-downloads-5066655.html",
+	downloadArchiveUrlPart = "http://download.oracle.com/otn-pub/java/jdk/11.0.1+13/90cf5d8f270a4347a95050320eef3fb7/jdk-11.0.1_"
+)
 val jvmVersionSample__oracle_jdk_11 = JvmVersionSample(
 	vendor = "oracle",
 	type = "jdk",
@@ -59,22 +70,26 @@ val jvmVersionSample__oracle_jdk_8u172 = JvmVersionSample(
 	downloadArchiveUrlPart = "http://download.oracle.com/otn/java/jdk/8u172-b11/a58eab1ec242421181065cdc37240b08/jdk-8u172-"
 )
 
-val jvmVersionSample__oracle_jdk_8u181 = JvmVersionSample(
+val jvmVersionSample__oracle_jdk_8u191 = JvmVersionSample(
 	vendor = "oracle",
 	type = "jdk",
-	versions = listOf("8u181", "1.8.0_181-b13"),
-	fullVersion = "1.8.0_181-b13",
-	cleanVersion = "8u181",
+	versions = listOf("8u191", "1.8.0_191-b12"),
+	fullVersion = "1.8.0_181-b12",
+	cleanVersion = "8u191",
 	versionMajor = 8,
-	versionUpdate = 181,
+	versionUpdate = 191,
 	downloadPageUrl = "/technetwork/java/javase/downloads/jdk8-downloads-2133151.html",
-	downloadArchiveUrlPart = "http://download.oracle.com/otn-pub/java/jdk/8u181-b13/96a7b8442fe848ef90c96a2fad6ed6d1/jdk-8u181-"
+	downloadArchiveUrlPart = "http://download.oracle.com/otn-pub/java/jdk/8u191-b12/2787e4a523244c269598db4e85c51e0c/jdk-8u191-"
 )
 
 val OracleJvmVersionLatestSamples = listOf(
-	jvmVersionSample__oracle_jdk_11, jvmVersionSample__oracle_jdk_10_0_2, jvmVersionSample__oracle_jdk_8u181
+	jvmVersionSample__oracle_jdk_11_0_1, jvmVersionSample__oracle_jdk_8u191
 )
 
 val OracleJvmVersionArchiveSamples = listOf(
-	jvmVersionSample__oracle_jdk_10_0_1, jvmVersionSample__oracle_jdk_8u171, jvmVersionSample__oracle_jdk_8u172
+	jvmVersionSample__oracle_jdk_11,
+	jvmVersionSample__oracle_jdk_10_0_2,
+	jvmVersionSample__oracle_jdk_10_0_1,
+	jvmVersionSample__oracle_jdk_8u171,
+	jvmVersionSample__oracle_jdk_8u172
 )
