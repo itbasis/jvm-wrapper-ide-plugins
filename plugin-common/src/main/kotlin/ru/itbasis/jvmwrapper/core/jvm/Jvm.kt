@@ -29,8 +29,6 @@ data class Jvm(
 				else                  -> version
 			}).toIntOrNull()
 			       ?: throw IllegalArgumentException("I can not determine the major version of JVM for '$version'")
-
-//			return version.substringBefore("_").substringBefore("u").substringAfter("1.").substringBefore(".").toInt()
 		}
 
 	val update: Int?
