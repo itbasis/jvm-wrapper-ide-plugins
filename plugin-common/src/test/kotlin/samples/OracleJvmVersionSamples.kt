@@ -19,8 +19,8 @@ val jvmVersionSample__oracle_jdk_11 = JvmVersionSample(
 	cleanVersion = "11",
 	versionMajor = 11,
 	versionUpdate = null,
-	downloadPageUrl = "/technetwork/java/javase/downloads/jdk11-downloads-5066655.html",
-	downloadArchiveUrlPart = "http://download.oracle.com/otn-pub/java/jdk/11+28/55eed80b163941c8885ad9298e6d786a/jdk-11"
+	downloadPageUrl = "/technetwork/java/javase/downloads/java-archive-javase11-5116896.html",
+	downloadArchiveUrlPart = "http://download.oracle.com/otn/java/jdk/11+28/55eed80b163941c8885ad9298e6d786a/jdk-11_"
 )
 
 val jvmVersionSample__oracle_jdk_10_0_2 = JvmVersionSample(

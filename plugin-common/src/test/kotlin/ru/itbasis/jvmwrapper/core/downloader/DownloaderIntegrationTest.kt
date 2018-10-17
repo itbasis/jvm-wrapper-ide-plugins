@@ -27,7 +27,6 @@ internal class DownloaderIntegrationTest : AbstractIntegrationTests() {
 		OracleJvmVersionLatestSamples.firstOrNull(),
 		OracleJvmVersionArchiveSamples.firstOrNull(),
 		OpenJDKJvmVersionEarlyAccessSamples.firstOrNull()
-
 	).asRows()
 
 	init {
