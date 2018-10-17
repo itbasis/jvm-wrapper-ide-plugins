@@ -25,7 +25,7 @@ data class Jvm(
 			return (when {
 				version.contains("u") -> version.substringBefore("u")
 				version.contains("_") -> version.substringAfter("1.").substringBefore(".")
-				version.contains(".") -> version.substringBefore(".")
+				version.contains(".") -> version.replaceFirst("^1\\.".toRegex(), "").substringBefore(".")
 				else                  -> version
 			}).toIntOrNull()
 			       ?: throw IllegalArgumentException("I can not determine the major version of JVM for '$version'")
