@@ -22,7 +22,15 @@ data class Jvm(
 
 	val major: Int
 		get() {
-			return version.substringBefore("_").substringBefore("u").substringAfter("1.").substringBefore(".").toInt()
+			return (when {
+				version.contains("u") -> version.substringBefore("u")
+				version.contains("_") -> version.substringAfter("1.").substringBefore(".")
+				version.contains(".") -> version.substringBefore(".")
+				else                  -> version
+			}).toIntOrNull()
+			       ?: throw IllegalArgumentException("I can not determine the major version of JVM for '$version'")
+
+//			return version.substringBefore("_").substringBefore("u").substringAfter("1.").substringBefore(".").toInt()
 		}
 
 	val update: Int?
