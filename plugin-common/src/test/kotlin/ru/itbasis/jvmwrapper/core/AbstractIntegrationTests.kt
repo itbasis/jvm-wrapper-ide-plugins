@@ -8,6 +8,7 @@ import samples.OpenJDKJvmVersionEarlyAccessSamples
 import samples.OpenJDKJvmVersionLatestSamples
 import samples.OracleJvmVersionArchiveSamples
 import samples.OracleJvmVersionLatestSamples
+import samples.jvmVersionSample__openjdk_jdk_11
 import java.math.BigDecimal
 import java.math.RoundingMode
 
@@ -19,10 +20,11 @@ abstract class AbstractIntegrationTests : FunSpec() {
 	).flatten().asRows()
 
 	protected open val jvmFirstRows = listOf(
-		OpenJDKJvmVersionLatestSamples.firstOrNull(),
-		OracleJvmVersionLatestSamples.firstOrNull(),
-		OracleJvmVersionArchiveSamples.firstOrNull(),
-		OpenJDKJvmVersionEarlyAccessSamples.firstOrNull()
+		jvmVersionSample__openjdk_jdk_11
+//		OpenJDKJvmVersionLatestSamples.firstOrNull(),
+//		OracleJvmVersionLatestSamples.firstOrNull(),
+//		OracleJvmVersionArchiveSamples.firstOrNull(),
+//		OpenJDKJvmVersionEarlyAccessSamples.firstOrNull()
 	).asRows()
 
 	override fun isInstancePerTest(): Boolean {

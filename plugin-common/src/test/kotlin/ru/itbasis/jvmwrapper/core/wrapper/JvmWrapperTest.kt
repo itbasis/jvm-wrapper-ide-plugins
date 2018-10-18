@@ -21,6 +21,10 @@ import java.util.concurrent.TimeUnit
 internal class JvmWrapperTest : AbstractIntegrationTests() {
 	override val logger = KotlinLogging.logger {}
 
+	override fun isInstancePerTest(): Boolean {
+		return false
+	}
+
 	private var temporaryFolder = TemporaryFolder()
 
 	override fun beforeTest(description: Description) {
@@ -34,7 +38,11 @@ internal class JvmWrapperTest : AbstractIntegrationTests() {
 	private fun prepareTest(vendor: String, version: String) {
 		logger.info { "temporaryFolder: ${temporaryFolder.root}" }
 		logger.info { "vendor: $vendor, version: $version" }
-		temporaryFolder.root.listFiles().forEach { it.deleteRecursively() }
+
+		JVMW_HOME_DIR.deleteRecursively()
+		temporaryFolder.root.listFiles().forEach {
+			it.deleteRecursively()
+		}
 
 		val propertiesFile = temporaryFolder.newFile("jvmw.properties").apply {
 			appendText("JVM_VERSION=$version\n")
@@ -53,7 +61,7 @@ internal class JvmWrapperTest : AbstractIntegrationTests() {
 		test("test all versions").config(enabled = SystemUtils.IS_OS_LINUX || SystemUtils.IS_OS_MAC) {
 			forall(
 				rows = *jvmAllRows
-			) { (vendor, type, version, fullVersion, cleanVersion, _, _, _, _) ->
+			) { (vendor, type, version, fullVersion, _, _, _, _, _) ->
 				prepareTest(vendor, version)
 
 				val jvm = Jvm(
