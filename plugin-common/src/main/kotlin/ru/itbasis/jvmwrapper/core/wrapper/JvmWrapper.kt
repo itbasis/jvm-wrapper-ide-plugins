@@ -22,7 +22,9 @@ class JvmWrapper(
 	private val stepListener: ProcessStepListener? = null
 ) {
 	init {
-		require(workingDir.isDirectory) { "'$workingDir' is not a directory" }
+		require(workingDir.isDirectory) {
+			"'$workingDir' is not a directory"
+		}
 	}
 
 	private val wrapperProperties: JvmWrapperProperties = JvmWrapperProperties().apply {
@@ -72,6 +74,9 @@ class JvmWrapper(
 					provider.remoteArchiveFile
 				}
 			}
+			if (wrapperProperties.debug!!) {
+				println("remoteArchiveFile=$remoteArchiveFile")
+			}
 			if (lastUpdateFile.equals(remoteArchiveFile = remoteArchiveFile)) {
 				lastUpdateFile.update(remoteArchiveFile = remoteArchiveFile)
 				return
@@ -80,6 +85,9 @@ class JvmWrapper(
 				File(JVMW_HOME_DIR, "$jvmName.${jvm.archiveFileExtension}").apply {
 					provider.download(target = this, downloadProcessListener = downloadProcessListener)
 				}
+			}
+			if (wrapperProperties.debug!!) {
+				println("archiveFile=$archiveFile")
 			}
 			"unpack JRE archive file".step(stepListener) {
 				UnarchiverFactory.getInstance(archiveFile, jvmHomeDir, stepListener).unpack()

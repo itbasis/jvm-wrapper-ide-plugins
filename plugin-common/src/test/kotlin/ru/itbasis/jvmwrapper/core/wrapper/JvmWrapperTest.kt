@@ -19,6 +19,9 @@ import ru.itbasis.jvmwrapper.core.jvm.fixFromMac
 import ru.itbasis.jvmwrapper.core.jvm.toJvmType
 import ru.itbasis.jvmwrapper.core.jvm.toJvmVendor
 import ru.itbasis.jvmwrapper.core.unarchiver.UnarchiverFactory
+import ru.itbasis.jvmwrapper.core.wrapper.JvmWrapperPropertyKeys.JVMW_DEBUG
+import ru.itbasis.jvmwrapper.core.wrapper.JvmWrapperPropertyKeys.JVM_VENDOR
+import ru.itbasis.jvmwrapper.core.wrapper.JvmWrapperPropertyKeys.JVM_VERSION
 import samples.JvmVersionRow
 import samples.asJvmVersionRow
 import samples.jvmVersionSample__openjdk_jdk_11
@@ -52,8 +55,9 @@ internal class JvmWrapperTest : AbstractIntegrationTests() {
 		}
 
 		val propertiesFile = temporaryFolder.newFile("jvmw.properties").apply {
-			appendText("JVM_VERSION=$version\n")
-			appendText("JVM_VENDOR=$vendor")
+			mapOf(JVMW_DEBUG to true, JVM_VERSION to version, JVM_VENDOR to vendor).forEach { key, value ->
+				appendText("${key.name}=$value\n")
+			}
 		}
 		logger.info { "--- properties file :: begin ---" }
 		logger.info { propertiesFile.readText() }
