@@ -1,7 +1,6 @@
 package ru.itbasis.jvmwrapper.core.downloader
 
 import mu.KLogger
-import org.apache.commons.lang3.SystemUtils
 import ru.itbasis.jvmwrapper.core.HttpClient
 import ru.itbasis.jvmwrapper.core.SystemInfo
 import ru.itbasis.jvmwrapper.core.checksum256
@@ -17,7 +16,11 @@ abstract class AbstractDownloader {
 
 	open fun license() {}
 
-	open fun download(target: File, downloadProcessListener: DownloadProcessListener? = null) {
+	fun download(target: File, downloadProcessListener: DownloadProcessListener? = null) {
+		download(remoteArchiveFile = remoteArchiveFile, target = target, downloadProcessListener = downloadProcessListener)
+	}
+
+	open fun download(remoteArchiveFile: RemoteArchiveFile, target: File, downloadProcessListener: DownloadProcessListener? = null) {
 		if (target.isFile && target.checksum256(remoteArchiveFile.checksum)) {
 			return
 		}

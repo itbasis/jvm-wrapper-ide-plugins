@@ -3,6 +3,7 @@ package ru.itbasis.jvmwrapper.core.downloader
 import io.kotlintest.data.forall
 import io.kotlintest.matchers.beGreaterThan
 import io.kotlintest.matchers.file.shouldNotBeEmpty
+import io.kotlintest.matchers.file.shouldNotExist
 import io.kotlintest.matchers.startWith
 import io.kotlintest.should
 import io.kotlintest.shouldBe
@@ -32,12 +33,18 @@ internal class DownloaderIntegrationTest : AbstractIntegrationTests() {
 				remoteArchiveFile.url should startWith(downloadArchiveUrlPart)
 				logger.info { "remoteArchiveFile.url = ${remoteArchiveFile.url}" }
 
-				val tempFile = File.createTempFile("tmp", "tmp")
+				val tempFile = File.createTempFile("tmp", ".tmp")
+				tempFile.deleteOnExit()
+
 				downloader.download(target = tempFile, downloadProcessListener = downloadProcessListener)
 				tempFile.shouldNotBeEmpty()
 				tempFile.length() shouldBe beGreaterThan(10 * 1024)
 
-				tempFile.delete()
+				tempFile.shouldNotExist()
+
+				val tempFile1 =
+					downloader.downloadToTempFile(remoteArchiveFile = remoteArchiveFile, archiveFileExtension = jvm.archiveFileExtension)
+				tempFile1 shouldBe tempFile
 			}
 		}
 

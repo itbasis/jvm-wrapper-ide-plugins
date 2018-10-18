@@ -1,21 +1,22 @@
 package ru.itbasis.jvmwrapper.core.wrapper
 
 import ru.itbasis.jvmwrapper.core.downloader.RemoteArchiveFile
+import ru.itbasis.jvmwrapper.core.jvm.Jvm
 import java.io.File
 import java.time.Duration
 import java.time.LocalDateTime
 import java.time.LocalDateTime.now
 import java.time.format.DateTimeFormatter
 
-class LastUpdateFile(jvmName: String) {
-	private val updatedFile = File(JVMW_HOME_DIR, "$jvmName.last_update")
+class LastUpdateFile(jvm: Jvm) {
+	val file: File by lazy {
+		val fileName = jvm.toString().toLowerCase() + FILE_EXTENSION
+		return@lazy File(JVMW_HOME_DIR, fileName)
+	}
 
-	var updated: LocalDateTime = now().minusDays(1)
-		private set
-	var archiveRemoteUrl: String? = null
-		private set
-	var archiveChecksum: String? = null
-		private set
+	private var updated: LocalDateTime = now().minusDays(1)
+	private var archiveRemoteUrl: String? = null
+	private var archiveChecksum: String? = null
 
 	init {
 		read()
@@ -39,7 +40,7 @@ class LastUpdateFile(jvmName: String) {
 	}
 
 	private fun read() {
-		updatedFile.takeIf {
+		file.takeIf {
 			it.isFile
 		}?.useLines {
 			it.forEachIndexed { index, row ->
@@ -48,7 +49,7 @@ class LastUpdateFile(jvmName: String) {
 					1    -> archiveRemoteUrl = row
 					2    -> archiveChecksum = row
 
-					else -> throw IllegalStateException("unsupported line count in file: $updatedFile")
+					else -> throw IllegalStateException("unsupported line count in file: $file")
 				}
 			}
 		}
@@ -65,10 +66,13 @@ class LastUpdateFile(jvmName: String) {
 			?: archiveChecksum
 			?: ""
 		).joinToString("\n")
-		updatedFile.writeText(text)
+		file.writeText(text)
 	}
 
 	companion object {
+		@JvmStatic
+		val FILE_EXTENSION = ".last_update"
+
 		@JvmStatic
 		private val DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")
 	}

@@ -7,16 +7,21 @@ import io.kotlintest.matchers.file.startWithPath
 import io.kotlintest.matchers.string.containIgnoringCase
 import io.kotlintest.should
 import io.kotlintest.shouldBe
+import io.kotlintest.tables.row
 import mu.KotlinLogging
-import org.apache.commons.lang3.SystemUtils
 import org.junit.rules.TemporaryFolder
 import ru.itbasis.jvmwrapper.core.AbstractIntegrationTests
+import ru.itbasis.jvmwrapper.core.downloader.downloader
 import ru.itbasis.jvmwrapper.core.jvm.Jvm
+import ru.itbasis.jvmwrapper.core.jvm.fixFromMac
 import ru.itbasis.jvmwrapper.core.jvm.toJvmType
 import ru.itbasis.jvmwrapper.core.jvm.toJvmVendor
+import ru.itbasis.jvmwrapper.core.unarchiver.UnarchiverFactory
+import samples.JvmVersionRow
+import samples.asJvmVersionRow
+import samples.jvmVersionSample__openjdk_jdk_11
+import samples.jvmVersionSample__openjdk_jdk_11_0_1
 import java.io.File
-import java.nio.charset.Charset
-import java.util.concurrent.TimeUnit
 
 internal class JvmWrapperTest : AbstractIntegrationTests() {
 	override val logger = KotlinLogging.logger {}
@@ -39,7 +44,7 @@ internal class JvmWrapperTest : AbstractIntegrationTests() {
 		logger.info { "temporaryFolder: ${temporaryFolder.root}" }
 		logger.info { "vendor: $vendor, version: $version" }
 
-		JVMW_HOME_DIR.deleteRecursively()
+//		JVMW_HOME_DIR.deleteRecursively()
 		temporaryFolder.root.listFiles().forEach {
 			it.deleteRecursively()
 		}
@@ -57,31 +62,73 @@ internal class JvmWrapperTest : AbstractIntegrationTests() {
 		File(System.getProperty("user.dir")).parentFile.resolve(SCRIPT_FILE_NAME).copyTo(File(workingDir, SCRIPT_FILE_NAME))
 	}
 
+	private fun buildPreviousVersion(jvmVersionSample: JvmVersionRow): Jvm {
+		val version = jvmVersionSample.version
+		val vendor = jvmVersionSample.vendor
+		val type = jvmVersionSample.type
+
+		prepareTest(vendor, version)
+
+		logger.info { "version: $version" }
+		val jvm = Jvm(vendor = vendor.toJvmVendor(), type = type.toJvmType(), version = version)
+		logger.info { "jvm: $jvm" }
+		val downloader = jvm.downloader()
+
+		val jvmHomePath = File(JVMW_HOME_DIR, jvm.toString())
+
+		val tempFile = downloader.downloadToTempFile(
+			remoteArchiveFile = jvmVersionSample.remoteFiles.getValue(jvm.os), archiveFileExtension = jvm.archiveFileExtension
+		)
+		UnarchiverFactory.getInstance(sourceFile = tempFile, targetDir = jvmHomePath).unpack()
+
+		val actualFullVersion = getFullVersion(jvmHomePath = jvmHomePath.toPath().fixFromMac())
+		actualFullVersion shouldBe containIgnoringCase(""" full version "${jvmVersionSample.fullVersion}"""")
+
+		return jvm
+	}
+
+	private fun testJvmVersion(vendor: String, type: String, version: String, versionMajor: Int, fullVersion: String) {
+		prepareTest(vendor, version)
+
+		val jvm = Jvm(
+			vendor = vendor.toJvmVendor(), type = type.toJvmType(), version = version
+		)
+		val jvmWrapper = JvmWrapper(
+			workingDir = temporaryFolder.root, stepListener = stepListener, downloadProcessListener = downloadProcessListener
+		)
+		val jvmHomeDir = jvmWrapper.jvmHomeDir
+		logger.info { "jvmHomeDir: $jvmHomeDir" }
+		jvmHomeDir should startWithPath(JVMW_HOME_DIR.resolve(jvm.toString()))
+
+		val actualFullVersion = getFullVersion(jvmHomePath = jvmHomeDir.toPath())
+		actualFullVersion shouldBe containIgnoringCase(""" full version "$fullVersion"""")
+	}
+
 	init {
-		test("test all versions").config(enabled = SystemUtils.IS_OS_LINUX || SystemUtils.IS_OS_MAC) {
+		test("update jvm").config(enabled = isNixOS) {
+			forall(
+				row(jvmVersionSample__openjdk_jdk_11.asJvmVersionRow().first(), jvmVersionSample__openjdk_jdk_11_0_1)
+			) { previousJvmVersionSample, (vendor, type, versions, fullVersion, _, versionMajor) ->
+				val previousJvmVersion = buildPreviousVersion(previousJvmVersionSample)
+				val lastUpdateFile = LastUpdateFile(jvm = previousJvmVersion).file
+				lastUpdateFile.delete()
+				File(lastUpdateFile.absolutePath.substringBefore(LastUpdateFile.FILE_EXTENSION) + ".${previousJvmVersion.archiveFileExtension}").takeIf { it.exists() }
+					?.delete()
+
+				testJvmVersion(
+					vendor = vendor, type = type, version = versions.first(), versionMajor = versionMajor, fullVersion = fullVersion
+				)
+			}
+		}
+
+		test("test all versions").config(enabled = isNixOS) {
+			//		test("test all versions").config(enabled = false) {
 			forall(
 				rows = *jvmAllRows
-			) { (vendor, type, version, fullVersion, _, _, _, _, _) ->
-				prepareTest(vendor, version)
-
-				val jvm = Jvm(
-					vendor = vendor.toJvmVendor(), type = type.toJvmType(), version = version
+			) { (vendor, type, version, fullVersion, _, versionMajor) ->
+				testJvmVersion(
+					vendor = vendor, type = type, version = version, versionMajor = versionMajor, fullVersion = fullVersion
 				)
-				val jvmWrapper = JvmWrapper(
-					workingDir = temporaryFolder.root, stepListener = stepListener, downloadProcessListener = downloadProcessListener
-				)
-				val jvmHomeDir = jvmWrapper.jvmHomeDir
-				logger.info { "jvmHomeDir: $jvmHomeDir" }
-				jvmHomeDir should startWithPath(JVMW_HOME_DIR.resolve(jvm.toString()))
-
-				val jvmBinDir = jvmHomeDir.resolve("bin")
-				logger.info { "jvmBinDir: $jvmBinDir" }
-				jvmBinDir.exists() shouldBe true
-
-				val process = ProcessBuilder(File(jvmBinDir, "java").absolutePath, "-fullversion").start()
-				process.waitFor(5, TimeUnit.SECONDS)
-				val actualFullVersion = process.errorStream.readBytes().toString(Charset.defaultCharset()).trim()
-				actualFullVersion shouldBe containIgnoringCase(""" full version "$fullVersion"""")
 			}
 		}
 	}

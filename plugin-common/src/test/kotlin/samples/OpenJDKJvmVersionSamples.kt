@@ -35,6 +35,30 @@ var jvmVersionSample__openjdk_jdk_11 = JvmVersionSample(
 	vendor = "openjdk",
 	type = "jdk",
 	versions = listOf("11"),
+	fullVersion = "11+28",
+	cleanVersion = "11",
+	versionMajor = 11,
+	versionUpdate = null,
+	downloadPageUrl = "https://jdk.java.net/11/",
+	downloadArchiveUrlPart = "",
+	remoteFiles = mapOf(
+		"osx" to RemoteArchiveFile(
+			url = "https://download.java.net/java/ga/jdk11/openjdk-11_osx-x64_bin.tar.gz",
+			checksum = "6b969d2df6a9758d9458f5ba47939250e848dfba8b49e41c935cf210606b6d38"
+		), "linux" to RemoteArchiveFile(
+		url = "https://download.java.net/java/ga/jdk11/openjdk-11_linux-x64_bin.tar.gz",
+		checksum = "3784cfc4670f0d4c5482604c7c513beb1a92b005f569df9bf100e8bef6610f2e"
+	), "windows" to RemoteArchiveFile(
+		url = "https://download.java.net/java/ga/jdk11/openjdk-11_windows-x64_bin.zip",
+		checksum = "fde3b28ca31b86a889c37528f17411cd0b9651beb6fa76cac89a223417910f4b"
+	)
+	)
+)
+
+var jvmVersionSample__openjdk_jdk_11_0_1 = JvmVersionSample(
+	vendor = "openjdk",
+	type = "jdk",
+	versions = listOf("11"),
 	fullVersion = "11.0.1+13",
 	cleanVersion = "11.0.1",
 	versionMajor = 11,
@@ -60,5 +84,9 @@ val OpenJDKJvmVersionEarlyAccessSamples = listOf(
 )
 
 val OpenJDKJvmVersionLatestSamples = listOf(
+	jvmVersionSample__openjdk_jdk_11_0_1
+)
+
+val OpenJDKJvmVersionArchiveSamples = listOf(
 	jvmVersionSample__openjdk_jdk_11
 )

@@ -6,8 +6,6 @@ import io.kotlintest.matchers.file.shouldNotBeEmpty
 import io.kotlintest.matchers.file.shouldNotBeNonEmptyDirectory
 import io.kotlintest.shouldBe
 import mu.KotlinLogging
-import org.apache.commons.lang3.SystemUtils.IS_OS_LINUX
-import org.apache.commons.lang3.SystemUtils.IS_OS_MAC
 import ru.itbasis.jvmwrapper.core.AbstractIntegrationTests
 import ru.itbasis.jvmwrapper.core.downloader.downloader
 import ru.itbasis.jvmwrapper.core.jvm.Jvm
@@ -19,7 +17,7 @@ internal class UnarchiverIntegrationTest : AbstractIntegrationTests() {
 	override val logger = KotlinLogging.logger {}
 
 	init {
-		test("unpack").config(enabled = IS_OS_LINUX || IS_OS_MAC) {
+		test("unpack").config(enabled = isNixOS) {
 			forall(
 				rows = *jvmFirstRows
 			) { (vendor, type, version, _, _, _, _, _, _) ->

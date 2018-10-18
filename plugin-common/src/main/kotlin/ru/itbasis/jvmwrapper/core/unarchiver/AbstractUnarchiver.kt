@@ -16,6 +16,11 @@ abstract class AbstractUnarchiver(
 
 	protected val tempDir: File = createTempDir(suffix = sourceFileName)
 
+	@Suppress("unused")
+	protected fun finalize() {
+		tempDir.takeIf { it.exists() }?.deleteRecursively()
+	}
+
 	fun unpack() {
 		try {
 			"Running unpack the archive: $sourceFile".step(stepListener) {
@@ -37,6 +42,9 @@ abstract class AbstractUnarchiver(
 	protected abstract fun doUnpack()
 
 	protected open fun doMovingToDest() {
+		targetDir.parentFile.takeUnless { it.isDirectory }?.mkdirs()
+		targetDir.takeIf { it.isDirectory }?.deleteRecursively()
+
 		val unpackDir = tempDir.listFiles().first()
 		val macContentsDirectory = unpackDir.resolve("Contents")
 		if (macContentsDirectory.isDirectory) {

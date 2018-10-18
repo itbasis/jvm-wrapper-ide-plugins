@@ -47,7 +47,7 @@ class JvmWrapper(
 
 	val sdkName: String by lazy { "$SCRIPT_FILE_NAME-$jvmName" }
 
-	private val lastUpdateFile = LastUpdateFile(jvmName)
+	private val lastUpdateFile by lazy { LastUpdateFile(jvm = jvm) }
 
 	val jvmHomeDir: File = JVMW_HOME_DIR.resolve(jvmName).run {
 		checkAndDownloadJvm(this)

@@ -1,6 +1,6 @@
 package ru.itbasis.jvmwrapper.core.jvm
 
-import asRows
+import samples.asKotlinTestRows
 import io.kotlintest.data.forall
 import io.kotlintest.matchers.string.beUpperCase
 import io.kotlintest.should
@@ -12,7 +12,7 @@ internal class JvmTest : FunSpec() {
 	init {
 		test("version") {
 			forall(
-				rows = *JvmVersionSamples.asRows()
+				rows = *JvmVersionSamples.asKotlinTestRows()
 			) { (vendor, type, version, _, cleanVersion, versionMajor, versionUpdate, _, _) ->
 				val actual = Jvm(vendor = vendor.toJvmVendor(), type = type.toJvmType(), version = version)
 
