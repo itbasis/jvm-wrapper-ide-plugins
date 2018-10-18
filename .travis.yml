@@ -2,7 +2,7 @@ sudo: required
 language: generic
 
 os:
-  - osx
+#  - osx
   - linux
 
 before_script: ./jvmw upgrade

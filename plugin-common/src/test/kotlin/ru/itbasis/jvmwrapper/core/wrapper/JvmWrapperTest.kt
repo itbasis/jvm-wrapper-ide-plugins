@@ -93,11 +93,13 @@ internal class JvmWrapperTest : AbstractIntegrationTests() {
 		return jvm
 	}
 
-	private fun testJvmVersion(vendor: String, type: String, version: String, versionMajor: Int, fullVersion: String) {
-		prepareTest(vendor, version)
+	private fun testJvmVersion(jvmVersionRow: JvmVersionRow) {
+		logger.info("jvmVersionRow=$jvmVersionRow")
+
+		prepareTest(jvmVersionRow.vendor, jvmVersionRow.version)
 
 		val jvm = Jvm(
-			vendor = vendor.toJvmVendor(), type = type.toJvmType(), version = version
+			vendor = jvmVersionRow.vendor.toJvmVendor(), type = jvmVersionRow.type.toJvmType(), version = jvmVersionRow.version
 		)
 		val jvmWrapper = JvmWrapper(
 			workingDir = temporaryFolder.root, stepListener = stepListener, downloadProcessListener = downloadProcessListener
@@ -107,7 +109,7 @@ internal class JvmWrapperTest : AbstractIntegrationTests() {
 		jvmHomeDir should startWithPath(JVMW_HOME_DIR.resolve(jvm.toString()))
 
 		val actualFullVersion = getFullVersion(jvmHomePath = jvmHomeDir.toPath())
-		actualFullVersion shouldBe containIgnoringCase(""" full version "$fullVersion"""")
+		actualFullVersion shouldBe containIgnoringCase(""" full version "${jvmVersionRow.fullVersion}"""")
 	}
 
 	init {
@@ -121,13 +123,7 @@ internal class JvmWrapperTest : AbstractIntegrationTests() {
 				File(lastUpdateFile.absolutePath.substringBefore(LastUpdateFile.FILE_EXTENSION) + ".${previousJvmVersion.archiveFileExtension}").takeIf { it.exists() }
 					?.delete()
 
-				testJvmVersion(
-					vendor = jvmVersionSample.vendor,
-					type = jvmVersionSample.type,
-					version = jvmVersionSample.version,
-					versionMajor = jvmVersionSample.versionMajor,
-					fullVersion = jvmVersionSample.fullVersion
-				)
+				testJvmVersion(jvmVersionRow = jvmVersionSample)
 			}
 		}
 
@@ -135,10 +131,8 @@ internal class JvmWrapperTest : AbstractIntegrationTests() {
 			//		test("test all versions").config(enabled = false) {
 			forall(
 				rows = *jvmAllRows
-			) { (vendor, type, version, fullVersion, _, versionMajor) ->
-				testJvmVersion(
-					vendor = vendor, type = type, version = version, versionMajor = versionMajor, fullVersion = fullVersion
-				)
+			) { jvmVersionRow ->
+				testJvmVersion(jvmVersionRow = jvmVersionRow)
 			}
 		}
 	}
