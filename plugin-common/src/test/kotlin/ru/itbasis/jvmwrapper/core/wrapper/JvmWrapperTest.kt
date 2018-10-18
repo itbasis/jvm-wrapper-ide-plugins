@@ -1,3 +1,5 @@
+@file:Suppress("Destructure")
+
 package ru.itbasis.jvmwrapper.core.wrapper
 
 import io.kotlintest.Description
@@ -107,8 +109,8 @@ internal class JvmWrapperTest : AbstractIntegrationTests() {
 	init {
 		test("update jvm").config(enabled = isNixOS) {
 			forall(
-				row(jvmVersionSample__openjdk_jdk_11.asJvmVersionRow().first(), jvmVersionSample__openjdk_jdk_11_0_1)
-			) { previousJvmVersionSample, (vendor, type, versions, fullVersion, _, versionMajor) ->
+				row(jvmVersionSample__openjdk_jdk_11.asJvmVersionRow().first(), jvmVersionSample__openjdk_jdk_11_0_1.asJvmVersionRow().first())
+			) { previousJvmVersionSample, jvmVersionSample ->
 				val previousJvmVersion = buildPreviousVersion(previousJvmVersionSample)
 				val lastUpdateFile = LastUpdateFile(jvm = previousJvmVersion).file
 				lastUpdateFile.delete()
@@ -116,7 +118,11 @@ internal class JvmWrapperTest : AbstractIntegrationTests() {
 					?.delete()
 
 				testJvmVersion(
-					vendor = vendor, type = type, version = versions.first(), versionMajor = versionMajor, fullVersion = fullVersion
+					vendor = jvmVersionSample.vendor,
+					type = jvmVersionSample.type,
+					version = jvmVersionSample.version,
+					versionMajor = jvmVersionSample.versionMajor,
+					fullVersion = jvmVersionSample.fullVersion
 				)
 			}
 		}

@@ -22,7 +22,7 @@ val JvmVersionLatestSamples = listOf(
 ).flatten()
 
 val JvmVersionArchiveSamples = listOf(
-	OpenJDKJvmVersionArchiveSamples, OracleJvmVersionArchiveSamples
+	OracleJvmVersionArchiveSamples
 ).flatten()
 
 val JvmVersionEarlyAccessSamples = listOf(
