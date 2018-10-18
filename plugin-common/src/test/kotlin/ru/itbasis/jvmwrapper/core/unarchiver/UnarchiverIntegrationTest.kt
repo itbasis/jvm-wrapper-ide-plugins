@@ -1,6 +1,5 @@
 package ru.itbasis.jvmwrapper.core.unarchiver
 
-import asRows
 import io.kotlintest.data.forall
 import io.kotlintest.matchers.file.shouldBeNonEmptyDirectory
 import io.kotlintest.matchers.file.shouldNotBeEmpty
@@ -14,26 +13,15 @@ import ru.itbasis.jvmwrapper.core.downloader.downloader
 import ru.itbasis.jvmwrapper.core.jvm.Jvm
 import ru.itbasis.jvmwrapper.core.jvm.toJvmType
 import ru.itbasis.jvmwrapper.core.jvm.toJvmVendor
-import samples.OpenJDKJvmVersionEarlyAccessSamples
-import samples.OpenJDKJvmVersionLatestSamples
-import samples.OracleJvmVersionArchiveSamples
-import samples.OracleJvmVersionLatestSamples
 import java.io.File
 
 internal class UnarchiverIntegrationTest : AbstractIntegrationTests() {
 	override val logger = KotlinLogging.logger {}
 
-	private val rows = listOf(
-		OpenJDKJvmVersionLatestSamples.firstOrNull(),
-		OracleJvmVersionLatestSamples.firstOrNull(),
-		OracleJvmVersionArchiveSamples.firstOrNull(),
-		OpenJDKJvmVersionEarlyAccessSamples.firstOrNull()
-	).asRows()
-
 	init {
 		test("unpack").config(enabled = IS_OS_LINUX || IS_OS_MAC) {
 			forall(
-				rows = *rows
+				rows = *jvmFirstRows
 			) { (vendor, type, version, _, _, _, _, _, _) ->
 				logger.info { "version: $version" }
 				val jvm = Jvm(vendor = vendor.toJvmVendor(), type = type.toJvmType(), version = version)

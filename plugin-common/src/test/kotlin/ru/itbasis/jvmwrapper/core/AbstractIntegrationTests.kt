@@ -1,13 +1,29 @@
 package ru.itbasis.jvmwrapper.core
 
+import asRows
 import io.kotlintest.specs.FunSpec
 import mu.KLogger
 import ru.itbasis.jvmwrapper.core.downloader.DownloadProcessListener
+import samples.OpenJDKJvmVersionEarlyAccessSamples
+import samples.OpenJDKJvmVersionLatestSamples
+import samples.OracleJvmVersionArchiveSamples
+import samples.OracleJvmVersionLatestSamples
 import java.math.BigDecimal
 import java.math.RoundingMode
 
 abstract class AbstractIntegrationTests : FunSpec() {
 	abstract val logger: KLogger
+
+	protected open val jvmAllRows = listOf(
+		OpenJDKJvmVersionLatestSamples, OracleJvmVersionLatestSamples, OracleJvmVersionArchiveSamples, OpenJDKJvmVersionEarlyAccessSamples
+	).flatten().asRows()
+
+	protected open val jvmFirstRows = listOf(
+		OpenJDKJvmVersionLatestSamples.firstOrNull(),
+		OracleJvmVersionLatestSamples.firstOrNull(),
+		OracleJvmVersionArchiveSamples.firstOrNull(),
+		OpenJDKJvmVersionEarlyAccessSamples.firstOrNull()
+	).asRows()
 
 	override fun isInstancePerTest(): Boolean {
 		return true

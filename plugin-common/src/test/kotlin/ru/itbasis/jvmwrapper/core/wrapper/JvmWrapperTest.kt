@@ -1,6 +1,5 @@
 package ru.itbasis.jvmwrapper.core.wrapper
 
-import asRows
 import io.kotlintest.Description
 import io.kotlintest.TestResult
 import io.kotlintest.data.forall
@@ -15,7 +14,6 @@ import ru.itbasis.jvmwrapper.core.AbstractIntegrationTests
 import ru.itbasis.jvmwrapper.core.jvm.Jvm
 import ru.itbasis.jvmwrapper.core.jvm.toJvmType
 import ru.itbasis.jvmwrapper.core.jvm.toJvmVendor
-import samples.JvmVersionSamples
 import java.io.File
 import java.nio.charset.Charset
 import java.util.concurrent.TimeUnit
@@ -54,8 +52,7 @@ internal class JvmWrapperTest : AbstractIntegrationTests() {
 	init {
 		test("test all versions").config(enabled = SystemUtils.IS_OS_LINUX || SystemUtils.IS_OS_MAC) {
 			forall(
-				rows = *JvmVersionSamples.asRows()
-//				rows = *OpenJDKJvmVersionLatestSamples.asRows()
+				rows = *jvmAllRows
 			) { (vendor, type, version, fullVersion, cleanVersion, _, _, _, _) ->
 				prepareTest(vendor, version)
 
@@ -75,7 +72,8 @@ internal class JvmWrapperTest : AbstractIntegrationTests() {
 
 				val process = ProcessBuilder(File(jvmBinDir, "java").absolutePath, "-fullversion").start()
 				process.waitFor(5, TimeUnit.SECONDS)
-				process.errorStream.readBytes().toString(Charset.defaultCharset()).trim() shouldBe containIgnoringCase(""" full version "$fullVersion"""")
+				val actualFullVersion = process.errorStream.readBytes().toString(Charset.defaultCharset()).trim()
+				actualFullVersion shouldBe containIgnoringCase(""" full version "$fullVersion"""")
 			}
 		}
 	}

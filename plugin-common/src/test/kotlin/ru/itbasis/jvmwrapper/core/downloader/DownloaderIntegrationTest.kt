@@ -1,6 +1,5 @@
 package ru.itbasis.jvmwrapper.core.downloader
 
-import asRows
 import io.kotlintest.data.forall
 import io.kotlintest.matchers.beGreaterThan
 import io.kotlintest.matchers.file.shouldNotBeEmpty
@@ -13,26 +12,15 @@ import ru.itbasis.jvmwrapper.core.AbstractIntegrationTests
 import ru.itbasis.jvmwrapper.core.jvm.Jvm
 import ru.itbasis.jvmwrapper.core.jvm.toJvmType
 import ru.itbasis.jvmwrapper.core.jvm.toJvmVendor
-import samples.OpenJDKJvmVersionEarlyAccessSamples
-import samples.OpenJDKJvmVersionLatestSamples
-import samples.OracleJvmVersionArchiveSamples
-import samples.OracleJvmVersionLatestSamples
 import java.io.File
 
 internal class DownloaderIntegrationTest : AbstractIntegrationTests() {
 	override val logger = KotlinLogging.logger {}
 
-	private val rows = listOf(
-		OpenJDKJvmVersionLatestSamples.firstOrNull(),
-		OracleJvmVersionLatestSamples.firstOrNull(),
-		OracleJvmVersionArchiveSamples.firstOrNull(),
-		OpenJDKJvmVersionEarlyAccessSamples.firstOrNull()
-	).asRows()
-
 	init {
 		test("resolve and download use downloadProcessListener").config(enabled = true) {
 			forall(
-				rows = *rows
+				rows = *jvmFirstRows
 			) { (vendor, type, version, _, _, _, _, _, downloadArchiveUrlPart) ->
 				logger.info { "version: $version" }
 				val jvm = Jvm(vendor = vendor.toJvmVendor(), type = type.toJvmType(), version = version)
@@ -55,7 +43,7 @@ internal class DownloaderIntegrationTest : AbstractIntegrationTests() {
 
 		test("resolve and download not use downloadProcessListener").config(enabled = true) {
 			forall(
-				rows = *rows
+				rows = *jvmFirstRows
 			) { (vendor, type, version, _, _, _, _, _, downloadArchiveUrlPart) ->
 				logger.info { "version: $version" }
 				val jvm = Jvm(vendor = vendor.toJvmVendor(), type = type.toJvmType(), version = version)
