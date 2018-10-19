@@ -66,6 +66,9 @@ class JvmWrapper(
 		val provider = DownloaderFactory.getInstance(jvm)
 		"check exists jvm home directory: $jvmHomeDir".step(stepListener) {
 			if (jvmHomeDir.isDirectory && !lastUpdateFile.isExpired()) {
+				if (wrapperProperties.debug!!) {
+					stepListener?.invoke("$jvmHomeDir is exists and not expired")
+				}
 				return
 			}
 
@@ -75,10 +78,13 @@ class JvmWrapper(
 				}
 			}
 			if (wrapperProperties.debug!!) {
-				println("remoteArchiveFile=$remoteArchiveFile")
+				stepListener?.invoke("remoteArchiveFile=$remoteArchiveFile")
 			}
 			if (lastUpdateFile.equals(remoteArchiveFile = remoteArchiveFile)) {
 				lastUpdateFile.update(remoteArchiveFile = remoteArchiveFile)
+				if (wrapperProperties.debug!!) {
+					stepListener?.invoke("The remote file is equal to the previously downloaded file: $remoteArchiveFile")
+				}
 				return
 			}
 			val archiveFile = "download remote archive: ${remoteArchiveFile.url}".step(stepListener) {
@@ -87,7 +93,7 @@ class JvmWrapper(
 				}
 			}
 			if (wrapperProperties.debug!!) {
-				println("archiveFile=$archiveFile")
+				stepListener?.invoke("archiveFile=$archiveFile")
 			}
 			"unpack JRE archive file".step(stepListener) {
 				UnarchiverFactory.getInstance(archiveFile, jvmHomeDir, stepListener).unpack()
