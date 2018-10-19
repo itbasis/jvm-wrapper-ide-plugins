@@ -7,7 +7,7 @@ import com.intellij.openapi.projectRoots.impl.JavaHomeFinder
 import com.intellij.openapi.projectRoots.impl.ProjectJdkImpl
 import ru.itbasis.jvmwrapper.core.jvm.Jvm
 import ru.itbasis.jvmwrapper.core.jvm.toJvm
-import ru.itbasis.jvmwrapper.core.wrapper.JVMW_HOME_DIR
+import ru.itbasis.jvmwrapper.core.wrapper.DEFAULT_JVMW_HOME_DIR
 import ru.itbasis.jvmwrapper.core.wrapper.SCRIPT_FILE_NAME
 import java.io.File
 import java.nio.file.Paths
@@ -28,7 +28,7 @@ class ProjectSdkScannerApplicationService(
 			dir.listFiles().first().toPath()
 		}
 		                   ?: emptyList()
-		val jvmwJvmDirs = JVMW_HOME_DIR.takeIf { it.isDirectory }?.listFiles { dir ->
+		val jvmwJvmDirs = DEFAULT_JVMW_HOME_DIR.takeIf { it.isDirectory }?.listFiles { dir ->
 			dir?.isDirectory
 			?: false
 		}?.map { dir ->

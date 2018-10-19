@@ -2,8 +2,6 @@
 
 package ru.itbasis.jvmwrapper.core.wrapper
 
-import io.kotlintest.Description
-import io.kotlintest.TestResult
 import io.kotlintest.data.forall
 import io.kotlintest.matchers.file.startWithPath
 import io.kotlintest.matchers.string.containIgnoringCase
@@ -11,17 +9,10 @@ import io.kotlintest.should
 import io.kotlintest.shouldBe
 import io.kotlintest.tables.row
 import mu.KotlinLogging
-import org.junit.rules.TemporaryFolder
 import ru.itbasis.jvmwrapper.core.AbstractIntegrationTests
-import ru.itbasis.jvmwrapper.core.downloader.downloader
 import ru.itbasis.jvmwrapper.core.jvm.Jvm
-import ru.itbasis.jvmwrapper.core.jvm.fixFromMac
 import ru.itbasis.jvmwrapper.core.jvm.toJvmType
 import ru.itbasis.jvmwrapper.core.jvm.toJvmVendor
-import ru.itbasis.jvmwrapper.core.unarchiver.UnarchiverFactory
-import ru.itbasis.jvmwrapper.core.wrapper.JvmWrapperPropertyKeys.JVMW_DEBUG
-import ru.itbasis.jvmwrapper.core.wrapper.JvmWrapperPropertyKeys.JVM_VENDOR
-import ru.itbasis.jvmwrapper.core.wrapper.JvmWrapperPropertyKeys.JVM_VERSION
 import samples.JvmVersionRow
 import samples.asJvmVersionRow
 import samples.jvmVersionSample__openjdk_jdk_11
@@ -33,64 +24,6 @@ internal class JvmWrapperTest : AbstractIntegrationTests() {
 
 	override fun isInstancePerTest(): Boolean {
 		return false
-	}
-
-	private var temporaryFolder = TemporaryFolder()
-
-	override fun beforeTest(description: Description) {
-		temporaryFolder.create()
-	}
-
-	override fun afterTest(description: Description, result: TestResult) {
-		temporaryFolder.delete()
-	}
-
-	private fun prepareTest(vendor: String, version: String) {
-		logger.info { "temporaryFolder: ${temporaryFolder.root}" }
-		logger.info { "vendor: $vendor, version: $version" }
-
-//		JVMW_HOME_DIR.deleteRecursively()
-		temporaryFolder.root.listFiles().forEach {
-			it.deleteRecursively()
-		}
-
-		val propertiesFile = temporaryFolder.newFile("jvmw.properties").apply {
-			mapOf(JVMW_DEBUG to true, JVM_VERSION to version, JVM_VENDOR to vendor).forEach { key, value ->
-				appendText("${key.name}=$value\n")
-			}
-		}
-		logger.info { "--- properties file :: begin ---" }
-		logger.info { propertiesFile.readText() }
-		logger.info { "--- properties file :: end ---" }
-		val workingDir = propertiesFile.parentFile
-		workingDir.absolutePath shouldBe temporaryFolder.root.absolutePath
-
-		File(System.getProperty("user.dir")).parentFile.resolve(SCRIPT_FILE_NAME).copyTo(File(workingDir, SCRIPT_FILE_NAME))
-	}
-
-	private fun buildPreviousVersion(jvmVersionSample: JvmVersionRow): Jvm {
-		val version = jvmVersionSample.version
-		val vendor = jvmVersionSample.vendor
-		val type = jvmVersionSample.type
-
-		prepareTest(vendor, version)
-
-		logger.info { "version: $version" }
-		val jvm = Jvm(vendor = vendor.toJvmVendor(), type = type.toJvmType(), version = version)
-		logger.info { "jvm: $jvm" }
-		val downloader = jvm.downloader()
-
-		val jvmHomePath = File(JVMW_HOME_DIR, jvm.toString())
-
-		val tempFile = downloader.downloadToTempFile(
-			remoteArchiveFile = jvmVersionSample.remoteFiles.getValue(jvm.os), archiveFileExtension = jvm.archiveFileExtension
-		)
-		UnarchiverFactory.getInstance(sourceFile = tempFile, targetDir = jvmHomePath).unpack()
-
-		val actualFullVersion = getFullVersion(jvmHomePath = jvmHomePath.toPath().fixFromMac())
-		actualFullVersion shouldBe containIgnoringCase(""" full version "${jvmVersionSample.fullVersion}"""")
-
-		return jvm
 	}
 
 	private fun testJvmVersion(jvmVersionRow: JvmVersionRow) {
@@ -106,7 +39,7 @@ internal class JvmWrapperTest : AbstractIntegrationTests() {
 		)
 		val jvmHomeDir = jvmWrapper.jvmHomeDir
 		logger.info { "jvmHomeDir: $jvmHomeDir" }
-		jvmHomeDir should startWithPath(JVMW_HOME_DIR.resolve(jvm.toString()))
+		jvmHomeDir should startWithPath(temporaryFolder.root.resolve(jvm.toString()))
 
 		val actualFullVersion = getFullVersion(jvmHomePath = jvmHomeDir.toPath())
 		actualFullVersion shouldBe containIgnoringCase(""" full version "${jvmVersionRow.fullVersion}"""")

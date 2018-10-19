@@ -8,10 +8,10 @@ import java.time.LocalDateTime
 import java.time.LocalDateTime.now
 import java.time.format.DateTimeFormatter
 
-class LastUpdateFile(jvm: Jvm) {
+class LastUpdateFile(jvm: Jvm, private val jvmwHomeDir: File = DEFAULT_JVMW_HOME_DIR) {
 	val file: File by lazy {
 		val fileName = jvm.toString().toLowerCase() + FILE_EXTENSION
-		return@lazy File(JVMW_HOME_DIR, fileName)
+		return@lazy File(jvmwHomeDir, fileName)
 	}
 
 	private var updated: LocalDateTime = now().minusDays(1)

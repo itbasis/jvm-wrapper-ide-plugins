@@ -14,12 +14,13 @@ import java.io.File
 import java.net.URL
 
 const val SCRIPT_FILE_NAME = "jvmw"
-val JVMW_HOME_DIR: File = File(SystemUtils.USER_HOME, ".jvm")
+val DEFAULT_JVMW_HOME_DIR: File = File(SystemUtils.USER_HOME, ".jvm")
 
 class JvmWrapper(
 	private val workingDir: File,
 	private val downloadProcessListener: DownloadProcessListener? = null,
-	private val stepListener: ProcessStepListener? = null
+	private val stepListener: ProcessStepListener? = null,
+	private val jvmwHomeDir: File = DEFAULT_JVMW_HOME_DIR
 ) {
 	init {
 		require(workingDir.isDirectory) {
@@ -31,7 +32,7 @@ class JvmWrapper(
 		"Reading properties from the working directory".step(stepListener) { append(workingDir.resolve(JVMW_PROPERTY_FILE_NAME)) }
 		"Reading properties from the shared directory".step(stepListener) {
 			append(
-				JVMW_HOME_DIR.resolve(
+				jvmwHomeDir.resolve(
 					JVMW_PROPERTY_FILE_NAME
 				)
 			)
@@ -49,9 +50,11 @@ class JvmWrapper(
 
 	val sdkName: String by lazy { "$SCRIPT_FILE_NAME-$jvmName" }
 
-	private val lastUpdateFile by lazy { LastUpdateFile(jvm = jvm) }
+	private val lastUpdateFile by lazy {
+		LastUpdateFile(jvm = jvm, jvmwHomeDir = jvmwHomeDir)
+	}
 
-	val jvmHomeDir: File = JVMW_HOME_DIR.resolve(jvmName).run {
+	val jvmHomeDir: File = jvmwHomeDir.resolve(jvmName).run {
 		checkAndDownloadJvm(this)
 		return@run this
 	}.run {
@@ -88,7 +91,7 @@ class JvmWrapper(
 				return
 			}
 			val archiveFile = "download remote archive: ${remoteArchiveFile.url}".step(stepListener) {
-				File(JVMW_HOME_DIR, "$jvmName.${jvm.archiveFileExtension}").apply {
+				File(jvmwHomeDir, "$jvmName.${jvm.archiveFileExtension}").apply {
 					provider.download(target = this, downloadProcessListener = downloadProcessListener)
 				}
 			}
