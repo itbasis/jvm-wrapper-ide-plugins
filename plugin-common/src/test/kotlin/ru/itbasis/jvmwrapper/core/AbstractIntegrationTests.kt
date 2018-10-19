@@ -2,7 +2,10 @@ package ru.itbasis.jvmwrapper.core
 
 import io.kotlintest.Description
 import io.kotlintest.TestResult
+import io.kotlintest.TestStatus
+import io.kotlintest.matchers.file.startWithPath
 import io.kotlintest.matchers.string.containIgnoringCase
+import io.kotlintest.should
 import io.kotlintest.shouldBe
 import io.kotlintest.specs.FunSpec
 import mu.KLogger
@@ -17,15 +20,14 @@ import ru.itbasis.jvmwrapper.core.jvm.fixFromMac
 import ru.itbasis.jvmwrapper.core.jvm.toJvmType
 import ru.itbasis.jvmwrapper.core.jvm.toJvmVendor
 import ru.itbasis.jvmwrapper.core.unarchiver.UnarchiverFactory
+import ru.itbasis.jvmwrapper.core.wrapper.JVMW_PROPERTY_FILE_NAME
 import ru.itbasis.jvmwrapper.core.wrapper.JvmWrapperPropertyKeys
-import ru.itbasis.jvmwrapper.core.wrapper.SCRIPT_FILE_NAME
 import samples.JvmVersionRow
 import samples.OpenJDKJvmVersionEarlyAccessSamples
 import samples.OpenJDKJvmVersionLatestSamples
 import samples.OracleJvmVersionArchiveSamples
 import samples.OracleJvmVersionLatestSamples
 import samples.asKotlinTestRows
-import samples.jvmVersionSample__openjdk_jdk_11
 import java.io.File
 import java.math.BigDecimal
 import java.math.RoundingMode
@@ -36,12 +38,12 @@ import java.util.concurrent.TimeUnit
 abstract class AbstractIntegrationTests : FunSpec() {
 	abstract val logger: KLogger
 
+	//	protected open val jvmAllRows = listOf(
+//		jvmVersionSample__openjdk_jdk_11_0_1
+//	).asKotlinTestRows()
 	protected open val jvmAllRows = listOf(
-		jvmVersionSample__openjdk_jdk_11
-	).asKotlinTestRows()
-//	protected open val jvmAllRows = listOf(
-//		OpenJDKJvmVersionLatestSamples, OracleJvmVersionLatestSamples, OracleJvmVersionArchiveSamples, OpenJDKJvmVersionEarlyAccessSamples
-//	).flatten().samples.asKotlinTestRows()
+		OpenJDKJvmVersionLatestSamples, OracleJvmVersionLatestSamples, OracleJvmVersionArchiveSamples, OpenJDKJvmVersionEarlyAccessSamples
+	).flatten().asKotlinTestRows()
 
 	protected open val jvmFirstRows = listOf(
 		OpenJDKJvmVersionLatestSamples.firstOrNull(),
@@ -71,12 +73,20 @@ abstract class AbstractIntegrationTests : FunSpec() {
 	protected var temporaryFolder = TemporaryFolder()
 		private set
 
+	protected fun temporaryJvmWrapperFolder(): File {
+		val folderName = ".jvmw"
+		return File(temporaryFolder.root, folderName).takeIf { it.isDirectory }
+		       ?: temporaryFolder.newFolder(folderName)
+	}
+
 	override fun beforeTest(description: Description) {
 		temporaryFolder.create()
 	}
 
 	override fun afterTest(description: Description, result: TestResult) {
-		temporaryFolder.delete()
+		if (result.status == TestStatus.Success) {
+			temporaryFolder.delete()
+		}
 	}
 
 	protected fun getFullVersion(jvmHomePath: Path): String {
@@ -93,11 +103,8 @@ abstract class AbstractIntegrationTests : FunSpec() {
 		logger.info { "temporaryFolder: ${temporaryFolder.root}" }
 		logger.info { "vendor: $vendor, version: $version" }
 
-		temporaryFolder.root.listFiles().forEach {
-			it.deleteRecursively()
-		}
-
-		val propertiesFile = temporaryFolder.newFile("jvmw.properties").apply {
+		File(temporaryFolder.root, JVMW_PROPERTY_FILE_NAME).takeIf { it.exists() }?.delete()
+		val propertiesFile = temporaryFolder.newFile(JVMW_PROPERTY_FILE_NAME).apply {
 			mapOf(
 				JvmWrapperPropertyKeys.JVMW_DEBUG to true,
 				JvmWrapperPropertyKeys.JVM_VERSION to version,
@@ -112,7 +119,7 @@ abstract class AbstractIntegrationTests : FunSpec() {
 		val workingDir = propertiesFile.parentFile
 		workingDir.absolutePath shouldBe temporaryFolder.root.absolutePath
 
-		File(System.getProperty("user.dir")).parentFile.resolve(SCRIPT_FILE_NAME).copyTo(File(workingDir, SCRIPT_FILE_NAME))
+//		File(System.getProperty("user.dir")).parentFile.resolve(SCRIPT_FILE_NAME).copyTo(File(workingDir, SCRIPT_FILE_NAME))
 	}
 
 	protected fun buildPreviousVersion(jvmVersionSample: JvmVersionRow): Jvm {
@@ -127,13 +134,14 @@ abstract class AbstractIntegrationTests : FunSpec() {
 		logger.info { "jvm: $jvm" }
 		val downloader = jvm.downloader()
 
-		val jvmHomePath = File(temporaryFolder.root, jvm.toString())
+		val jvmHomePath = File(temporaryJvmWrapperFolder(), jvm.toString())
 
 		val tempFile = downloader.downloadToTempFile(
 			remoteArchiveFile = jvmVersionSample.remoteFiles.getValue(jvm.os), archiveFileExtension = jvm.archiveFileExtension
 		)
 		UnarchiverFactory.getInstance(sourceFile = tempFile, targetDir = jvmHomePath).unpack()
 
+		jvmHomePath should startWithPath(temporaryJvmWrapperFolder().resolve(jvm.toString()))
 		val actualFullVersion = getFullVersion(jvmHomePath = jvmHomePath.toPath().fixFromMac())
 		actualFullVersion shouldBe containIgnoringCase(""" full version "${jvmVersionSample.fullVersion}"""")
 

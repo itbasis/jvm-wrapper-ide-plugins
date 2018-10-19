@@ -8,7 +8,7 @@ import java.time.LocalDateTime
 import java.time.LocalDateTime.now
 import java.time.format.DateTimeFormatter
 
-class LastUpdateFile(jvm: Jvm, private val jvmwHomeDir: File = DEFAULT_JVMW_HOME_DIR) {
+class LastUpdateFile(jvm: Jvm, private val jvmwHomeDir: File) {
 	val file: File by lazy {
 		val fileName = jvm.toString().toLowerCase() + FILE_EXTENSION
 		return@lazy File(jvmwHomeDir, fileName)

@@ -17,7 +17,6 @@ import samples.JvmVersionRow
 import samples.asJvmVersionRow
 import samples.jvmVersionSample__openjdk_jdk_11
 import samples.jvmVersionSample__openjdk_jdk_11_0_1
-import java.io.File
 
 internal class JvmWrapperTest : AbstractIntegrationTests() {
 	override val logger = KotlinLogging.logger {}
@@ -35,11 +34,14 @@ internal class JvmWrapperTest : AbstractIntegrationTests() {
 			vendor = jvmVersionRow.vendor.toJvmVendor(), type = jvmVersionRow.type.toJvmType(), version = jvmVersionRow.version
 		)
 		val jvmWrapper = JvmWrapper(
-			workingDir = temporaryFolder.root, stepListener = stepListener, downloadProcessListener = downloadProcessListener
+			jvmwHomeDir = temporaryJvmWrapperFolder(),
+			workingDir = temporaryFolder.root,
+			stepListener = stepListener,
+			downloadProcessListener = downloadProcessListener
 		)
 		val jvmHomeDir = jvmWrapper.jvmHomeDir
 		logger.info { "jvmHomeDir: $jvmHomeDir" }
-		jvmHomeDir should startWithPath(temporaryFolder.root.resolve(jvm.toString()))
+		jvmHomeDir should startWithPath(temporaryJvmWrapperFolder().resolve(jvm.toString()))
 
 		val actualFullVersion = getFullVersion(jvmHomePath = jvmHomeDir.toPath())
 		actualFullVersion shouldBe containIgnoringCase(""" full version "${jvmVersionRow.fullVersion}"""")
@@ -50,11 +52,8 @@ internal class JvmWrapperTest : AbstractIntegrationTests() {
 			forall(
 				row(jvmVersionSample__openjdk_jdk_11.asJvmVersionRow().first(), jvmVersionSample__openjdk_jdk_11_0_1.asJvmVersionRow().first())
 			) { previousJvmVersionSample, jvmVersionSample ->
-				val previousJvmVersion = buildPreviousVersion(previousJvmVersionSample)
-				val lastUpdateFile = LastUpdateFile(jvm = previousJvmVersion).file
-				lastUpdateFile.delete()
-				File(lastUpdateFile.absolutePath.substringBefore(LastUpdateFile.FILE_EXTENSION) + ".${previousJvmVersion.archiveFileExtension}").takeIf { it.exists() }
-					?.delete()
+				val previousJvm = buildPreviousVersion(previousJvmVersionSample)
+				LastUpdateFile(jvm = previousJvm, jvmwHomeDir = temporaryJvmWrapperFolder()).file.delete()
 
 				testJvmVersion(jvmVersionRow = jvmVersionSample)
 			}
