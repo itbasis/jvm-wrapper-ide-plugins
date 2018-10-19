@@ -1,6 +1,7 @@
 package ru.itbasis.plugins.intellij.jvmwrapper.services.application
 
 import com.intellij.openapi.projectRoots.JavaSdk
+import com.intellij.openapi.projectRoots.JdkUtil
 import com.intellij.openapi.projectRoots.ProjectJdkTable
 import com.intellij.openapi.projectRoots.SdkType
 import com.intellij.openapi.projectRoots.impl.JavaHomeFinder
@@ -18,17 +19,19 @@ class ProjectSdkScannerApplicationService(
 	private val javaSdk: JavaSdk
 ) : Runnable {
 	override fun run() {
-		val initJdkCount = projectJdkTable.allJdks.size
-
 		val defaultSystemJvm = JavaHomeFinder.suggestHomePaths().map { path -> Paths.get(path) }
 
-		val adoptOpenJdk = File("/usr/local/Cellar").takeIf { it.isDirectory }?.listFiles { _, name ->
+		val adoptOpenJdk = File("/usr/local/Cellar").takeIf {
+			it.isDirectory
+		}?.listFiles { _, name ->
 			name.startsWith("adoptopenjdk-openjdk")
 		}?.map { dir ->
 			dir.listFiles().first().toPath()
 		}
 		                   ?: emptyList()
-		val jvmwJvmDirs = DEFAULT_JVMW_HOME_DIR.takeIf { it.isDirectory }?.listFiles { dir ->
+		val jvmwJvmDirs = DEFAULT_JVMW_HOME_DIR.takeIf {
+			it.isDirectory
+		}?.listFiles { dir ->
 			dir?.isDirectory
 			?: false
 		}?.map { dir ->
@@ -56,12 +59,15 @@ class ProjectSdkScannerApplicationService(
 		projectJdkTable.getSdksOfType(javaSdk).map { it ->
 			it as ProjectJdkImpl
 		}.filter {
-			it.versionString != null
+			it.versionString != null && !it.homePath.isNullOrEmpty() && JdkUtil.checkForJdk(it.homePath!!)
 		}.forEach {
 			val jvmHomePath = it.homePath
 			val suggestSdkName = (it.sdkType as SdkType).suggestSdkName(it.sdkType.name, jvmHomePath)
-			m.getOrPut(suggestSdkName) { mutableListOf() }.add(jvmHomePath.toJvm())
+			m.getOrPut(suggestSdkName) {
+				mutableListOf()
+			}.add(jvmHomePath.toJvm())
 		}
+		println("m: ${m.keys}")
 		m.forEach { suggestSdkName, sdkList ->
 			sdkList.sortDescending()
 			sdkReceiverApplicationService.apply(sdkName = suggestSdkName, sdkPath = sdkList.first().path!!, overrideOnlyByName = true)
