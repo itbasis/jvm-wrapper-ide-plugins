@@ -66,9 +66,13 @@ class JvmWrapper(
 	}
 
 	private fun checkAndDownloadJvm(jvmHomeDir: File) {
+		var force = false
 		val provider = DownloaderFactory.getInstance(jvm)
 		"check exists jvm home directory: $jvmHomeDir".step(stepListener) {
-			if (jvmHomeDir.isDirectory && !lastUpdateFile.isExpired()) {
+			force = !jvmHomeDir.isDirectory || jvmHomeDir.listFiles().isEmpty()
+			stepListener?.invoke("force=$force")
+
+			if (!force && !lastUpdateFile.isExpired()) {
 				if (wrapperProperties.debug!!) {
 					stepListener?.invoke("$jvmHomeDir is exists and not expired")
 				}
@@ -83,7 +87,7 @@ class JvmWrapper(
 			if (wrapperProperties.debug!!) {
 				stepListener?.invoke("remoteArchiveFile=$remoteArchiveFile")
 			}
-			if (lastUpdateFile.equals(remoteArchiveFile = remoteArchiveFile)) {
+			if (!force && lastUpdateFile.equals(remoteArchiveFile = remoteArchiveFile)) {
 				lastUpdateFile.update(remoteArchiveFile = remoteArchiveFile)
 				if (wrapperProperties.debug!!) {
 					stepListener?.invoke("The remote file is equal to the previously downloaded file: $remoteArchiveFile")

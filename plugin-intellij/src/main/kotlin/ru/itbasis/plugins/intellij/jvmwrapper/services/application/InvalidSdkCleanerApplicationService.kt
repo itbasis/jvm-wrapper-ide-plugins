@@ -5,7 +5,6 @@ import com.intellij.openapi.application.WriteActionAware
 import com.intellij.openapi.projectRoots.JavaSdk
 import com.intellij.openapi.projectRoots.JdkUtil
 import com.intellij.openapi.projectRoots.ProjectJdkTable
-import java.io.File
 
 class InvalidSdkCleanerApplicationService(
 	private val application: Application, private val projectJdkTable: ProjectJdkTable, private val javaSdk: JavaSdk
@@ -13,7 +12,7 @@ class InvalidSdkCleanerApplicationService(
 	override fun run() {
 		application.runWriteAction {
 			projectJdkTable.getSdksOfType(javaSdk).filterNot { sdk ->
-				JdkUtil.checkForJdk(File(sdk.homePath))
+				!sdk.homePath.isNullOrEmpty() && JdkUtil.checkForJdk(sdk.homePath!!)
 			}.forEach { sdk ->
 				// TODO https://github.com/itbasis/jvm-wrapper-ide-plugins/issues/4
 				projectJdkTable.removeJdk(sdk)
