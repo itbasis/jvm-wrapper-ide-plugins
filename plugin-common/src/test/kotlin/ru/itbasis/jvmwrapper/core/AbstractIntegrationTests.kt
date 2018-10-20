@@ -38,9 +38,6 @@ import java.util.concurrent.TimeUnit
 abstract class AbstractIntegrationTests : FunSpec() {
 	abstract val logger: KLogger
 
-	//	protected open val jvmAllRows = listOf(
-//		jvmVersionSample__openjdk_jdk_11_0_1
-//	).asKotlinTestRows()
 	protected open val jvmAllRows = listOf(
 		OpenJDKJvmVersionLatestSamples, OracleJvmVersionLatestSamples, OracleJvmVersionArchiveSamples, OpenJDKJvmVersionEarlyAccessSamples
 	).flatten().asKotlinTestRows()
@@ -118,8 +115,6 @@ abstract class AbstractIntegrationTests : FunSpec() {
 		logger.info { "--- properties file :: end ---" }
 		val workingDir = propertiesFile.parentFile
 		workingDir.absolutePath shouldBe temporaryFolder.root.absolutePath
-
-//		File(System.getProperty("user.dir")).parentFile.resolve(SCRIPT_FILE_NAME).copyTo(File(workingDir, SCRIPT_FILE_NAME))
 	}
 
 	protected fun buildPreviousVersion(jvmVersionSample: JvmVersionRow): Jvm {
@@ -137,7 +132,7 @@ abstract class AbstractIntegrationTests : FunSpec() {
 		val jvmHomePath = File(temporaryJvmWrapperFolder(), jvm.toString())
 
 		val tempFile = downloader.downloadToTempFile(
-			remoteArchiveFile = jvmVersionSample.remoteFiles.getValue(jvm.os), archiveFileExtension = jvm.archiveFileExtension
+			remoteArchiveFile = jvmVersionSample.remoteFiles.getValue(jvm.os)
 		)
 		UnarchiverFactory.getInstance(sourceFile = tempFile, targetDir = jvmHomePath).unpack()
 
@@ -150,10 +145,10 @@ abstract class AbstractIntegrationTests : FunSpec() {
 
 	internal fun AbstractDownloader.downloadToTempFile(
 		remoteArchiveFile: RemoteArchiveFile,
-		downloadProcessListener: DownloadProcessListener? = this@AbstractIntegrationTests.downloadProcessListener,
-		archiveFileExtension: String
+		downloadProcessListener: DownloadProcessListener? = this@AbstractIntegrationTests.downloadProcessListener
 	): File {
-		val tempFile = File.createTempFile("tmp", ".$archiveFileExtension")
+
+		val tempFile = File.createTempFile("jvmw_", remoteArchiveFile.url.substringAfterLast("/"))
 		tempFile.deleteOnExit()
 		download(remoteArchiveFile = remoteArchiveFile, target = tempFile, downloadProcessListener = downloadProcessListener)
 		return tempFile
