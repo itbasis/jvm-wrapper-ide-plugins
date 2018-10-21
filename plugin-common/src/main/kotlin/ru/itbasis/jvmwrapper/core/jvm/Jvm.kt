@@ -1,5 +1,6 @@
 package ru.itbasis.jvmwrapper.core.jvm
 
+import mu.KotlinLogging
 import org.apache.commons.lang3.SystemUtils.IS_OS_MAC
 import org.apache.commons.lang3.SystemUtils.IS_OS_WINDOWS
 import ru.itbasis.jvmwrapper.core.jvm.JvmVendor.OPEN_JDK
@@ -19,6 +20,7 @@ data class Jvm(
 	val type: JvmType = JvmTypeDetector.detect(path!!.fixFromMac()),
 	val vendor: JvmVendor = JvmVendorDetector.detect(path!!.fixFromMac())
 ) : Comparable<Jvm> {
+	private val logger = KotlinLogging.logger {}
 
 	val major: Int
 		get() {
@@ -28,7 +30,7 @@ data class Jvm(
 				version.contains(".") -> version.replaceFirst("^1\\.".toRegex(), "").substringBefore(".")
 				else                  -> version
 			}.substringBefore("-ea").substringBefore("+")
-			println("major :: $version > $value")
+			logger.trace { "major :: $version > $value" }
 			return value.toIntOrNull()
 			       ?: throw IllegalArgumentException("I can not determine the major version of JVM for '$version'")
 		}
@@ -41,7 +43,7 @@ data class Jvm(
 				version.contains(".") -> /* 10.0.1 */ version.substringAfterLast(".")
 				else                  -> null
 			}?.substringBefore("+")
-			println("update :: $version > $value")
+			logger.trace { "update :: $version > $value" }
 			return value?.toIntOrNull()?.takeIf { it != 0 }
 		}
 

@@ -67,16 +67,18 @@ class JvmWrapper(
 	}
 
 	private fun checkAndDownloadJvm(jvmHomeDir: File) {
-		var force: Boolean = false
+		var force = false
 
 		val provider = DownloaderFactory.getInstance(jvm)
 		"check exists jvm home directory: $jvmHomeDir".step(stepListener) {
-			try {
-				force = JvmVersionDetector.detect(jvmHomeDir.toPath()) != jvm.version
-			} catch (e: Exception) {
-				force = true
+			"Check for forced JVM download".step(stepListener) {
+				force = try {
+					JvmVersionDetector.detect(jvmHomeDir.toPath()).isNotBlank()
+				} catch (e: IllegalArgumentException) {
+					true
+				}
+				stepListener?.invoke("force=$force")
 			}
-			stepListener?.invoke("force=$force")
 
 			if (!force && !lastUpdateFile.isExpired()) {
 				if (wrapperProperties.debug!!) {
