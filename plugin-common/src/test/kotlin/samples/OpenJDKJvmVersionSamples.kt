@@ -12,20 +12,21 @@ var jvmVersionSample__openjdk_jdk_12 = JvmVersionSample(
 	cleanVersion = "12",
 	versionMajor = 12,
 	versionUpdate = null,
+	versionEarlyAccess = true,
 	downloadPageUrl = "https://jdk.java.net/12/",
 	downloadArchiveUrlPart = "",
 	remoteFiles = mapOf(
 		"osx" to RemoteArchiveFile(
-			url = "https://download.java.net/java/early_access/jdk12/16/GPL/openjdk-12-ea+16_osx-x64_bin.tar.gz",
+			url = "https://download.java.net/java/early_access/jdk12/16/GPL/openjdk-12-versionEarlyAccess+16_osx-x64_bin.tar.gz",
 			checksum = "557e8259050ae9aa463dd8373d02e34deaae07db1b7fd3b9b7f16c81477e7bb7"
 		), "linux" to RemoteArchiveFile(
-		url = "https://download.java.net/java/early_access/jdk12/16/GPL/openjdk-12-ea+16_linux-x64_bin.tar.gz",
+		url = "https://download.java.net/java/early_access/jdk12/16/GPL/openjdk-12-versionEarlyAccess+16_linux-x64_bin.tar.gz",
 		checksum = "20ab4c21b20d0c823c5dcbf0bdb81bc9ab5c2a45954a80563ffd591b25b36038"
 	), "windows" to RemoteArchiveFile(
-		url = "https://download.java.net/java/early_access/jdk12/16/GPL/openjdk-12-ea+16_windows-x64_bin.zip",
+		url = "https://download.java.net/java/early_access/jdk12/16/GPL/openjdk-12-versionEarlyAccess+16_windows-x64_bin.zip",
 		checksum = "cd9cd3087d1c11912662870d62257c200eb82c407eb9d364d1ee86d65711c2b4"
 	), "alpine_linux" to RemoteArchiveFile(
-		url = "https://download.java.net/java/early_access/alpine/14/binaries/openjdk-12-ea+14_linux-x64-musl_bin.tar.gz",
+		url = "https://download.java.net/java/early_access/alpine/14/binaries/openjdk-12-versionEarlyAccess+14_linux-x64-musl_bin.tar.gz",
 		checksum = "172c7d7c6859253822e03f0839f83627ffe06055f118423c6ef619a1af836b4c"
 	)
 	)
@@ -58,11 +59,11 @@ var jvmVersionSample__openjdk_jdk_11 = JvmVersionSample(
 var jvmVersionSample__openjdk_jdk_11_0_1 = JvmVersionSample(
 	vendor = "openjdk",
 	type = "jdk",
-	versions = listOf("11"),
-	fullVersion = "11.0.1+13",
-	cleanVersion = "11",
+	versions = listOf("11.0.1"),
+	fullVersion = "11.0.1",
+	cleanVersion = "11.0.1",
 	versionMajor = 11,
-	versionUpdate = null,
+	versionUpdate = 1,
 	downloadPageUrl = "https://jdk.java.net/11/",
 	downloadArchiveUrlPart = "",
 	remoteFiles = mapOf(

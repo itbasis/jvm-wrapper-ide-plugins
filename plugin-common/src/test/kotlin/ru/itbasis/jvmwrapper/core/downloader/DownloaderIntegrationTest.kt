@@ -20,15 +20,15 @@ internal class DownloaderIntegrationTest : AbstractIntegrationTests() {
 		test("resolve and download use downloadProcessListener").config(enabled = true) {
 			forall(
 				rows = *jvmFirstRows
-			) { (vendor, type, version, _, _, _, _, _, downloadArchiveUrlPart) ->
-				logger.info { "version: $version" }
-				val jvm = Jvm(vendor = vendor.toJvmVendor(), type = type.toJvmType(), version = version)
+			) { jvmVersionRow ->
+				logger.info { "version: ${jvmVersionRow.version}" }
+				val jvm = Jvm(vendor = jvmVersionRow.vendor.toJvmVendor(), type = jvmVersionRow.type.toJvmType(), version = jvmVersionRow.version)
 				logger.info { "jvm: $jvm" }
 				val downloader = jvm.downloader()
 
 				val remoteArchiveFile = downloader.remoteArchiveFile
 				remoteArchiveFile shouldNotBe null
-				remoteArchiveFile.url should startWith(downloadArchiveUrlPart)
+				remoteArchiveFile.url should startWith(jvmVersionRow.downloadArchiveUrlPart)
 				logger.info { "remoteArchiveFile.url = ${remoteArchiveFile.url}" }
 
 				val tempFile = temporaryFolder.newFile()
@@ -48,15 +48,15 @@ internal class DownloaderIntegrationTest : AbstractIntegrationTests() {
 		test("resolve and download not use downloadProcessListener").config(enabled = true) {
 			forall(
 				rows = *jvmFirstRows
-			) { (vendor, type, version, _, _, _, _, _, downloadArchiveUrlPart) ->
-				logger.info { "version: $version" }
-				val jvm = Jvm(vendor = vendor.toJvmVendor(), type = type.toJvmType(), version = version)
+			) { jvmVersionRow ->
+				logger.info { "version: ${jvmVersionRow.version}" }
+				val jvm = Jvm(vendor = jvmVersionRow.vendor.toJvmVendor(), type = jvmVersionRow.type.toJvmType(), version = jvmVersionRow.version)
 				logger.info { "jvm: $jvm" }
 				val downloader = jvm.downloader()
 
 				val remoteArchiveFile = downloader.remoteArchiveFile
 				remoteArchiveFile shouldNotBe null
-				remoteArchiveFile.url should startWith(downloadArchiveUrlPart)
+				remoteArchiveFile.url should startWith(jvmVersionRow.downloadArchiveUrlPart)
 				logger.info { "remoteArchiveFile.url = ${remoteArchiveFile.url}" }
 
 				val tempFile = temporaryFolder.newFile()

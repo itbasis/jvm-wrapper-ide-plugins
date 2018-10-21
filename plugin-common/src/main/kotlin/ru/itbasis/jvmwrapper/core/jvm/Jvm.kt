@@ -22,31 +22,34 @@ data class Jvm(
 
 	val major: Int
 		get() {
-			return (when {
+			val value = when {
 				version.contains("u") -> version.substringBefore("u")
 				version.contains("_") -> version.substringAfter("1.").substringBefore(".")
 				version.contains(".") -> version.replaceFirst("^1\\.".toRegex(), "").substringBefore(".")
 				else                  -> version
-			}).toIntOrNull()
+			}.substringBefore("-ea").substringBefore("+")
+			println("major :: $version > $value")
+			return value.toIntOrNull()
 			       ?: throw IllegalArgumentException("I can not determine the major version of JVM for '$version'")
 		}
 
 	val update: Int?
 		get() {
-			return (when {
+			val value = when {
 				version.contains("u") -> /* 8u172 */ version.substringAfter("u")
 				version.contains("_") -> /* 1.8.0_172-b11 */ version.substringAfter("_").substringBefore("-")
 				version.contains(".") -> /* 10.0.1 */ version.substringAfterLast(".")
 				else                  -> null
-			})?.toIntOrNull()?.takeIf { it != 0 }
+			}?.substringBefore("+")
+			println("update :: $version > $value")
+			return value?.toIntOrNull()?.takeIf { it != 0 }
 		}
+
+	val earlyAccess: Boolean = version.contains("-ea")
 
 	val cleanVersion: String
 		get() {
-			return when (vendor) {
-				OPEN_JDK -> "$major"
-				else     -> arrayOf(major, update).filterNotNull().joinToString(if (major > 8) ".0." else "u")
-			}
+			return arrayOf(major, update).filterNotNull().joinToString(if (major > 8) ".0." else "u")
 		}
 
 	val os: String

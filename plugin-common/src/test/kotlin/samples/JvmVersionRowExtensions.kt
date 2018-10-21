@@ -12,6 +12,7 @@ data class JvmVersionRow(
 	val cleanVersion: String,
 	val versionMajor: Int,
 	val versionUpdate: Int?,
+	val versionEarlyAccess: Boolean,
 	val downloadPageUrl: String,
 	val downloadArchiveUrlPart: String,
 	val remoteFiles: Map<String, RemoteArchiveFile> = emptyMap()
@@ -35,6 +36,7 @@ internal fun JvmVersionSample.asJvmVersionRow(): List<JvmVersionRow> {
 			cleanVersion = cleanVersion,
 			versionMajor = versionMajor,
 			versionUpdate = versionUpdate,
+			versionEarlyAccess = versionEarlyAccess,
 			downloadPageUrl = downloadPageUrl,
 			downloadArchiveUrlPart = downloadArchiveUrlPart,
 			remoteFiles = remoteFiles

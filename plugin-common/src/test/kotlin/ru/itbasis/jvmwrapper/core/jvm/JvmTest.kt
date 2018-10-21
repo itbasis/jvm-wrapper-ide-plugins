@@ -1,26 +1,42 @@
+@file:Suppress("Destructure")
+
 package ru.itbasis.jvmwrapper.core.jvm
 
-import samples.asKotlinTestRows
 import io.kotlintest.data.forall
 import io.kotlintest.matchers.string.beUpperCase
 import io.kotlintest.should
 import io.kotlintest.shouldBe
-import io.kotlintest.specs.FunSpec
-import samples.JvmVersionSamples
+import ru.itbasis.jvmwrapper.core.AbstractTests
 
-internal class JvmTest : FunSpec() {
+internal class JvmTest : AbstractTests() {
 	init {
 		test("version") {
 			forall(
-				rows = *JvmVersionSamples.asKotlinTestRows()
-			) { (vendor, type, version, _, cleanVersion, versionMajor, versionUpdate, _, _) ->
-				val actual = Jvm(vendor = vendor.toJvmVendor(), type = type.toJvmType(), version = version)
+				rows = *jvmAllRows
+			) { jvmVersionRow ->
+				val actual =
+					Jvm(vendor = jvmVersionRow.vendor.toJvmVendor(), type = jvmVersionRow.type.toJvmType(), version = jvmVersionRow.version)
 
 				actual.type.name should beUpperCase()
-				actual.type.name.toLowerCase() shouldBe type
-				actual.major shouldBe versionMajor
-				actual.update shouldBe versionUpdate
-				actual.cleanVersion shouldBe cleanVersion
+				actual.type.name.toLowerCase() shouldBe jvmVersionRow.type
+				actual.major shouldBe jvmVersionRow.versionMajor
+				actual.update shouldBe jvmVersionRow.versionUpdate
+			}
+		}
+
+		test("full version") {
+			forall(
+				rows = *jvmAllRows
+			) { jvmVersionRow ->
+				val actual =
+					Jvm(vendor = jvmVersionRow.vendor.toJvmVendor(), type = jvmVersionRow.type.toJvmType(), version = jvmVersionRow.fullVersion)
+
+				actual.type.name should beUpperCase()
+				actual.type.name.toLowerCase() shouldBe jvmVersionRow.type
+				actual.major shouldBe jvmVersionRow.versionMajor
+				actual.update shouldBe jvmVersionRow.versionUpdate
+				actual.earlyAccess shouldBe jvmVersionRow.versionEarlyAccess
+				actual.cleanVersion shouldBe jvmVersionRow.cleanVersion
 			}
 		}
 	}

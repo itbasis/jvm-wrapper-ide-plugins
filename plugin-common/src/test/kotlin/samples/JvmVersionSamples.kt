@@ -12,6 +12,7 @@ data class JvmVersionSample(
 	val cleanVersion: String,
 	val versionMajor: Int,
 	val versionUpdate: Int?,
+	val versionEarlyAccess: Boolean = false,
 	val downloadPageUrl: String,
 	val downloadArchiveUrlPart: String,
 	val remoteFiles: Map<String, RemoteArchiveFile> = emptyMap()

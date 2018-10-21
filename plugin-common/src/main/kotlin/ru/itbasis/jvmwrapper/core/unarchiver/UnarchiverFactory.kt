@@ -5,7 +5,7 @@ import java.io.File
 
 object UnarchiverFactory {
 	fun getInstance(
-		sourceFile: File, targetDir: File, stepListener: ProcessStepListener? = null, removeOriginal: Boolean = false
+		sourceFile: File, targetDir: File, stepListener: ProcessStepListener? = null, removeOriginal: Boolean = true
 	): AbstractUnarchiver {
 		val sourceFileName = sourceFile.name.toLowerCase()
 		return when {

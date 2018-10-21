@@ -7,7 +7,6 @@ import io.kotlintest.matchers.file.startWithPath
 import io.kotlintest.matchers.string.containIgnoringCase
 import io.kotlintest.should
 import io.kotlintest.shouldBe
-import io.kotlintest.specs.FunSpec
 import mu.KLogger
 import org.apache.commons.lang3.SystemUtils
 import org.junit.rules.TemporaryFolder
@@ -23,11 +22,6 @@ import ru.itbasis.jvmwrapper.core.unarchiver.UnarchiverFactory
 import ru.itbasis.jvmwrapper.core.wrapper.JVMW_PROPERTY_FILE_NAME
 import ru.itbasis.jvmwrapper.core.wrapper.JvmWrapperPropertyKeys
 import samples.JvmVersionRow
-import samples.OpenJDKJvmVersionEarlyAccessSamples
-import samples.OpenJDKJvmVersionLatestSamples
-import samples.OracleJvmVersionArchiveSamples
-import samples.OracleJvmVersionLatestSamples
-import samples.asKotlinTestRows
 import java.io.File
 import java.math.BigDecimal
 import java.math.RoundingMode
@@ -35,23 +29,8 @@ import java.nio.charset.Charset
 import java.nio.file.Path
 import java.util.concurrent.TimeUnit
 
-abstract class AbstractIntegrationTests : FunSpec() {
+abstract class AbstractIntegrationTests : AbstractTests() {
 	abstract val logger: KLogger
-
-	protected open val jvmAllRows = listOf(
-		OpenJDKJvmVersionLatestSamples, OracleJvmVersionLatestSamples, OracleJvmVersionArchiveSamples, OpenJDKJvmVersionEarlyAccessSamples
-	).flatten().asKotlinTestRows()
-
-	protected open val jvmFirstRows = listOf(
-		OpenJDKJvmVersionLatestSamples.firstOrNull(),
-		OracleJvmVersionLatestSamples.firstOrNull(),
-		OracleJvmVersionArchiveSamples.firstOrNull(),
-		OpenJDKJvmVersionEarlyAccessSamples.firstOrNull()
-	).asKotlinTestRows()
-
-	override fun isInstancePerTest(): Boolean {
-		return true
-	}
 
 	protected val stepListener: (String) -> Unit = { msg ->
 		logger.info { msg }
