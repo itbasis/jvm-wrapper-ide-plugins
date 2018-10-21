@@ -4,9 +4,11 @@ package ru.itbasis.jvmwrapper.core.wrapper
 
 import io.kotlintest.data.forall
 import io.kotlintest.matchers.file.startWithPath
+import io.kotlintest.matchers.startWith
 import io.kotlintest.matchers.string.containIgnoringCase
 import io.kotlintest.should
 import io.kotlintest.shouldBe
+import io.kotlintest.shouldNot
 import io.kotlintest.tables.row
 import mu.KotlinLogging
 import ru.itbasis.jvmwrapper.core.AbstractIntegrationTests
@@ -74,6 +76,21 @@ internal class JvmWrapperTest : AbstractIntegrationTests() {
 				testJvmVersion(jvmVersionRow = jvmVersionSample)
 				val actualFullVersion = getFullVersion(jvmHomePath = jvmHomeDir.toPath())
 				actualFullVersion shouldBe containIgnoringCase(""" full version "${jvmVersionSample.fullVersion}"""")
+			}
+		}
+
+		test("JvmWrapper Recall").config(enabled = isNixOS) {
+			forall(
+				row(OpenJDKJvmVersionLatestSamples.first().asJvmVersionRow().first())
+			) { jvmVersionSample ->
+				testJvmVersion(jvmVersionRow = jvmVersionSample)
+
+				JvmWrapper(jvmwHomeDir = temporaryJvmWrapperFolder(), workingDir = temporaryFolder.root, stepListener = { msg ->
+					logger.info { msg }
+					msg shouldNot startWith("download remote archive:")
+				}, downloadProcessListener = { _, _, _ ->
+					throw IllegalStateException("")
+				})
 			}
 		}
 

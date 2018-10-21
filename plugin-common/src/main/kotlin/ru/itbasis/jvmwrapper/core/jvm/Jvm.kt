@@ -16,9 +16,9 @@ import java.nio.file.Path
 data class Jvm(
 	val system: Boolean = false,
 	val path: Path? = null,
-	val version: String = JvmVersionDetector.detect(path!!.fixFromMac()),
-	val type: JvmType = JvmTypeDetector.detect(path!!.fixFromMac()),
-	val vendor: JvmVendor = JvmVendorDetector.detect(path!!.fixFromMac())
+	val version: String = JvmVersionDetector.detect(path!!),
+	val type: JvmType = JvmTypeDetector.detect(path!!),
+	val vendor: JvmVendor = JvmVendorDetector.detect(path!!)
 ) : Comparable<Jvm> {
 	private val logger = KotlinLogging.logger {}
 

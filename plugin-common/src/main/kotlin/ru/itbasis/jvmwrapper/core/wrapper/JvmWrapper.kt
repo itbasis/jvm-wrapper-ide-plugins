@@ -72,9 +72,10 @@ class JvmWrapper(
 		val provider = DownloaderFactory.getInstance(jvm)
 		"check exists jvm home directory: $jvmHomeDir".step(stepListener) {
 			"Check for forced JVM download".step(stepListener) {
-				force = try {
-					JvmVersionDetector.detect(jvmHomeDir.toPath()).isNotBlank()
-				} catch (e: IllegalArgumentException) {
+				stepListener?.invoke("force=$force")
+				force = force || try {
+					JvmVersionDetector.detect(path = jvmHomeDir.toPath()).isBlank()
+				} catch (e: Exception) {
 					true
 				}
 				stepListener?.invoke("force=$force")

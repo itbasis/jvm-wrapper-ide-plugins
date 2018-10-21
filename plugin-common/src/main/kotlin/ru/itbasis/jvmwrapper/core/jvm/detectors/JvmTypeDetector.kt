@@ -1,13 +1,14 @@
 package ru.itbasis.jvmwrapper.core.jvm.detectors
 
 import ru.itbasis.jvmwrapper.core.jvm.JvmType
+import ru.itbasis.jvmwrapper.core.jvm.fixFromMac
 import ru.itbasis.jvmwrapper.core.jvm.getExecutable
 import java.nio.file.Path
 
 object JvmTypeDetector {
 	@Throws(IllegalStateException::class)
 	fun detect(path: Path): JvmType {
-		val binPath = path.resolve("bin")
+		val binPath = path.fixFromMac().resolve("bin")
 		return when {
 			binPath.isExecutableFile("javac") -> JvmType.JDK
 			binPath.isExecutableFile("java")  -> JvmType.JRE
