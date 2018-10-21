@@ -89,7 +89,7 @@ class JvmWrapper(
 			}
 
 			val remoteArchiveFile = "download jvm archive...".step(stepListener) {
-				"specifying the URL for the JRE archive...".step(stepListener) {
+				"specifying the URL for the JVM archive...".step(stepListener) {
 					provider.remoteArchiveFile
 				}
 			}
@@ -111,7 +111,7 @@ class JvmWrapper(
 			if (wrapperProperties.debug!!) {
 				stepListener?.invoke("archiveFile=$archiveFile")
 			}
-			"unpack JRE archive file".step(stepListener) {
+			"unpack JVM archive file".step(stepListener) {
 				UnarchiverFactory.getInstance(archiveFile, jvmHomeDir, stepListener).unpack()
 			}
 			lastUpdateFile.update(remoteArchiveFile)

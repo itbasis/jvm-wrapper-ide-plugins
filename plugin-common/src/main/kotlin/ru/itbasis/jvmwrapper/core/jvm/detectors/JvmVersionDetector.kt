@@ -46,15 +46,18 @@ object JvmVersionDetector {
 		fixedPath.resolve("bin").getExecutable("java").toFile().takeIf {
 			it.canExecute()
 		}?.let { javaExec ->
-			logger.trace { "detect from java executable: $javaExec" }
-			val process = ProcessBuilder(javaExec.absolutePath, "-fullversion").redirectErrorStream(true).start()
+			val processBuilder = ProcessBuilder(javaExec.absolutePath, "-fullversion")
+			logger.trace { "detect from executable: ${processBuilder.command()}" }
+			val process = processBuilder.redirectErrorStream(true).start()
 			val text = process.inputStream.use {
 				it.reader().readText()
 			}
 			logger.trace { "output: $text" }
 			val matcher = """.*"(.*)".*""".toPattern().matcher(text)
 			if (matcher.find()) {
-				return matcher.group(1)
+				val match = matcher.group(1)
+				logger.trace { "match: $match" }
+				return match
 			}
 		}
 
