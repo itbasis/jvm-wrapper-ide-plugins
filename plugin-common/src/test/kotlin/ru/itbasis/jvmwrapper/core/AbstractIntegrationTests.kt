@@ -3,6 +3,7 @@ package ru.itbasis.jvmwrapper.core
 import io.kotlintest.Description
 import io.kotlintest.TestResult
 import io.kotlintest.TestStatus
+import io.kotlintest.matchers.file.aDirectory
 import io.kotlintest.matchers.file.startWithPath
 import io.kotlintest.matchers.string.containIgnoringCase
 import io.kotlintest.should
@@ -68,7 +69,7 @@ abstract class AbstractIntegrationTests : AbstractTests() {
 	protected fun getFullVersion(jvmHomePath: Path): String {
 		val jvmBinDir = jvmHomePath.resolve("bin").toFile()
 		logger.info { "jvmBinDir: $jvmBinDir" }
-		jvmBinDir.exists() shouldBe true
+		jvmBinDir should aDirectory()
 
 		val process = ProcessBuilder(File(jvmBinDir, "java").absolutePath, "-fullversion").start()
 		process.waitFor(5, TimeUnit.SECONDS)

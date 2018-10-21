@@ -7,6 +7,7 @@ import ru.itbasis.jvmwrapper.core.downloader.DownloaderFactory
 import ru.itbasis.jvmwrapper.core.jvm.Jvm
 import ru.itbasis.jvmwrapper.core.jvm.JvmType.JDK
 import ru.itbasis.jvmwrapper.core.jvm.JvmVendor.ORACLE
+import ru.itbasis.jvmwrapper.core.jvm.detectors.JvmVersionDetector
 import ru.itbasis.jvmwrapper.core.jvm.fixFromMac
 import ru.itbasis.jvmwrapper.core.step
 import ru.itbasis.jvmwrapper.core.unarchiver.UnarchiverFactory
@@ -66,10 +67,15 @@ class JvmWrapper(
 	}
 
 	private fun checkAndDownloadJvm(jvmHomeDir: File) {
-		var force = false
+		var force: Boolean = false
+
 		val provider = DownloaderFactory.getInstance(jvm)
 		"check exists jvm home directory: $jvmHomeDir".step(stepListener) {
-			force = !jvmHomeDir.isDirectory || jvmHomeDir.listFiles().isEmpty()
+			try {
+				force = JvmVersionDetector.detect(jvmHomeDir.toPath()) != jvm.version
+			} catch (e: Exception) {
+				force = true
+			}
 			stepListener?.invoke("force=$force")
 
 			if (!force && !lastUpdateFile.isExpired()) {
