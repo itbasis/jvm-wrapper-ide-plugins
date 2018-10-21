@@ -64,7 +64,7 @@ internal class JvmWrapperTest : AbstractIntegrationTests() {
 			forall(
 				row(jvmVersionSample__openjdk_jdk_11.asJvmVersionRow().first(), jvmVersionSample__openjdk_jdk_11_0_1.asJvmVersionRow().first())
 			) { previousJvmVersionSample, jvmVersionSample ->
-				val previousJvm = buildPreviousVersion(previousJvmVersionSample)
+				val previousJvm = downloadVersion(previousJvmVersionSample)
 				LastUpdateFile(jvm = previousJvm, jvmwHomeDir = temporaryJvmWrapperFolder()).file.delete()
 
 				testJvmVersion(jvmVersionRow = jvmVersionSample)

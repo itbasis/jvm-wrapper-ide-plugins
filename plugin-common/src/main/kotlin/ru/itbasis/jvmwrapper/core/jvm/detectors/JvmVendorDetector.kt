@@ -16,9 +16,20 @@ object JvmVendorDetector {
 	fun detect(path: Path): JvmVendor {
 		val fixedPath = path.fixFromMac()
 
+		fixedPath.resolve("bin").getExecutable("java").toFile().takeIf { it.canExecute() }?.let { javaExec ->
+			val process = ProcessBuilder(javaExec.absolutePath, "-fullversion").redirectErrorStream(true).start()
+			val text = process.inputStream.use { it.reader().readText() }
+			try {
+				return text.toJvmVendor()
+			} catch (ignored: Exception) {
+			}
+		}
+
 		fixedPath.resolve("release").toFile().takeIf { it.isFile }?.let { releaseFile ->
 			val properties = Properties().apply {
-				releaseFile.inputStream().use { load(it) }
+				releaseFile.inputStream().use {
+					load(it)
+				}
 			}
 			properties.getProperty("IMPLEMENTOR")?.let {
 				return it.replace("\"", "").toJvmVendor()
@@ -32,15 +43,6 @@ object JvmVendorDetector {
 				 ?: mainAttributes.getValue("Implementation-Version"))?.let {
 					return it.toJvmVendor()
 				}
-			}
-		}
-
-		fixedPath.resolve("bin").getExecutable("java").toFile().takeIf { it.canExecute() }?.let { javaExec ->
-			val process = ProcessBuilder(javaExec.absolutePath, "-fullversion").redirectErrorStream(true).start()
-			val text = process.inputStream.use { it.reader().readText() }
-			try {
-				return text.toJvmVendor()
-			} catch (ignored: Exception) {
 			}
 		}
 

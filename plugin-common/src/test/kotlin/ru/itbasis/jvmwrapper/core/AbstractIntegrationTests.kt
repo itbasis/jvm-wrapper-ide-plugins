@@ -97,7 +97,7 @@ abstract class AbstractIntegrationTests : AbstractTests() {
 		workingDir.absolutePath shouldBe temporaryFolder.root.absolutePath
 	}
 
-	protected fun buildPreviousVersion(jvmVersionSample: JvmVersionRow): Jvm {
+	protected fun downloadVersion(jvmVersionSample: JvmVersionRow): Jvm {
 		val version = jvmVersionSample.version
 		val vendor = jvmVersionSample.vendor
 		val type = jvmVersionSample.type
