@@ -9,13 +9,14 @@ import samples.asKotlinTestRows
 
 abstract class AbstractTests : FunSpec() {
 	protected open val jvmAllRows = listOf(
-		OpenJDKJvmVersionLatestSamples, OracleJvmVersionLatestSamples, OracleJvmVersionArchiveSamples, OpenJDKJvmVersionEarlyAccessSamples
+//		OpenJDKJvmVersionLatestSamples, OracleJvmVersionLatestSamples, OracleJvmVersionArchiveSamples,
+		OpenJDKJvmVersionEarlyAccessSamples
 	).flatten().asKotlinTestRows()
 
 	protected open val jvmFirstRows = listOf(
-		OpenJDKJvmVersionLatestSamples.firstOrNull(),
-		OracleJvmVersionLatestSamples.firstOrNull(),
-		OracleJvmVersionArchiveSamples.firstOrNull(),
+//		OpenJDKJvmVersionLatestSamples.firstOrNull(),
+//		OracleJvmVersionLatestSamples.firstOrNull(),
+//		OracleJvmVersionArchiveSamples.firstOrNull(),
 		OpenJDKJvmVersionEarlyAccessSamples.firstOrNull()
 	).asKotlinTestRows()
 

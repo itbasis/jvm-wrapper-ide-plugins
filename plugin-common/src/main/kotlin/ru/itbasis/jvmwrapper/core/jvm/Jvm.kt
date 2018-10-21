@@ -30,7 +30,7 @@ data class Jvm(
 				version.contains(".") -> version.replaceFirst("^1\\.".toRegex(), "").substringBefore(".")
 				else                  -> version
 			}.substringBefore("-ea").substringBefore("+")
-			logger.trace { "major :: $version > $value" }
+			logger.trace { "major :: $version > $value , path=$path" }
 			return value.toIntOrNull()
 			       ?: throw IllegalArgumentException("I can not determine the major version of JVM for '$version'")
 		}

@@ -5,8 +5,6 @@ import ru.itbasis.jvmwrapper.core.jvm.fixFromMac
 import ru.itbasis.jvmwrapper.core.jvm.getExecutable
 import java.nio.file.Path
 import java.nio.file.Paths
-import java.util.Properties
-import java.util.jar.JarFile
 
 object JvmVersionDetector {
 	private val logger = KotlinLogging.logger {}
@@ -16,7 +14,9 @@ object JvmVersionDetector {
 
 	@Throws(IllegalArgumentException::class)
 	fun detect(path: Path): String {
+		logger.trace { "path=$path" }
 		val fixedPath = path.fixFromMac()
+		logger.debug { "fixedPath=$fixedPath" }
 
 		fixedPath.toFile().takeUnless {
 			it.isDirectory && it.list().isNotEmpty()
@@ -48,7 +48,10 @@ object JvmVersionDetector {
 		}?.let { javaExec ->
 			logger.trace { "detect from java executable: $javaExec" }
 			val process = ProcessBuilder(javaExec.absolutePath, "-fullversion").redirectErrorStream(true).start()
-			val text = process.inputStream.use { it.reader().readText() }
+			val text = process.inputStream.use {
+				it.reader().readText()
+			}
+			logger.trace { "output: $text" }
 			val matcher = """.*"(.*)".*""".toPattern().matcher(text)
 			if (matcher.find()) {
 				return matcher.group(1)
