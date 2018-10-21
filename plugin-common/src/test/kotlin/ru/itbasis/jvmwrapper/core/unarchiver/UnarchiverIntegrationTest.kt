@@ -20,7 +20,7 @@ internal class UnarchiverIntegrationTest : AbstractIntegrationTests() {
 		test("unpack").config(enabled = isNixOS) {
 			forall(
 				rows = *jvmFirstRows
-			) { (vendor, type, version, _, _, _, _, _, _) ->
+			) { (vendor, type, version, fullVersion, _, _, _, _, _) ->
 				logger.info { "version: $version" }
 				val jvm = Jvm(vendor = vendor.toJvmVendor(), type = type.toJvmType(), version = version)
 				logger.info { "jvm: $jvm" }
@@ -39,7 +39,7 @@ internal class UnarchiverIntegrationTest : AbstractIntegrationTests() {
 				targetDir.shouldBeNonEmptyDirectory()
 
 				val actualJvm = Jvm(path = targetDir.toPath())
-				actualJvm.version shouldBe version
+				actualJvm.version shouldBe fullVersion
 
 				tempFile.deleteRecursively()
 				targetDir.deleteRecursively()
