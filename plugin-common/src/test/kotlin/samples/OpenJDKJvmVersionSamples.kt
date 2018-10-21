@@ -80,8 +80,30 @@ var jvmVersionSample__openjdk_jdk_11_0_1 = JvmVersionSample(
 	)
 )
 
+var jvmVersionSample__openjdk_jdk_8 = JvmVersionSample(
+	vendor = "openjdk",
+	type = "jdk",
+	versions = listOf("8", "8u192"),
+	fullVersion = "1.8.0_192-ea-b04",
+	cleanVersion = "8u192",
+	versionMajor = 8,
+	versionUpdate = 192,
+	versionEarlyAccess = true,
+	downloadPageUrl = "https://jdk.java.net/8/",
+	downloadArchiveUrlPart = "",
+	remoteFiles = mapOf(
+		"osx" to RemoteArchiveFile(
+			url = "https://download.java.net/java/jdk8u192/archive/b04/binaries/jdk-8u192-ea-bin-b04-macosx-x86_64-01_aug_2018.dmg"
+		), "linux" to RemoteArchiveFile(
+		url = "https://download.java.net/java/jdk8u192/archive/b04/binaries/jdk-8u192-ea-bin-b04-linux-x64-01_aug_2018.tar.gz"
+	), "windows" to RemoteArchiveFile(
+		url = "https://download.java.net/java/jdk8u192/archive/b04/binaries/jdk-8u192-ea-bin-b04-windows-x64-01_aug_2018.exe"
+	)
+	)
+)
+
 val OpenJDKJvmVersionEarlyAccessSamples = listOf(
-	jvmVersionSample__openjdk_jdk_12
+	jvmVersionSample__openjdk_jdk_12, jvmVersionSample__openjdk_jdk_8
 )
 
 val OpenJDKJvmVersionLatestSamples = listOf(

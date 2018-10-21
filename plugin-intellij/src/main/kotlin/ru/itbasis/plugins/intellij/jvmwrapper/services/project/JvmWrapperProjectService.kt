@@ -30,12 +30,15 @@ class JvmWrapperProjectService(
 	private fun getWrapper(): JvmWrapper? {
 		return progressManager.run(object : Task.WithResult<JvmWrapper, ExecutionException>(project, "JRE Wrapper", true) {
 			override fun compute(progressIndicator: ProgressIndicator): JvmWrapper? {
-				return if (!hasWrapper()) null
-				else JvmWrapper(
-					workingDir = File(project.basePath),
-					stepListener = stepListener(progressIndicator),
-					downloadProcessListener = downloadProcessListener(progressIndicator)
-				)
+				return if (!hasWrapper()) {
+					null
+				} else {
+					JvmWrapper(
+						workingDir = File(project.basePath),
+						stepListener = stepListener(progressIndicator),
+						downloadProcessListener = downloadProcessListener(progressIndicator)
+					)
+				}
 			}
 		})
 	}

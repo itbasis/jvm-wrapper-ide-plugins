@@ -33,9 +33,9 @@ internal class JvmWrapperTest : AbstractIntegrationTests() {
 
 		prepareTest(jvmVersionRow.vendor, jvmVersionRow.version)
 
-		val jvm = Jvm(
-			vendor = jvmVersionRow.vendor.toJvmVendor(), type = jvmVersionRow.type.toJvmType(), version = jvmVersionRow.version
-		)
+		val jvmVendor = jvmVersionRow.vendor.toJvmVendor()
+		val jvmType = jvmVersionRow.type.toJvmType()
+		val jvm = Jvm(vendor = jvmVendor, type = jvmType, version = jvmVersionRow.version)
 		val jvmWrapper = JvmWrapper(
 			jvmwHomeDir = temporaryJvmWrapperFolder(),
 			workingDir = temporaryFolder.root,
@@ -45,6 +45,13 @@ internal class JvmWrapperTest : AbstractIntegrationTests() {
 		val jvmHomeDir = jvmWrapper.jvmHomeDir
 		logger.info { "jvmHomeDir: $jvmHomeDir" }
 		jvmHomeDir should startWithPath(temporaryJvmWrapperFolder().resolve(jvm.toString()))
+
+		val actualJvm = Jvm(path = jvmHomeDir.toPath())
+		actualJvm.vendor shouldBe jvmVendor
+		actualJvm.type shouldBe jvmType
+		actualJvm.major shouldBe jvmVersionRow.versionMajor
+		actualJvm.update shouldBe jvmVersionRow.versionUpdate
+		actualJvm.earlyAccess shouldBe jvmVersionRow.versionEarlyAccess
 
 		val actualFullVersion = getFullVersion(jvmHomePath = jvmHomeDir.toPath())
 		actualFullVersion shouldBe containIgnoringCase(""" full version "${jvmVersionRow.fullVersion}"""")

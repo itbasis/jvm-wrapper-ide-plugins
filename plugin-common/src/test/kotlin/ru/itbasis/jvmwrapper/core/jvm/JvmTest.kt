@@ -20,7 +20,6 @@ internal class JvmTest : AbstractTests() {
 				actual.type.name should beUpperCase()
 				actual.type.name.toLowerCase() shouldBe jvmVersionRow.type
 				actual.major shouldBe jvmVersionRow.versionMajor
-				actual.update shouldBe jvmVersionRow.versionUpdate
 			}
 		}
 
