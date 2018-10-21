@@ -10,6 +10,7 @@ class JvmVendorDetectorIntegrationTest : AbstractIntegrationTests() {
 	override val logger = KotlinLogging.logger {}
 
 	init {
+		// TODO https://github.com/itbasis/jvm-wrapper-ide-plugins/issues/9
 		test("detect").config(enabled = false) {
 			forall(
 				rows = *jvmAllRows
