@@ -24,24 +24,24 @@ object JvmVersionDetector {
 			throw IllegalArgumentException("path not found or empty directory: $fixedPath")
 		}
 
-		fixedPath.resolve("release").toFile().takeIf {
-			it.isFile && it.length() > 0
-		}?.let { releaseFile ->
-			logger.trace { "detect from release file: $releaseFile" }
-			val properties = Properties().apply {
-				releaseFile.inputStream().use { load(it) }
-			}
-			return properties.getProperty("JAVA_FULL_VERSION", properties.getProperty("JAVA_VERSION")).replace("\"", "")
-		}
-
-		fixedPath.resolve("jre/lib/rt.jar").toFile().takeIf {
-			it.isFile
-		}?.let { rtFile ->
-			logger.trace { "detect from rt.jar: $rtFile" }
-			JarFile(rtFile, false).use { rtJarFile ->
-				return rtJarFile.manifest?.mainAttributes?.getValue("Implementation-Version")!!
-			}
-		}
+//		fixedPath.resolve("release").toFile().takeIf {
+//			it.isFile && it.length() > 0
+//		}?.let { releaseFile ->
+//			logger.trace { "detect from release file: $releaseFile" }
+//			val properties = Properties().apply {
+//				releaseFile.inputStream().use { load(it) }
+//			}
+//			return properties.getProperty("JAVA_FULL_VERSION", properties.getProperty("JAVA_VERSION")).replace("\"", "")
+//		}
+//
+//		fixedPath.resolve("jre/lib/rt.jar").toFile().takeIf {
+//			it.isFile
+//		}?.let { rtFile ->
+//			logger.trace { "detect from rt.jar: $rtFile" }
+//			JarFile(rtFile, false).use { rtJarFile ->
+//				return rtJarFile.manifest?.mainAttributes?.getValue("Implementation-Version")!!
+//			}
+//		}
 
 		fixedPath.resolve("bin").getExecutable("java").toFile().takeIf {
 			it.canExecute()
