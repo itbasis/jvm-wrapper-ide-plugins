@@ -43,7 +43,10 @@ data class Jvm(
 
 	val cleanVersion: String
 		get() {
-			return arrayOf(major, update).filterNotNull().joinToString(if (major > 8) ".0." else "u")
+			return when (vendor) {
+				OPEN_JDK -> "$major"
+				else     -> arrayOf(major, update).filterNotNull().joinToString(if (major > 8) ".0." else "u")
+			}
 		}
 
 	val os: String
