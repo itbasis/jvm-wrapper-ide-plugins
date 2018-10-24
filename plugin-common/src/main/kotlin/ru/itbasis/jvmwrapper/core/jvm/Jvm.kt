@@ -3,14 +3,9 @@ package ru.itbasis.jvmwrapper.core.jvm
 import mu.KotlinLogging
 import org.apache.commons.lang3.SystemUtils.IS_OS_MAC
 import org.apache.commons.lang3.SystemUtils.IS_OS_WINDOWS
-import ru.itbasis.jvmwrapper.core.jvm.JvmVendor.OPEN_JDK
 import ru.itbasis.jvmwrapper.core.jvm.detectors.JvmTypeDetector
 import ru.itbasis.jvmwrapper.core.jvm.detectors.JvmVendorDetector
 import ru.itbasis.jvmwrapper.core.jvm.detectors.JvmVersionDetector
-import ru.itbasis.jvmwrapper.core.unarchiver.UnarchiverFactory.FileArchiveType.DMG
-import ru.itbasis.jvmwrapper.core.unarchiver.UnarchiverFactory.FileArchiveType.EXE
-import ru.itbasis.jvmwrapper.core.unarchiver.UnarchiverFactory.FileArchiveType.TAR_GZ
-import ru.itbasis.jvmwrapper.core.unarchiver.UnarchiverFactory.FileArchiveType.ZIP
 import java.nio.file.Path
 
 data class Jvm(
@@ -62,18 +57,6 @@ data class Jvm(
 				else          -> "linux"
 			}
 		}
-
-	val archiveFileExtension: String by lazy {
-		when {
-			major >= 11 && IS_OS_WINDOWS     -> ZIP
-			major >= 9 && vendor == OPEN_JDK -> TAR_GZ
-
-			IS_OS_MAC                        -> DMG
-			IS_OS_WINDOWS                    -> EXE
-
-			else                             -> TAR_GZ
-		}.extension
-	}
 
 	override fun toString(): String {
 		return "${vendor.code}-$type-$cleanVersion"

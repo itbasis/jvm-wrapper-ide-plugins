@@ -1,13 +1,14 @@
 package ru.itbasis.jvmwrapper.core.downloader.openjdk
 
 import mu.KotlinLogging
+import ru.itbasis.jvmwrapper.core.FileNameExtension
 import ru.itbasis.jvmwrapper.core.downloader.AbstractDownloader
 import ru.itbasis.jvmwrapper.core.downloader.RemoteArchiveFile
 import ru.itbasis.jvmwrapper.core.findOne
 import ru.itbasis.jvmwrapper.core.jvm.Jvm
 import kotlin.text.RegexOption.IGNORE_CASE
 
-class OpenJdkDownloader(private val jvm: Jvm) : AbstractDownloader() {
+class OpenJdkDownloader(jvm: Jvm) : AbstractDownloader(jvm = jvm) {
 	override val logger = KotlinLogging.logger {}
 
 	override val remoteArchiveFile: RemoteArchiveFile by lazy {
@@ -19,7 +20,7 @@ class OpenJdkDownloader(private val jvm: Jvm) : AbstractDownloader() {
 		require(!this.isNullOrBlank()) {
 			val msg = "request url null or empty"
 			logger.error { msg }
-			msg
+			return@require msg
 		}
 
 		val htmlContent = this!!.htmlContent(httpClient = httpClient)
@@ -28,10 +29,16 @@ class OpenJdkDownloader(private val jvm: Jvm) : AbstractDownloader() {
 		val remoteFileChecksumUrl = "$remoteFileUrl.sha256"
 		val remoteFileChecksum =
 			if (htmlContent.contains(remoteFileChecksumUrl)) remoteFileChecksumUrl.htmlContent(httpClient = httpClient) else null
-		return RemoteArchiveFile(url = remoteFileUrl, checksum = remoteFileChecksum)
+		return RemoteArchiveFile(url = remoteFileUrl, checksum = remoteFileChecksum, archiveFileExtension = archiveFileExtension)
+	}
+
+	override val archiveFileExtension = when {
+		jvm.major >= 9 -> FileNameExtension.TAR_GZ
+		else           -> super.archiveFileExtension
 	}
 
 	private val regexDownloadFile: Regex by lazy {
-		""""(https://download.java.net/java/.*?jdk-${jvm.major}.*?${jvm.os}.*?.${jvm.archiveFileExtension})"""".toRegex(IGNORE_CASE)
+		val filename = archiveFileExtension.withDot(prefix = "jdk-${jvm.major}.*?${jvm.os}-$archiveArchitecture-.*?")
+		return@lazy """"(https://download.java.net/java/.*?$filename)"""".toRegex(IGNORE_CASE)
 	}
 }

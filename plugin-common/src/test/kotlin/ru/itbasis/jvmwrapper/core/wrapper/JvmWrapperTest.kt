@@ -61,7 +61,7 @@ internal class JvmWrapperTest : AbstractIntegrationTests() {
 	}
 
 	init {
-		test("update jvm").config(enabled = false) {
+		test("update jvm").config(enabled = isNixOS) {
 			forall(
 				row(jvmVersionSample__openjdk_jdk_11.asJvmVersionRow().first(), jvmVersionSample__openjdk_jdk_11_0_1.asJvmVersionRow().first())
 			) { previousJvmVersionSample, jvmVersionSample ->
@@ -72,7 +72,7 @@ internal class JvmWrapperTest : AbstractIntegrationTests() {
 			}
 		}
 
-		test("JVM reload if unpacked directory was deleted").config(enabled = false) {
+		test("JVM reload if unpacked directory was deleted").config(enabled = isNixOS) {
 			forall(
 				row(OpenJDKJvmVersionLatestSamples.first().asJvmVersionRow().first())
 			) { jvmVersionSample ->
@@ -87,7 +87,7 @@ internal class JvmWrapperTest : AbstractIntegrationTests() {
 			}
 		}
 
-		test("JvmWrapper Recall").config(enabled = false) {
+		test("JvmWrapper Recall").config(enabled = isNixOS) {
 			forall(
 				row(OpenJDKJvmVersionLatestSamples.first().asJvmVersionRow().first())
 			) { jvmVersionSample ->

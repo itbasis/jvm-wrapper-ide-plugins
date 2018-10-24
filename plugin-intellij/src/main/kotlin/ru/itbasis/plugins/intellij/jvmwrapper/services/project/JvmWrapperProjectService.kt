@@ -27,25 +27,20 @@ class JvmWrapperProjectService(
 		return isSupportedOS && Paths.get(project.basePath).getExecutable(SCRIPT_FILE_NAME).exists()
 	}
 
-	private fun getWrapper(): JvmWrapper? {
+	private fun getWrapper(): JvmWrapper {
 		return progressManager.run(object : Task.WithResult<JvmWrapper, ExecutionException>(project, "JRE Wrapper", true) {
 			override fun compute(progressIndicator: ProgressIndicator): JvmWrapper? {
-				return if (!hasWrapper()) {
-					null
-				} else {
-					JvmWrapper(
-						workingDir = File(project.basePath),
-						stepListener = stepListener(progressIndicator),
-						downloadProcessListener = downloadProcessListener(progressIndicator)
-					)
-				}
+				return JvmWrapper(
+					workingDir = File(project.basePath),
+					stepListener = stepListener(progressIndicator),
+					downloadProcessListener = downloadProcessListener(progressIndicator)
+				)
 			}
 		})
 	}
 
-	fun getSdk(): Sdk? {
+	fun getSdk(): Sdk {
 		val wrapper = getWrapper()
-		              ?: return null
 		return sdkReceiverApplicationService.apply(sdkName = wrapper.sdkName, sdkPath = wrapper.jvmHomeDir.toPath(), overrideAll = true)
 	}
 

@@ -104,7 +104,7 @@ class JvmWrapper(
 				return
 			}
 			val archiveFile = "download remote archive: ${remoteArchiveFile.url}".step(stepListener) {
-				File(jvmwHomeDir, "$jvmName.${jvm.archiveFileExtension}").apply {
+				File(jvmwHomeDir, remoteArchiveFile.archiveFileExtension.withDot(prefix = jvmName)).apply {
 					provider.download(target = this, downloadProcessListener = downloadProcessListener)
 				}
 			}

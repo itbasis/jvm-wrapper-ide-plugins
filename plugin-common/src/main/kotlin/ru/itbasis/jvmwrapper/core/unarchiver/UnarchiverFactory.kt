@@ -1,5 +1,7 @@
 package ru.itbasis.jvmwrapper.core.unarchiver
 
+import ru.itbasis.jvmwrapper.core.FileNameExtension.DMG
+import ru.itbasis.jvmwrapper.core.FileNameExtension.TAR_GZ
 import ru.itbasis.jvmwrapper.core.ProcessStepListener
 import java.io.File
 
@@ -9,15 +11,11 @@ object UnarchiverFactory {
 	): AbstractUnarchiver {
 		val sourceFileName = sourceFile.name.toLowerCase()
 		return when {
-			sourceFileName.endsWith("." + FileArchiveType.DMG.extension)    -> DmgUnarchiver(sourceFile, targetDir, stepListener, removeOriginal)
-			sourceFileName.endsWith("." + FileArchiveType.TAR_GZ.extension) -> TarGzUnarchiver(
+			sourceFileName.endsWith(DMG.withDot())    -> DmgUnarchiver(sourceFile, targetDir, stepListener, removeOriginal)
+			sourceFileName.endsWith(TAR_GZ.withDot()) -> TarGzUnarchiver(
 				sourceFile, targetDir, stepListener, removeOriginal
 			)
-			else                                                            -> throw IllegalArgumentException("unsupported archive type: $sourceFile")
+			else                                      -> throw IllegalArgumentException("unsupported archive type: $sourceFile")
 		}
-	}
-
-	enum class FileArchiveType(val extension: kotlin.String) {
-		DMG("dmg"), TAR_GZ("tar.gz"), EXE("exe"), ZIP("zip")
 	}
 }

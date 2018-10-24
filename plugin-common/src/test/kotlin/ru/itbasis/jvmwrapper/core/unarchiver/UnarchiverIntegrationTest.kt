@@ -22,7 +22,7 @@ internal class UnarchiverIntegrationTest : AbstractIntegrationTests() {
 		logger.info { "jvm: $jvm" }
 		val downloader = jvm.downloader()
 
-		val tempFile = temporaryFolder.newFile("tmp_$jvm.${jvm.archiveFileExtension}")
+		val tempFile = temporaryFolder.newFile(downloader.remoteArchiveFile.archiveFileExtension.withDot("tmp_$jvm"))
 		downloader.download(target = tempFile, downloadProcessListener = downloadProcessListener)
 		tempFile.shouldNotBeEmpty()
 

@@ -10,7 +10,7 @@ import ru.itbasis.jvmwrapper.core.findOne
 import ru.itbasis.jvmwrapper.core.jvm.Jvm
 import kotlin.text.RegexOption.IGNORE_CASE
 
-class OracleDownloader(private val jvm: Jvm) : AbstractDownloader() {
+class OracleDownloader(jvm: Jvm) : AbstractDownloader(jvm = jvm) {
 	override val logger = KotlinLogging.logger {}
 
 	override val remoteArchiveFile: RemoteArchiveFile by lazy {
@@ -34,7 +34,7 @@ class OracleDownloader(private val jvm: Jvm) : AbstractDownloader() {
 
 		return JsonParser().parse(result).asJsonObject.let { jsonObject ->
 			RemoteArchiveFile(
-				url = jsonObject.get("filepath").asString, checksum = jsonObject.get("SHA256").asString
+				url = jsonObject.get("filepath").asString, checksum = jsonObject.get("SHA256").asString, archiveFileExtension = archiveFileExtension
 			)
 		}
 	}
@@ -57,7 +57,7 @@ class OracleDownloader(private val jvm: Jvm) : AbstractDownloader() {
 	}
 
 	private val regexDownloadFile: Regex by lazy {
-		"""downloads\['${jvm.type}-${jvm.cleanVersion}-oth-JPR']\['files']\['.*${jvm.os}.*$archiveArchitecture.*\.${jvm.archiveFileExtension}'] = (.*);""".toRegex(
+		"""downloads\['${jvm.type}-${jvm.cleanVersion}-oth-JPR']\['files']\['.*${jvm.os}.*$archiveArchitecture.*\.$archiveFileExtension'] = (.*);""".toRegex(
 			IGNORE_CASE
 		)
 	}
