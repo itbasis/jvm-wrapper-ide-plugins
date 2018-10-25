@@ -1,5 +1,6 @@
 package ru.itbasis.jvmwrapper.core.unarchiver
 
+import ru.itbasis.jvmwrapper.core.FileNameExtension
 import ru.itbasis.jvmwrapper.core.ProcessStepListener
 import ru.itbasis.jvmwrapper.core.step
 import java.io.File
@@ -10,9 +11,9 @@ abstract class AbstractUnarchiver(
 	private val targetDir: File,
 	protected val stepListener: ProcessStepListener? = null,
 	private val removeOriginal: Boolean = true,
-	private val fileNameExtension: UnarchiverFactory.FileArchiveType
+	private val fileNameExtension: FileNameExtension
 ) {
-	protected val sourceFileName: String = sourceFile.name.substringBeforeLast("." + this.fileNameExtension.extension)
+	protected val sourceFileName: String = sourceFile.name.substringBeforeLast(this.fileNameExtension.withDot())
 
 	protected val tempDir: File = createTempDir(suffix = sourceFileName)
 

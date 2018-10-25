@@ -1,9 +1,9 @@
 package ru.itbasis.jvmwrapper.core.unarchiver
 
 import mu.KotlinLogging
+import ru.itbasis.jvmwrapper.core.FileNameExtension
 import ru.itbasis.jvmwrapper.core.ProcessStepListener
 import ru.itbasis.jvmwrapper.core.step
-import ru.itbasis.jvmwrapper.core.unarchiver.UnarchiverFactory.FileArchiveType.DMG
 import java.io.File
 
 class DmgUnarchiver(sourceFile: File, targetDir: File, stepListener: ProcessStepListener? = null, removeOriginal: Boolean = false) :
@@ -12,7 +12,7 @@ class DmgUnarchiver(sourceFile: File, targetDir: File, stepListener: ProcessStep
 		targetDir = targetDir,
 		stepListener = stepListener,
 		removeOriginal = removeOriginal,
-		fileNameExtension = DMG
+		fileNameExtension = FileNameExtension.DMG
 	) {
 
 	private val logger = KotlinLogging.logger {}
