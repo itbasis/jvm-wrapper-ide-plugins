@@ -17,6 +17,17 @@ internal class DownloaderIntegrationTest : AbstractIntegrationTests() {
 	override val logger = KotlinLogging.logger {}
 
 	init {
+		test("resolve urls").config(enabled = true) {
+			forall(
+				rows = *jvmAllRows
+			) { jvmVersionRow ->
+				logger.info { "version: ${jvmVersionRow.version}" }
+				val jvm = Jvm(vendor = jvmVersionRow.vendor.toJvmVendor(), type = jvmVersionRow.type.toJvmType(), version = jvmVersionRow.version)
+				logger.info { "jvm: $jvm" }
+				val downloader = jvm.downloader()
+			}
+		}
+
 		test("resolve and download use downloadProcessListener").config(enabled = true) {
 			forall(
 				rows = *jvmFirstRows
