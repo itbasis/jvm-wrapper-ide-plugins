@@ -1,7 +1,9 @@
 package ru.itbasis.jvmwrapper.core.downloader.openjdk
 
 import mu.KotlinLogging
+import ru.itbasis.jvmwrapper.core.FileArchitecture.X64
 import ru.itbasis.jvmwrapper.core.FileNameExtension
+import ru.itbasis.jvmwrapper.core.SystemInfo.is32Bit
 import ru.itbasis.jvmwrapper.core.downloader.AbstractDownloader
 import ru.itbasis.jvmwrapper.core.downloader.RemoteArchiveFile
 import ru.itbasis.jvmwrapper.core.findOne
@@ -37,8 +39,13 @@ class OpenJdkDownloader(jvm: Jvm) : AbstractDownloader(jvm = jvm) {
 		else           -> super.archiveFileExtension
 	}
 
+	override val archiveArchitecture = when {
+		jvm.major >= 10 && !is32Bit -> X64
+		else                        -> super.archiveArchitecture
+	}
+
 	private val regexDownloadFile: Regex by lazy {
-		val filename = archiveFileExtension.withDot(prefix = "jdk-${jvm.major}.*?${jvm.os}-$archiveArchitecture-.*?")
+		val filename = archiveFileExtension.withDot(prefix = "jdk-${jvm.major}.*?${jvm.os}-$archiveArchitecture.*?")
 		return@lazy """"(https://download.java.net/java/.*?$filename)"""".toRegex(IGNORE_CASE)
 	}
 }

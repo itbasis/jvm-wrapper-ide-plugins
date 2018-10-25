@@ -3,9 +3,12 @@ package ru.itbasis.jvmwrapper.core.downloader
 import mu.KLogger
 import org.apache.commons.lang3.SystemUtils
 import org.apache.commons.lang3.SystemUtils.IS_OS_MAC
+import ru.itbasis.jvmwrapper.core.FileArchitecture.I586
+import ru.itbasis.jvmwrapper.core.FileArchitecture.X64
+import ru.itbasis.jvmwrapper.core.FileArchitecture.X86_64
 import ru.itbasis.jvmwrapper.core.FileNameExtension
 import ru.itbasis.jvmwrapper.core.HttpClient
-import ru.itbasis.jvmwrapper.core.SystemInfo
+import ru.itbasis.jvmwrapper.core.SystemInfo.is32Bit
 import ru.itbasis.jvmwrapper.core.checksum256
 import ru.itbasis.jvmwrapper.core.jvm.Jvm
 import ru.itbasis.kotlin.utils.copyTo
@@ -57,9 +60,9 @@ abstract class AbstractDownloader(protected val jvm: Jvm) {
 		this
 
 	open val archiveArchitecture = when {
-		SystemInfo.is32Bit -> "i586"
-		IS_OS_MAC          -> "x86_64"
-		else               -> "x64"
+		is32Bit   -> I586
+		IS_OS_MAC -> X86_64
+		else      -> X64
 	}
 
 	protected open val archiveFileExtension = when {
