@@ -2,6 +2,7 @@ package samples
 
 import io.kotlintest.tables.Row1
 import io.kotlintest.tables.row
+import ru.itbasis.jvmwrapper.core.OsType
 import ru.itbasis.jvmwrapper.core.downloader.RemoteArchiveFile
 
 data class JvmVersionRow(
@@ -15,7 +16,7 @@ data class JvmVersionRow(
 	val versionEarlyAccess: Boolean,
 	val downloadPageUrl: String,
 	val downloadArchiveUrlPart: String,
-	val remoteFiles: Map<String, RemoteArchiveFile> = emptyMap()
+	val remoteFiles: Map<OsType, RemoteArchiveFile> = emptyMap()
 )
 
 internal fun List<JvmVersionSample?>.asKotlinTestRows(): Array<Row1<JvmVersionRow>> {

@@ -8,6 +8,9 @@ import ru.itbasis.jvmwrapper.core.FileArchitecture.X64
 import ru.itbasis.jvmwrapper.core.FileArchitecture.X86_64
 import ru.itbasis.jvmwrapper.core.FileNameExtension
 import ru.itbasis.jvmwrapper.core.HttpClient
+import ru.itbasis.jvmwrapper.core.OsType.LINUX
+import ru.itbasis.jvmwrapper.core.OsType.OSX
+import ru.itbasis.jvmwrapper.core.OsType.WINDOWS
 import ru.itbasis.jvmwrapper.core.SystemInfo.is32Bit
 import ru.itbasis.jvmwrapper.core.checksum256
 import ru.itbasis.jvmwrapper.core.jvm.Jvm
@@ -65,13 +68,19 @@ abstract class AbstractDownloader(protected val jvm: Jvm) {
 		else      -> X64
 	}
 
-	protected open val archiveFileExtension = when {
+	internal open val archiveFileExtension = when {
 		jvm.major >= 11 && SystemUtils.IS_OS_WINDOWS -> FileNameExtension.ZIP
 
 		SystemUtils.IS_OS_MAC                        -> FileNameExtension.DMG
 		SystemUtils.IS_OS_WINDOWS                    -> FileNameExtension.EXE
 
 		else                                         -> FileNameExtension.TAR_GZ
+	}
+
+	internal open val os = when {
+		IS_OS_MAC                 -> if (jvm.major > 8) OSX.toString() else "macosx"
+		SystemUtils.IS_OS_WINDOWS -> WINDOWS.toString()
+		else                      -> LINUX.toString()
 	}
 
 	val httpClient = HttpClient()

@@ -57,7 +57,10 @@ class OracleDownloader(jvm: Jvm) : AbstractDownloader(jvm = jvm) {
 	}
 
 	private val regexDownloadFile: Regex by lazy {
-		"""downloads\['${jvm.type}-${jvm.cleanVersion}-oth-JPR']\['files']\['.*${jvm.os}.*$archiveArchitecture.*\.$archiveFileExtension'] = (.*);""".toRegex(
+		val regexp =
+			"""downloads\['${jvm.type}-${jvm.cleanVersion}-oth-JPR']\['files']\['.*${jvm.osAsString}.*$archiveArchitecture.*\.$archiveFileExtension'] = (.*);"""
+		logger.debug { "regexp: $regexp" }
+		regexp.toRegex(
 			IGNORE_CASE
 		)
 	}

@@ -3,6 +3,10 @@ package ru.itbasis.jvmwrapper.core.jvm
 import mu.KotlinLogging
 import org.apache.commons.lang3.SystemUtils.IS_OS_MAC
 import org.apache.commons.lang3.SystemUtils.IS_OS_WINDOWS
+import ru.itbasis.jvmwrapper.core.OsType
+import ru.itbasis.jvmwrapper.core.OsType.LINUX
+import ru.itbasis.jvmwrapper.core.OsType.OSX
+import ru.itbasis.jvmwrapper.core.OsType.WINDOWS
 import ru.itbasis.jvmwrapper.core.jvm.detectors.JvmTypeDetector
 import ru.itbasis.jvmwrapper.core.jvm.detectors.JvmVendorDetector
 import ru.itbasis.jvmwrapper.core.jvm.detectors.JvmVersionDetector
@@ -49,14 +53,16 @@ data class Jvm(
 			return arrayOf(major, update).filterNotNull().joinToString(if (major > 8) ".0." else "u")
 		}
 
-	val os: String
-		get() {
-			return when {
-				IS_OS_MAC     -> if (major > 8) "osx" else "macosx"
-				IS_OS_WINDOWS -> "windows"
-				else          -> "linux"
-			}
-		}
+	val os: OsType = when {
+		IS_OS_MAC     -> OSX
+		IS_OS_WINDOWS -> WINDOWS
+		else          -> LINUX
+	}
+
+	val osAsString: String = when {
+		os == OSX && major > 8 -> "macos"
+		else                   -> os.toString()
+	}
 
 	override fun toString(): String {
 		return "${vendor.code}-$type-$cleanVersion"

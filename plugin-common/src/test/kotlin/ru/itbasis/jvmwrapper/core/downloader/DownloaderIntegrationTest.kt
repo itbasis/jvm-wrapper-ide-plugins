@@ -9,9 +9,12 @@ import io.kotlintest.shouldBe
 import io.kotlintest.shouldNotBe
 import mu.KotlinLogging
 import ru.itbasis.jvmwrapper.core.AbstractIntegrationTests
+import ru.itbasis.jvmwrapper.core.OsType
 import ru.itbasis.jvmwrapper.core.jvm.Jvm
 import ru.itbasis.jvmwrapper.core.jvm.toJvmType
 import ru.itbasis.jvmwrapper.core.jvm.toJvmVendor
+import samples.asKotlinTestRows
+import samples.jvmVersionSample__openjdk_jdk_11_0_1
 
 internal class DownloaderIntegrationTest : AbstractIntegrationTests() {
 	override val logger = KotlinLogging.logger {}
@@ -20,11 +23,20 @@ internal class DownloaderIntegrationTest : AbstractIntegrationTests() {
 		test("resolve urls").config(enabled = true) {
 			forall(
 				rows = *jvmAllRows
+//				rows = *listOf(jvmVersionSample__openjdk_jdk_11_0_1).asKotlinTestRows()
 			) { jvmVersionRow ->
 				logger.info { "version: ${jvmVersionRow.version}" }
 				val jvm = Jvm(vendor = jvmVersionRow.vendor.toJvmVendor(), type = jvmVersionRow.type.toJvmType(), version = jvmVersionRow.version)
 				logger.info { "jvm: $jvm" }
 				val downloader = jvm.downloader()
+				logger.info { "downloader: $downloader" }
+
+				val remoteArchiveFile = downloader.remoteArchiveFile
+				logger.info { "remoteArchiveFile.url = ${remoteArchiveFile.url}" }
+				val expectedUrl = jvmVersionRow.remoteFiles[OsType.currentOs()]!!.url
+				logger.info { "expectedUrl: $expectedUrl" }
+
+				remoteArchiveFile.url shouldBe expectedUrl
 			}
 		}
 

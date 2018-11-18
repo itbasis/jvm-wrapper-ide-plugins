@@ -1,6 +1,7 @@
 package ru.itbasis.jvmwrapper.core.downloader.openjdk
 
 import mu.KotlinLogging
+import org.apache.commons.lang3.SystemUtils
 import ru.itbasis.jvmwrapper.core.FileArchitecture.X64
 import ru.itbasis.jvmwrapper.core.FileNameExtension
 import ru.itbasis.jvmwrapper.core.SystemInfo.is32Bit
@@ -25,7 +26,7 @@ class OpenJdkDownloader(jvm: Jvm) : AbstractDownloader(jvm = jvm) {
 			return@require msg
 		}
 
-		val htmlContent = this!!.htmlContent(httpClient = httpClient)
+		val htmlContent = this.htmlContent(httpClient = httpClient)
 		val remoteFileUrl = regexDownloadFile.findOne(htmlContent)
 		                    ?: return null
 		val remoteFileChecksumUrl = "$remoteFileUrl.sha256"
@@ -35,7 +36,10 @@ class OpenJdkDownloader(jvm: Jvm) : AbstractDownloader(jvm = jvm) {
 	}
 
 	override val archiveFileExtension = when {
-		jvm.major >= 9 -> FileNameExtension.TAR_GZ
+		jvm.major >= 9 -> when {
+			SystemUtils.IS_OS_WINDOWS -> FileNameExtension.ZIP
+			else                      -> FileNameExtension.TAR_GZ
+		}
 		else           -> super.archiveFileExtension
 	}
 
@@ -45,7 +49,9 @@ class OpenJdkDownloader(jvm: Jvm) : AbstractDownloader(jvm = jvm) {
 	}
 
 	private val regexDownloadFile: Regex by lazy {
-		val filename = archiveFileExtension.withDot(prefix = "jdk-${jvm.major}.*?${jvm.os}-$archiveArchitecture.*?")
-		return@lazy """"(https://download.java.net/java/.*?$filename)"""".toRegex(IGNORE_CASE)
+		val filename = archiveFileExtension.withDot(prefix = "jdk-${jvm.major}.*?${jvm.osAsString}-$archiveArchitecture.*?")
+		val regexp = """"(https://download.java.net/java/.*?$filename)""""
+		logger.debug { "regexp: $regexp" }
+		return@lazy regexp.toRegex(IGNORE_CASE)
 	}
 }

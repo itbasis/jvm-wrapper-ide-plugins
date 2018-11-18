@@ -2,6 +2,7 @@
 
 package samples
 
+import ru.itbasis.jvmwrapper.core.OsType
 import ru.itbasis.jvmwrapper.core.downloader.RemoteArchiveFile
 
 data class JvmVersionSample(
@@ -15,7 +16,7 @@ data class JvmVersionSample(
 	val versionEarlyAccess: Boolean = false,
 	val downloadPageUrl: String,
 	val downloadArchiveUrlPart: String,
-	val remoteFiles: Map<String, RemoteArchiveFile> = emptyMap()
+	val remoteFiles: Map<OsType, RemoteArchiveFile> = emptyMap()
 )
 
 val JvmVersionLatestSamples = listOf(

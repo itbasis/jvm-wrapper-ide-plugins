@@ -2,6 +2,10 @@
 <project version="4">
   <component name="CompilerConfiguration">
     <bytecodeTargetLevel>
+      <module name="jvm-wrapper-ide-plugins.plugin-common.main" target="1.8" />
+      <module name="jvm-wrapper-ide-plugins.plugin-common.test" target="1.8" />
+      <module name="jvm-wrapper-ide-plugins.plugin-intellij.main" target="1.8" />
+      <module name="jvm-wrapper-ide-plugins.plugin-intellij.test" target="1.8" />
       <module name="plugin-common_integrationTest" target="1.8" />
       <module name="plugin-common_main" target="1.8" />
       <module name="plugin-common_test" target="1.8" />
